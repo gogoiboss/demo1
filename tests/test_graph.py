@@ -7,6 +7,7 @@ Two core test cases:
 """
 
 import pytest
+import pandas as pd
 from src.graph.timed_event_graph import (
     build_timed_event_graph,
     inject_delays,
@@ -184,6 +185,20 @@ class TestConflictPropagation:
         assert len(conflicts) == 0, (
             "No conflicts should be active when all trains are on schedule."
         )
+
+    def test_detect_conflicts_accepts_current_positions_dataframe(self):
+        """Live train-position rows can be passed directly to the detector."""
+        schedules = _two_train_schedules(same_section=True)
+        G = build_timed_event_graph(schedules, min_headway=10.0)
+        current_positions = pd.DataFrame([
+            {"train_id": "TRAIN_A", "station": "A", "event_type": "dep", "delay_min": 60.0},
+            {"train_id": "TRAIN_B", "station": "A", "event_type": "dep", "delay_min": 5.0},
+        ])
+
+        conflicts = detect_conflicts(G, current_positions)
+
+        assert len(conflicts) >= 1
+        assert conflicts[0]["affected_train"] == "TRAIN_B"
 
     def test_single_forward_pass_produces_same_result_as_manual(self):
         """
