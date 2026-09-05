@@ -17,7 +17,11 @@ class CalibratedPredictionPipeline:
         self.engine = engine
         self.graph = graph
 
-    def predict(self, current_state: pd.DataFrame) -> list[dict[str, Any]]:
+    def predict(
+        self,
+        current_state: pd.DataFrame,
+        prediction_variance: float | None = None,
+    ) -> list[dict[str, Any]]:
         state = current_state.copy()
         if not set(self.engine.features).issubset(state.columns):
             state = engineer_all_features(state)
@@ -31,7 +35,11 @@ class CalibratedPredictionPipeline:
                     conflict["propagated_delay_min"]
                 )
 
-        results = self.engine.predict(state, current_delay_rate=None)
+        results = self.engine.predict(
+            state,
+            current_delay_rate=None,
+            current_prediction_variance=prediction_variance,
+        )
         if not adjustments:
             return results
 
