@@ -41,7 +41,9 @@ Train precedence (Goverde, IRFCA FAQ III):
 
 from __future__ import annotations
 
+import copy
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -391,27 +393,75 @@ def propagate_delays(G: nx.DiGraph) -> dict[str, float]:
 # ---------------------------------------------------------------------------
 # Conflict detection
 # ---------------------------------------------------------------------------
+def _coerce_current_delays(current_delays) -> dict[str, float]:
+    """Convert the supported delay inputs to the graph's node-id mapping."""
+    if isinstance(current_delays, Mapping):
+        return {str(node_id): float(delay) for node_id, delay in current_delays.items()}
+
+    if not hasattr(current_delays, "to_dict") or not hasattr(current_delays, "columns"):
+        raise TypeError(
+            "current_delays must be a mapping or a DataFrame with delay_min and "
+            "node_id columns (or train_id, station, and event_type columns)."
+        )
+
+    columns = set(current_delays.columns)
+    if "delay_min" not in columns:
+        raise ValueError("current_delays DataFrame must contain a 'delay_min' column.")
+
+    delays = {}
+    for row in current_delays.to_dict(orient="records"):
+        if "node_id" in columns:
+            node_id = row["node_id"]
+        elif {"train_id", "station"}.issubset(columns):
+            event_type = row.get("event_type", "dep")
+            node_id = f"{row['train_id']}__{row['station']}__{event_type}"
+        else:
+            raise ValueError(
+                "current_delays DataFrame must contain either 'node_id' or "
+                "'train_id' and 'station' columns."
+            )
+        delays[str(node_id)] = float(row["delay_min"])
+    return delays
+
+
+def _reset_propagation_state(G: nx.DiGraph) -> None:
+    """Clear results from an earlier propagation before a fresh traversal."""
+    for node_data in G.nodes.values():
+        event: TrainEvent = node_data["event"]
+        event.actual_min = event.scheduled_min
+        event.delay_min = 0.0
+        node_data.pop("pinned_actual_min", None)
+
+
 def detect_conflicts(
     G: nx.DiGraph,
-    current_delays: dict[str, float],
+    current_delays,
 ) -> list[dict]:
     """
-    Given current train delays, identify which conflict edges are activated
-    and compute the propagated delay to the affected train.
+    Given current train delays, identify activated conflict edges and compute
+    the propagated delay to the affected train.
+
+    ``current_delays`` may be a node-id mapping for backwards compatibility,
+    or a DataFrame containing ``delay_min`` plus either ``node_id`` or
+    ``train_id``, ``station``, and optional ``event_type`` (default ``dep``).
     """
+    delays = _coerce_current_delays(current_delays)
+
     # 1. Run propagation without conflict edges to establish baseline
-    G_no_conflict = G.copy()
+    G_no_conflict = copy.deepcopy(G)
     conflict_edges = [
         (u, v) for u, v, d in G_no_conflict.edges(data=True)
         if d.get("edge_type") == "conflict"
     ]
     G_no_conflict.remove_edges_from(conflict_edges)
 
-    inject_delays(G_no_conflict, current_delays)
+    _reset_propagation_state(G_no_conflict)
+    _reset_propagation_state(G)
+    inject_delays(G_no_conflict, delays)
     baseline_delays = propagate_delays(G_no_conflict)
 
     # 2. Run propagation with conflict edges
-    inject_delays(G, current_delays)
+    inject_delays(G, delays)
     actual_delays = propagate_delays(G)
 
     conflicts = []
