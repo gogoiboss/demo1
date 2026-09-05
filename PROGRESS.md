@@ -15,3 +15,10 @@
   - **PITCH UPDATE REQUIRED**: The original +55/+40 inputs activate no conflict. With Train 56789 at +15 min, the graph reproduces the +9 min conflict, but computes +64 min total at Allahabad, not the PPT's +57 min or 15:20–16:10 window.
   - 9/9 graph tests passing (`tests/test_graph.py`).
   - Notebook `notebooks/03_conflict_graph_demo.ipynb`: valid JSON cell metadata, NetworkX visualisation, step-by-step propagation trace, and Q&A prep notes.
+
+- **2026-09-05**: Calibrated Output Engine (C4) implemented and empirically validated.
+  - MAPIE `SplitConformalRegressor` produces P10/P50/P90 delay intervals using a chronological 70/15/15 train/calibration/test split.
+  - Held-out validation: **90.3% P10-P90 coverage** on 1,500 test rows, 22.53-minute p50 MAE, and 70.9-minute average interval width. This is close to the 90% target and is measured rather than assumed.
+  - `AnomalyGate` uses rolling historical uncertainty variance and suspends output when current variance exceeds 3x baseline: `PREDICTION SUSPENDED — anomalous conditions`.
+  - `CalibratedPredictionPipeline` combines feature engineering, optional timed-event conflict adjustment, MAPIE calibration, and anomaly-aware output.
+  - Notebook `notebooks/02_baseline_vs_xgboost.ipynb` now reports the held-out coverage result.
