@@ -45,6 +45,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 import joblib
+from src.calibration.anomaly_gate import AnomalyGate
 
 from sklearn.model_selection import train_test_split
 
@@ -75,7 +76,8 @@ except ImportError:                                    # pragma: no cover
 # Constants
 # ---------------------------------------------------------------------------
 ANOMALY_MULTIPLIER   = 3.0    # gate fires if rate > 3× historical p90
-COVERAGE_90          = 0.80   # confidence_level for 80% coverage (p10 to p90 interval is 80% coverage)
+COVERAGE_90          = 0.90   # target coverage for outer interval
+COVERAGE_80          = 0.80   # target coverage for inner interval
 
 DEFAULT_FEATURES = [
     "scheduled_travel_hours",
@@ -121,9 +123,10 @@ class CalibratedETAEngine:
         self.features             = features
         self.anomaly_multiplier   = anomaly_multiplier
         self.base_model           = base_model          # fitted XGBRegressor
-        self.mapie_               = None                # fitted SplitConformalRegressor (80% confidence level = p10 to p90)
+        self.mapie_90_            = None                # fitted SplitConformalRegressor (90%)
         self.explainer_           = None                # shap.TreeExplainer
         self.delay_p90_rate_      = None                # historical 90th-percentile delay rate
+        self.anomaly_gate_        = AnomalyGate(multiplier=anomaly_multiplier)
         self.fitted_              = False
 
     # ------------------------------------------------------------------
@@ -159,20 +162,19 @@ class CalibratedETAEngine:
         # Delay rate = absolute residual as a fraction of predicted delay
         # Use p90 of absolute residuals as baseline; gate fires at 3× that.
         self.delay_p90_rate_ = float(np.percentile(cal_resids, 90))
+        self.anomaly_gate_.fit(cal_resids)
         logger.info(f"Anomaly gate threshold: {self.delay_p90_rate_:.1f} min "
                     f"(p90 abs residual on calibration set)")
 
-        # ----- Fit MAPIE (80% coverage = 10th to 90th percentile) ----------------------------------
-        # cv="prefit": base estimator is already fitted; MAPIE uses calibration
-        # set to compute conformity scores and build prediction intervals.
-        self.mapie_ = SplitConformalRegressor(
+        # ----- Fit MAPIE (90% coverage) ----------------------------------
+        self.mapie_90_ = SplitConformalRegressor(
             estimator=self.base_model,
             confidence_level=COVERAGE_90,
             prefit=True,
         )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            self.mapie_.conformalize(X_cal_f, y_cal.values)
+            self.mapie_90_.conformalize(X_cal_f, y_cal.values)
 
         # ----- SHAP explainer --------------------------------------------
         if SHAP_AVAILABLE:
@@ -196,6 +198,7 @@ class CalibratedETAEngine:
         X: pd.DataFrame,
         network_adjusted_delay: Optional[float] = None,
         current_delay_rate: Optional[float] = None,
+        current_prediction_variance: Optional[float] = None,
     ) -> list[dict]:
         """
         Generate calibrated ETA predictions for one or more train observations.
@@ -228,20 +231,17 @@ class CalibratedETAEngine:
         X_f = X[self.features]
 
         # ----- MAPIE intervals -------------------------------------------
-        # Returns y_pred (point) and y_pis (lower, upper) per confidence level
-        y_pred, y_pis = self.mapie_.predict_interval(X_f)
-        
-        # y_pis shape: (n_samples, 2, 1) -> lower=[:,0,0], upper=[:,1,0]
-        if len(y_pis.shape) == 3:
-            lower_90 = y_pis[:, 0, 0]
-            upper_90 = y_pis[:, 1, 0]
-        else:
-            lower_90 = y_pis[:, 0]
-            upper_90 = y_pis[:, 1]
+        # SplitConformalRegressor returns point predictions and bounds.
+        y_pred_90, y_pis_90 = self.mapie_90_.predict_interval(X_f)
+        # y_pis_90 shape: (n_samples, 2) → lower=[:,0], upper=[:,1]
+        if y_pis_90.ndim == 3:
+            y_pis_90 = y_pis_90[:, :, 0]
+        lower_90 = y_pis_90[:, 0]
+        upper_90 = y_pis_90[:, 1]
 
         results = []
         for i in range(len(X_f)):
-            p50 = float(y_pred[i])
+            p50 = float(y_pred_90[i])
             p10 = float(lower_90[i])
             p90 = float(upper_90[i])
 
@@ -258,19 +258,20 @@ class CalibratedETAEngine:
             p10 = max(0.0, p10)
 
             # ----- Anomaly gate ------------------------------------------
-            # Fires if current_delay_rate > ANOMALY_MULTIPLIER × p90_threshold
             anomaly_flag     = False
             uncertainty_mode = False
-            if (
-                current_delay_rate is not None
-                and self.delay_p90_rate_ is not None
-                and current_delay_rate > self.anomaly_multiplier * self.delay_p90_rate_
-            ):
+            if current_prediction_variance is not None:
+                gate_result = self.anomaly_gate_.evaluate_variance(current_prediction_variance)
+                anomaly_flag = bool(gate_result["suspended"])
+            elif current_delay_rate is not None and self.delay_p90_rate_ is not None:
+                anomaly_flag = current_delay_rate > self.anomaly_multiplier * self.delay_p90_rate_
+            if anomaly_flag:
                 anomaly_flag     = True
                 uncertainty_mode = True
+                interval_width = p90 - p10
                 # In uncertainty mode: widen interval significantly, suppress p50
-                p10 = max(0.0, p50 - 3 * (p90 - p10))
-                p90 = p50 + 3 * (p90 - p10)
+                p10 = max(0.0, p50 - 3 * interval_width)
+                p90 = p50 + 3 * interval_width
                 p50 = None   # suppressed — do not display point estimate
 
             # ----- SHAP explanation --------------------------------------
@@ -302,6 +303,7 @@ class CalibratedETAEngine:
                 "p90_delay_min":    round(p90, 1),
                 "anomaly_flag":     anomaly_flag,
                 "uncertainty_mode": uncertainty_mode,
+                "status": "PREDICTION SUSPENDED — anomalous conditions" if anomaly_flag else "PREDICTION ACTIVE",
                 "shap_explanation": shap_explanation,
                 "shap_text":        shap_text,
             })
@@ -382,8 +384,8 @@ def train_and_calibrate(
         logger.info("Loaded existing XGBoost model from disk.")
     else:
         logger.info("No saved model found — training from scratch.")
-        result = train_and_evaluate(df_train, features=features, target=target)
-        base_model = result["model"]
+        _, model_path = train_and_evaluate(df_train, target_col=target)
+        base_model = joblib.load(model_path)
 
     # --- Fit calibration engine ------------------------------------------
     X_train = df_train[features] if all(f in df_train for f in features) else df_train[features]
