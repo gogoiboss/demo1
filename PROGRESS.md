@@ -34,3 +34,10 @@
   - Dark control-panel design uses amber for calibrated/conflict signals and teal-gray for standard operations.
   - Live API data loads for train 20507; the Control Room demo trace visibly changes P50 from 83.1 to 92.1 minutes with a +9-minute amber conflict edge.
   - Desktop and 390px mobile browser checks passed. Setup is documented in `docs/dashboard_notes.md`.
+
+- **2026-09-05**: Final selected-route backtest completed and documented.
+  - Six selected routes, 174 chronological held-out test rows: prior-leg baseline MAE **34.746 min**, evaluated XGBoost + MAPIE P50 MAE **28.386 min**, absolute improvement **6.360 min / 18.30%**.
+  - P10-P90 empirical coverage: **97.70%**, with average interval width **106.589 min**.
+  - Graph conflict adjustment rows: **0** because the journey-level artifact has no station-pair live state; this is explicitly not a measured network-propagation result.
+  - Real held-out Train 12301 example: actual **85.499 min**, P50 **14.200 min**, interval **0.000-84.400 min**, missed by **1.099 min**. The illustrative 12301/56789 conflict remains unvalidated on real paired data.
+  - Final report: `notebooks/04_final_backtest_report.ipynb`; measured pitch numbers: `docs/RESULTS.md`.
