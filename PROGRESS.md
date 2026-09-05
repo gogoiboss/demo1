@@ -22,3 +22,9 @@
   - `AnomalyGate` uses rolling historical uncertainty variance and suspends output when current variance exceeds 3x baseline: `PREDICTION SUSPENDED — anomalous conditions`.
   - `CalibratedPredictionPipeline` combines feature engineering, optional timed-event conflict adjustment, MAPIE calibration, and anomaly-aware output.
   - Notebook `notebooks/02_baseline_vs_xgboost.ipynb` now reports the held-out coverage result.
+
+- **2026-09-05**: FastAPI API layer (C5) implemented and tested.
+  - Core calibrated prediction and health endpoints are available under `src/api/app.py`.
+  - Five distinct stakeholder framings are exposed: passenger, station master, crew controller, feeder transport, and maintenance.
+  - Pydantic response schemas, clear 404/422/503 handling, OpenAPI docs, and deterministic endpoint tests are included.
+  - `/docs` renders successfully; full project suite passes with 21 tests.
