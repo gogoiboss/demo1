@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from statistics import NormalDist
 
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.models import (
     CrewControllerResponse,
@@ -29,6 +30,17 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         title="RippleETA Prediction API",
         description="Calibrated, network-aware Indian Railways ETA decision support.",
         version="1.0.0",
+    )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://127.0.0.1:5500",
+            "http://localhost:5500",
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
+        ],
+        allow_methods=["GET"],
+        allow_headers=["*"],
     )
 
     def get_prediction(train_id: str, prediction_variance: float | None = None) -> dict:

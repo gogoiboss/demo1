@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RippleETA | Network Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#passenger" aria-label="RippleETA home">
+        <span class="brand-mark">R</span>
+        <span><strong>RippleETA</strong><small>NETWORK-AWARE ETA CONTROL</small></span>
+      </a>
+      <div class="topbar-status">
+        <span id="connection-dot" class="status-dot"></span>
+        <span id="connection-label">API CONNECTING</span>
+        <span class="separator"></span>
+        <span id="clock">--:--:-- IST</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="command-bar" aria-label="Dashboard controls">
+        <div>
+          <p class="eyebrow">LIVE OPERATIONS / C3 + C4</p>
+          <h1>One forecast. Five decisions.</h1>
+        </div>
+        <div class="controls">
+          <label class="train-picker">TRAIN <input id="train-id" value="20507" inputmode="numeric" aria-label="Train number"></label>
+          <button id="refresh-button" class="icon-button" type="button" title="Refresh prediction" aria-label="Refresh prediction">↻</button>
+        </div>
+      </section>
+
+      <nav class="view-tabs" aria-label="Stakeholder views">
+        <button class="tab is-active" data-view="passenger">Passenger</button>
+        <button class="tab" data-view="station">Station Controller</button>
+        <button class="tab" data-view="network">Control Room</button>
+      </nav>
+
+      <div id="notice" class="notice" role="status"></div>
+
+      <section id="passenger-view" class="view-panel" data-panel="passenger">
+        <div class="passenger-layout">
+          <div class="passenger-main">
+            <div class="section-kicker"><span class="live-pulse"></span> PASSENGER SIGNAL <span id="passenger-updated">UPDATED --</span></div>
+            <p id="passenger-train" class="train-label">TRAIN 20507</p>
+            <h2 id="passenger-delay" class="hero-delay">--<span>min late</span></h2>
+            <p id="passenger-message" class="hero-copy">Loading the calibrated arrival signal.</p>
+            <div class="range-card">
+              <div class="range-heading"><span>CALIBRATED ARRIVAL WINDOW</span><strong id="passenger-window">-- to -- min</strong></div>
+              <div class="range-track" aria-label="P10 to P90 delay range"><span class="range-fill"></span><span id="range-p50" class="range-marker"></span></div>
+              <div class="range-scale"><span id="range-p10">P10 --</span><span id="range-p50-label">P50 --</span><span id="range-p90">P90 --</span></div>
+            </div>
+            <div class="passenger-footer"><span class="trend-chip" id="passenger-trend">STABLE</span><span>Next update <strong id="passenger-next-update">--</strong></span></div>
+          </div>
+          <aside class="passenger-side">
+            <div class="quiet-card"><span class="card-label">WHAT THIS MEANS</span><p>Use the range to decide when to leave. It narrows as the train approaches.</p></div>
+            <div class="amber-card"><span class="card-label">NETWORK SIGNAL</span><strong id="passenger-conflict">No active conflict traced</strong><button id="trace-passenger" class="text-button" type="button">Trace on control room →</button></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="station-view" class="view-panel is-hidden" data-panel="station">
+        <div class="view-heading"><div><p class="eyebrow">JUNCTION OPERATIONS / PLATFORM ALLOCATION</p><h2>Commit with evidence.</h2></div><span class="data-stamp" id="station-stamp">LIVE SNAPSHOT</span></div>
+        <div class="station-grid">
+          <article class="decision-card decision-card-large"><span class="card-label">PLATFORM COMMITMENT</span><strong id="station-decision" class="decision-value">DEFER</strong><p id="station-message">Waiting for interval confidence.</p><div class="decision-rule"><span>DECISION NEEDED IN</span><strong id="station-deadline">-- min</strong></div></article>
+          <article class="metric-card"><span class="card-label">P10 ARRIVAL DELAY</span><strong id="station-p10">--</strong><span>minutes</span></article>
+          <article class="metric-card"><span class="card-label">P90 ARRIVAL DELAY</span><strong id="station-p90">--</strong><span>minutes</span></article>
+          <article class="signal-table"><div class="table-title">DECISION SIGNALS</div><div class="signal-row"><span>Interval width</span><strong id="station-width">-- min</strong></div><div class="signal-row"><span>Conflict propagation</span><strong id="station-conflict">--</strong></div><div class="signal-row"><span>Prediction state</span><strong id="station-state">--</strong></div><div class="signal-row"><span>Recommended line</span><strong>HOLD ALTERNATE</strong></div></article>
+        </div>
+      </section>
+
+      <section id="network-view" class="view-panel is-hidden" data-panel="network">
+        <div class="view-heading"><div><p class="eyebrow">CONTROL ROOM / CORRIDOR TRACE</p><h2>See the ripple move.</h2></div><button id="trace-conflict" class="amber-button" type="button">Trace conflict</button></div>
+        <div class="network-summary"><div><span class="card-label">ACTIVE CORRIDOR</span><strong>KANPUR → ALLAHABAD</strong></div><div><span class="card-label">GRAPH STATE</span><strong id="network-state">MONITORING</strong></div><div><span class="card-label">TRAINS IN VIEW</span><strong>04</strong></div></div>
+        <div class="network-canvas" id="network-canvas">
+          <div class="track-line track-top"></div><div class="track-line track-bottom"></div>
+          <div class="station-node node-kanpur"><span></span><strong>KANPUR</strong><small>22:25</small></div>
+          <div class="station-node node-allahabad"><span></span><strong>ALLAHABAD</strong><small>02:04</small></div>
+          <div class="station-node node-mughal"><span></span><strong>MUGHALSARAI</strong><small>04:10</small></div>
+          <div class="train-token token-56789"><i></i><strong>56789</strong><small>EXPRESS · +15</small></div>
+          <div class="train-token token-12301"><i></i><strong>12301</strong><small>RAJDHANI · +55</small></div>
+          <div id="conflict-path" class="conflict-path"><span>+9 MIN PROPAGATED</span></div>
+        </div>
+        <div class="network-detail"><div><span class="card-label">BEFORE TRACE</span><strong id="network-before">12301 · P50 -- min delay</strong></div><div class="trace-arrow">→</div><div class="amber-detail"><span class="card-label">AFTER HEADWAY CHECK</span><strong id="network-after">12301 · P50 -- min delay</strong><small>56789 clears section + minimum headway</small></div></div>
+        <p class="demo-caption">DEMO TRACE · station-pair approximation · amber path shows the conflict edge, not a block-level occupancy claim</p>
+      </section>
+    </main>
+
+    <footer class="footer"><span>RIPPLEETA / CALIBRATED NETWORK ETA</span><span>MAPIE COVERAGE 90.3% · STATION-PAIR GRAPH</span></footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
