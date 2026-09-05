@@ -41,3 +41,9 @@
   - Graph conflict adjustment rows: **0** because the journey-level artifact has no station-pair live state; this is explicitly not a measured network-propagation result.
   - Real held-out Train 12301 example: actual **85.499 min**, P50 **14.200 min**, interval **0.000-84.400 min**, missed by **1.099 min**. The illustrative 12301/56789 conflict remains unvalidated on real paired data.
   - Final report: `notebooks/04_final_backtest_report.ipynb`; measured pitch numbers: `docs/RESULTS.md`.
+
+- **2026-09-05**: Final polish and submission preparation complete.
+  - README rewritten with the actual architecture, setup path, measured results, and limitations.
+  - Live demo script added with Passenger, Station Controller, Control Room, API, and fallback walkthroughs.
+  - MIT license and final ignore rules added; tracked-history audit found no oversized or sensitive artifacts.
+  - Final claim audit distinguishes measured route results from literature ranges and the illustrative, unvalidated station-pair example.
