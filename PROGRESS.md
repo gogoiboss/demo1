@@ -28,3 +28,9 @@
   - Five distinct stakeholder framings are exposed: passenger, station master, crew controller, feeder transport, and maintenance.
   - Pydantic response schemas, clear 404/422/503 handling, OpenAPI docs, and deterministic endpoint tests are included.
   - `/docs` renders successfully; full project suite passes with 21 tests.
+
+- **2026-09-05**: Stakeholder dashboards (C6) implemented and browser-validated.
+  - `dashboard/index.html`, `styles.css`, and `app.js` provide distinct Passenger, Station Controller, and Control Room views.
+  - Dark control-panel design uses amber for calibrated/conflict signals and teal-gray for standard operations.
+  - Live API data loads for train 20507; the Control Room demo trace visibly changes P50 from 83.1 to 92.1 minutes with a +9-minute amber conflict edge.
+  - Desktop and 390px mobile browser checks passed. Setup is documented in `docs/dashboard_notes.md`.
