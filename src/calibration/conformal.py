@@ -47,8 +47,6 @@ import pandas as pd
 import joblib
 from src.calibration.anomaly_gate import AnomalyGate
 
-from sklearn.model_selection import train_test_split
-
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -77,7 +75,6 @@ except ImportError:                                    # pragma: no cover
 # ---------------------------------------------------------------------------
 ANOMALY_MULTIPLIER   = 3.0    # gate fires if rate > 3× historical p90
 COVERAGE_90          = 0.90   # target coverage for outer interval
-COVERAGE_80          = 0.80   # target coverage for inner interval
 
 DEFAULT_FEATURES = [
     "scheduled_travel_hours",

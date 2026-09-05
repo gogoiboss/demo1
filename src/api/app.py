@@ -10,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.models import (
     CrewControllerResponse,
-    ErrorResponse,
     FeederTransportResponse,
     HealthResponse,
     MaintenanceResponse,
@@ -19,9 +18,6 @@ from src.api.models import (
     StationMasterResponse,
 )
 from src.api.service import PredictionService, TrainNotFoundError
-
-
-SUSPENDED_STATUS = "PREDICTION SUSPENDED — anomalous conditions"
 
 
 def create_app(service: PredictionService | None = None) -> FastAPI:
