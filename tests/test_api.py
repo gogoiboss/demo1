@@ -88,3 +88,14 @@ def test_health_endpoint():
         "service": "rippleeta",
         "model_loaded": True,
     }
+
+
+def test_graph_demo_returns_computed_station_pair_propagation():
+    response = client.get("/graph/demo")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "REPLAYED STATION-PAIR SCENARIO"
+    assert body["conflict_addition_min"] == 9.0
+    assert body["final_delay_min"] == 64.0
+    assert "not a live network backtest" in body["message"]

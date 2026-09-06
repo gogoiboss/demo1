@@ -47,3 +47,10 @@
   - Live demo script added with Passenger, Station Controller, Control Room, API, and fallback walkthroughs.
   - MIT license and final ignore rules added; tracked-history audit found no oversized or sensitive artifacts.
   - Final claim audit distinguishes measured route results from literature ranges and the illustrative, unvalidated station-pair example.
+
+- **2026-09-06**: End-to-end integration verified for the available public journey pipeline.
+  - Added `src/pipeline.py` as the single raw CSV -> feature engineering -> XGBoost -> explicit graph boundary -> MAPIE calibration -> result orchestration path.
+  - `/predict/{train_id}` now runs through that orchestration and returns stage provenance; the real `20507` result was P10 **42.4**, P50 **83.1**, P90 **123.7** minutes.
+  - The graph stage reports `not_activated_no_station_event_state` for the journey artifact. No conflict adjustment is fabricated; paired station-event data remains required for live graph activation.
+  - Removed dashboard sample predictions. With the API running, browser validation showed `API ONLINE` and the real `20507` result; with the API stopped, the dashboard shows `API UNAVAILABLE`.
+  - Added `tests/test_pipeline_e2e.py`; full suite: **23 passed**.

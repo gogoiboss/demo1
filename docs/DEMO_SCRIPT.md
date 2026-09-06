@@ -44,9 +44,9 @@ Click **Control Room**, then click **Trace conflict**.
 
 Say:
 
-> “This is the differentiator. The amber path is the conflict edge in the timed event graph. The before/after panel shows the downstream P50 moving from 83.1 to 92.1 minutes when the +9-minute propagation is traced.”
+> “This is the differentiator. The amber path is the conflict edge in the timed event graph. The API runs the corrected station-pair replay: Train 56789 at +15 minutes constrains Train 12301, adding +9 minutes and producing +64 minutes at the section exit.”
 
-Call out the station-pair approximation note. Do not describe it as block-level occupancy: public data does not provide that signal.
+Call out the station-pair approximation note. This is a real graph computation on a replayed scenario, not a live network backtest. Do not describe it as block-level occupancy: public data does not provide that signal.
 
 ### 4. API proof
 

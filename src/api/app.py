@@ -11,12 +11,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api.models import (
     CrewControllerResponse,
     FeederTransportResponse,
+    GraphDemoResponse,
     HealthResponse,
     MaintenanceResponse,
     PassengerResponse,
     PredictionResponse,
     StationMasterResponse,
 )
+from src.graph.worked_example import run_worked_example
 from src.api.service import PredictionService, TrainNotFoundError
 
 
@@ -58,6 +60,24 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             status="ok",
             service="rippleeta",
             model_loaded=prediction_service.model_loaded,
+        )
+
+    @app.get("/graph/demo", response_model=GraphDemoResponse, tags=["graph"])
+    def graph_demo() -> GraphDemoResponse:
+        result = run_worked_example(verbose=False)["scenario_b"]
+        return GraphDemoResponse(
+            status="REPLAYED STATION-PAIR SCENARIO",
+            section="KANPUR -> ALLAHABAD",
+            delaying_train="56789",
+            affected_train="12301",
+            source_delay_min=15.0,
+            base_delay_min=55.0,
+            conflict_addition_min=result["conflict_min"],
+            final_delay_min=result["alld_delay_min"],
+            message=(
+                "Real timed-event graph computation on a corrected two-train "
+                "station-pair replay; not a live network backtest."
+            ),
         )
 
     @app.get("/predict/{train_id}/passenger", response_model=PassengerResponse, tags=["stakeholders"])
