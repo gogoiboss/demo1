@@ -59,6 +59,9 @@ The repository expects the processed dataset at `data/processed/kaggle_competiti
    python -m src.ingestion.load_kaggle --csv data/raw/train_delay.csv
    ```
 
+   The checked-in raw CSV is sufficient for the demo. This command regenerates
+   `data/processed/kaggle_competition_cleaned.parquet` from it.
+
 2. **Train the baseline/XGBoost artifact**
 
    ```powershell
@@ -71,7 +74,19 @@ The repository expects the processed dataset at `data/processed/kaggle_competiti
    python -m src.evaluation.backtest
    ```
 
-4. **Start the API** in one terminal:
+4. **Verify the complete prediction chain** from raw data to calibrated output:
+
+   ```powershell
+   python -c "from src.pipeline import RippleETAPipeline; print(RippleETAPipeline().run('20507'))"
+   ```
+
+   This runs raw-data loading, feature engineering, XGBoost fitting, the
+   explicit conflict-graph boundary, MAPIE calibration, and the final result.
+   The graph reports `not_activated_no_station_event_state` because the public
+   journey artifact has no paired station-event observations; it does not
+   fabricate a network adjustment.
+
+5. **Start the API** in one terminal:
 
    ```powershell
    uvicorn src.api.app:app --reload --port 8000
@@ -79,13 +94,13 @@ The repository expects the processed dataset at `data/processed/kaggle_competiti
 
    Open the interactive API at `http://127.0.0.1:8000/docs`.
 
-5. **Start the dashboard** in a second terminal:
+6. **Start the dashboard** in a second terminal:
 
    ```powershell
    python -m http.server 5500 --directory dashboard
    ```
 
-   Open `http://127.0.0.1:5500`. Enter a train ID such as `20507`, then move through Passenger, Station Controller, and Control Room views. Full demo instructions are in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
+   Open `http://127.0.0.1:5500`. Enter a train ID such as `20507`, then move through Passenger, Station Controller, and Control Room views. The dashboard displays `API UNAVAILABLE` rather than local sample data if the API is stopped. Full demo instructions are in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
 
 Run all tests with:
 
