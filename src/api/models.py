@@ -17,7 +17,21 @@ class PredictionResponse(BaseModel):
     anomaly_flag: bool
     uncertainty_mode: bool
     conflict_adjustment_min: float = 0.0
+    graph_status: str = "not_activated_no_station_event_state"
+    pipeline_stages: dict[str, str] = Field(default_factory=dict)
     generated_at: datetime
+    message: str
+
+
+class GraphDemoResponse(BaseModel):
+    status: Literal["REPLAYED STATION-PAIR SCENARIO"]
+    section: str
+    delaying_train: str
+    affected_train: str
+    source_delay_min: float
+    base_delay_min: float
+    conflict_addition_min: float
+    final_delay_min: float
     message: str
 
 
