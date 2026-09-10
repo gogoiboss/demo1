@@ -72,7 +72,7 @@ def test_stakeholder_endpoints_are_distinct():
     )
 
     assert all(response.status_code == 200 for response in responses)
-    assert responses[0].json()["trend"] == "worsening"
+    assert responses[0].json()["trend"] == "unknown"
     assert "platform_commit" in responses[1].json()
     assert "relief_dispatch_deadline" in responses[2].json()
     assert "maintenance_window_adequate" in responses[3].json()

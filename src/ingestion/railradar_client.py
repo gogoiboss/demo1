@@ -1,179 +1,203 @@
-"""
-RailRadar API Client — Live Train Position & Status
-====================================================
-API docs:  https://api.railradar.in/v1
-Auth:      Bearer token (header: Authorization: Bearer rr_live_YOUR_API_KEY)
-Free tier: ~1,000 requests/month  →  rate-limit to stay safe.
-
-Endpoints used:
-    GET /v1/trains/{number}/live    → real-time position, delay, current halt
-    GET /v1/trains/{number}/route   → full timetable + GeoJSON polyline
-
-This is a STUB — fill in your API key and test against the live service.
-"""
-
-import time
+import os
+import json
 import logging
+import time
 from typing import Optional
-
+from pathlib import Path
+import pandas as pd
 import requests
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 logger = logging.getLogger(__name__)
 
-
 # ---------------------------------------------------------------------------
-# Configuration
+# Configuration & Mode
 # ---------------------------------------------------------------------------
 BASE_URL = "https://api.railradar.in/v1"
-
-# TODO: Replace with your actual RailRadar API key.
-#       Sign up at https://railradar.in/login (no credit card required).
 API_KEY = "rr_live_YOUR_API_KEY"
-
-# Free tier = 1,000 requests/month ≈ 33/day ≈ 1 every ~44 minutes.
-# For 3 routes polled every 15 min over 7 days ≈ 2,016 requests → exceeds
-# free tier.  We enforce a minimum interval between requests to be safe.
-MIN_REQUEST_INTERVAL_SEC = 12  # ~5 req/min max burst; stay well under quota
+MIN_REQUEST_INTERVAL_SEC = 12
 MAX_RETRIES = 3
-RETRY_BACKOFF_SEC = 30  # base wait when rate-limited (429)
+RETRY_BACKOFF_SEC = 30
 
+RIPPLEETA_MODE = os.environ.get("RIPPLEETA_MODE", "live").lower()
+if RIPPLEETA_MODE == "replay":
+    logger.info("Starting in REPLAY MODE. External API calls are disabled.")
 
 # ---------------------------------------------------------------------------
-# Simple rate limiter
+# Validation Schemas & State
 # ---------------------------------------------------------------------------
+_KNOWN_STATIONS = set()
+try:
+    _timetable_path = Path("data/processed/timetable_processed.parquet")
+    if _timetable_path.exists():
+        _df = pd.read_parquet(_timetable_path, columns=["station_code"])
+        _KNOWN_STATIONS = set(_df["station_code"].dropna().unique())
+        # For replay mock stations:
+        _KNOWN_STATIONS.update(["NDLS", "KANPUR", "ALLAHABAD", "MUGHAL", "HWH", "MMCT", "SURAT", "BRC"])
+except Exception as e:
+    pass
+
+_VALIDATION_METRICS = {
+    "live_status_processed": 0, "live_status_rejected": 0,
+    "route_processed": 0, "route_rejected": 0,
+    "dedup_rejected": 0, "stale_rejected": 0
+}
+
+_WATERMARKS = {}
+_PROCESSED_PINGS = set()
+
+def get_validation_metrics():
+    return _VALIDATION_METRICS.copy()
+
+
+class LiveStatusSchema(BaseModel):
+    train_number: str
+    current_station: str
+    delay_min: float = Field(..., ge=-500, le=5000)
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+    last_updated: Optional[str] = None
+    journey_date: Optional[str] = None
+    event_type: Optional[str] = None
+    
+    @model_validator(mode='after')
+    def validate_geo_and_station(self):
+        if self.lat is not None and self.lng is not None:
+            if not (6.0 <= self.lat <= 36.0 and 68.0 <= self.lng <= 98.0):
+                raise ValueError("GPS outside India bounding box")
+        if _KNOWN_STATIONS and self.current_station not in _KNOWN_STATIONS:
+            raise ValueError(f"Station {self.current_station} not known.")
+        return self
+
+class RouteStationSchema(BaseModel):
+    station_code: str
+    seq: int
+    arrival_min: Optional[float] = None
+    departure_min: Optional[float] = None
+    
+    @model_validator(mode='after')
+    def validate_known_station(self):
+        if _KNOWN_STATIONS and self.station_code not in _KNOWN_STATIONS:
+            raise ValueError(f"Station {self.station_code} not known.")
+        return self
+
+class RouteSchema(BaseModel):
+    train_number: Optional[str] = None
+    stations: list[RouteStationSchema]
+    
+    @model_validator(mode='after')
+    def validate_monotonic_seq(self):
+        if self.stations:
+            seqs = [st.seq for st in self.stations]
+            if not all(seqs[i] < seqs[i+1] for i in range(len(seqs)-1)):
+                raise ValueError("Sequence numbers not strictly monotonic.")
+        return self
+
 class _RateLimiter:
-    """Token-bucket-ish rate limiter: enforces minimum interval between calls."""
-
     def __init__(self, min_interval: float = MIN_REQUEST_INTERVAL_SEC):
         self.min_interval = min_interval
         self._last_call: float = 0.0
 
     def wait(self) -> None:
-        """Block until it's safe to make the next request."""
         elapsed = time.time() - self._last_call
         if elapsed < self.min_interval:
-            sleep_for = self.min_interval - elapsed
-            logger.debug(f"Rate limiter: sleeping {sleep_for:.1f}s")
-            time.sleep(sleep_for)
+            time.sleep(self.min_interval - elapsed)
         self._last_call = time.time()
-
 
 _limiter = _RateLimiter()
 
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-def _headers() -> dict:
-    return {
-        "Authorization": f"Bearer {API_KEY}",
-        "Accept": "application/json",
-    }
-
-
 def _get(endpoint: str, params: Optional[dict] = None) -> dict:
-    """
-    Make a rate-limited GET request with retry on 429.
-
-    Returns parsed JSON on success.
-    Raises requests.HTTPError on non-recoverable failure.
-    """
     url = f"{BASE_URL}{endpoint}"
-
     for attempt in range(1, MAX_RETRIES + 1):
         _limiter.wait()
-        logger.info(f"GET {url}  (attempt {attempt}/{MAX_RETRIES})")
-
         try:
-            resp = requests.get(url, headers=_headers(), params=params, timeout=15)
-        except requests.ConnectionError as e:
-            logger.warning(f"Connection error: {e}")
+            resp = requests.get(url, headers={"Authorization": f"Bearer {API_KEY}"}, params=params, timeout=15)
+        except requests.ConnectionError:
             if attempt < MAX_RETRIES:
                 time.sleep(RETRY_BACKOFF_SEC)
                 continue
             raise
-
         if resp.status_code == 200:
             return resp.json()
-
         if resp.status_code == 429:
-            # Rate limited — back off exponentially
-            wait = RETRY_BACKOFF_SEC * (2 ** (attempt - 1))
-            logger.warning(f"429 Too Many Requests — backing off {wait}s")
-            time.sleep(wait)
+            time.sleep(RETRY_BACKOFF_SEC * (2 ** (attempt - 1)))
             continue
-
-        # Other HTTP errors — fail immediately
-        logger.error(f"HTTP {resp.status_code}: {resp.text[:200]}")
         resp.raise_for_status()
-
     raise RuntimeError(f"Exhausted {MAX_RETRIES} retries for {url}")
 
+def _load_replay_fixture(filename: str) -> dict:
+    path = Path("data/replay") / filename
+    if not path.exists():
+        raise FileNotFoundError(f"Replay fixture {path} not found.")
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
-def get_live_status(train_number: str) -> dict:
-    """
-    Fetch real-time position, delay, and current halt for a train.
-
-    Returns dict with keys like:
-        - current_station, delay_min, lat, lng, last_updated, ...
-
-    TODO: Parse the raw response into a clean dataclass once we have
-          real response samples from the sandbox.
-    """
-    return _get(f"/trains/{train_number}/live")
-
-
-def get_route(train_number: str) -> dict:
-    """
-    Fetch the full timetable + GeoJSON polyline for a train.
-
-    Returns dict with keys like:
-        - stations (list), geojson (FeatureCollection), ...
-
-    TODO: Parse into structured format for the timed-event graph.
-    """
-    return _get(f"/trains/{train_number}/route")
-
-
-def get_coach_composition(train_number: str) -> dict:
-    """
-    Fetch coach composition and layout.
-
-    Returns dict with keys like:
-        - coaches (list of {position, type, ...})
-    """
-    return _get(f"/trains/{train_number}/coaches")
-
-
-def search_trains(query: str) -> dict:
-    """
-    Search / autocomplete for train numbers or names.
-
-    Returns dict with a list of matching trains.
-    """
-    return _get("/lookup/search/trains", params={"q": query})
-
-
-# ---------------------------------------------------------------------------
-# Quick smoke test
-# ---------------------------------------------------------------------------
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-
-    # Test with Howrah Rajdhani
-    print("\n--- Live Status: 12301 (Howrah Rajdhani) ---")
+def get_live_status(train_number: str) -> Optional[dict]:
+    if RIPPLEETA_MODE == "replay":
+        try:
+            raw_data = _load_replay_fixture(f"{train_number}_live.json")
+        except FileNotFoundError:
+            return None
+    else:
+        raw_data = _get(f"/trains/{train_number}/live")
+        
+    _VALIDATION_METRICS["live_status_processed"] += 1
     try:
-        status = get_live_status("12301")
-        print(status)
-    except Exception as e:
-        print(f"  Failed (expected if API key not set): {e}")
+        valid_ping = LiveStatusSchema(**raw_data).model_dump()
+    except ValidationError as e:
+        _VALIDATION_METRICS["live_status_rejected"] += 1
+        logger.error(f"[SCHEMA VALIDATION FAILED] {e.errors()}")
+        return None
 
-    print("\n--- Route: 12301 ---")
+    # --- DEDUPLICATION & WATERMARKING ---
+    station = valid_ping.get("current_station")
+    journey_date = valid_ping.get("journey_date")
+    event_type = valid_ping.get("event_type")
+    last_updated_str = valid_ping.get("last_updated")
+    
+    # Step 1: Deduplication
+    if journey_date and event_type and station:
+        ping_key = (train_number, journey_date, station, event_type)
+        if ping_key in _PROCESSED_PINGS:
+            logger.warning(f"[DEDUPLICATION] Rejecting duplicate ping for {ping_key}")
+            _VALIDATION_METRICS["dedup_rejected"] += 1
+            return None
+        _PROCESSED_PINGS.add(ping_key)
+
+    # Step 2: Watermarking
+    if last_updated_str:
+        try:
+            from datetime import datetime
+            ping_time = datetime.fromisoformat(last_updated_str.replace("Z", "+00:00"))
+            watermark = _WATERMARKS.get(train_number)
+            
+            if watermark and ping_time < watermark:
+                logger.warning(f"[WATERMARK REJECT] Stale ping for {train_number}. Ping time: {ping_time}, Watermark: {watermark}")
+                _VALIDATION_METRICS["stale_rejected"] += 1
+                return None
+                
+            _WATERMARKS[train_number] = ping_time
+        except ValueError:
+            pass
+
+    return valid_ping
+
+def get_route(train_number: str) -> Optional[dict]:
+    if RIPPLEETA_MODE == "replay":
+        try:
+            raw_data = _load_replay_fixture(f"{train_number}_route.json")
+        except FileNotFoundError:
+            return None
+    else:
+        raw_data = _get(f"/trains/{train_number}/route")
+        
+    _VALIDATION_METRICS["route_processed"] += 1
     try:
-        route = get_route("12301")
-        print(route)
-    except Exception as e:
-        print(f"  Failed (expected if API key not set): {e}")
+        return RouteSchema(**raw_data).model_dump()
+    except ValidationError as e:
+        _VALIDATION_METRICS["route_rejected"] += 1
+        logger.error(f"[SCHEMA VALIDATION FAILED] {e.errors()}")
+        return None

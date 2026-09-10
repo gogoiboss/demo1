@@ -3,7 +3,7 @@ C4 — Calibrated Output Engine
 ==============================
 
 Wraps XGBoost point-estimate predictions in statistically calibrated
-conformal prediction intervals (p10 / p50 / p90) using MAPIE.
+conformal prediction intervals (lower / point / upper) using MAPIE.
 
 Key design choices (from pitch materials and research):
   1. CONFORMAL PREDICTION via MAPIE — not Bayesian, not bootstrap.
@@ -26,8 +26,9 @@ Key design choices (from pitch materials and research):
      matching the pitch claim: "55% weight: rake delay; 30%: section conflict".
      We use shap.TreeExplainer (exact, fast for XGBoost).
 
-  5. P10/P50/P90 OUTPUT — p50 is the network-adjusted point estimate from C3.
-     P10 and P90 are conformal quantile offsets from MAPIE.
+  5. INTERVAL OUTPUT — p50 is the point estimate from the model or graph.
+      The lower and upper bounds are conformal prediction-interval bounds;
+      they are not asserted to be conditional quantiles.
 
 References:
   - Angelopoulos & Bates (2023), "Conformal Prediction: A Gentle Introduction"
@@ -214,9 +215,9 @@ class CalibratedETAEngine:
         Returns
         -------
         list of dict, one per row, each containing:
-            - p10_delay_min  : 10th percentile delay (optimistic bound)
-            - p50_delay_min  : median / point estimate
-            - p90_delay_min  : 90th percentile delay (pessimistic bound)
+            - p10_delay_min  : lower conformal interval bound (legacy field name)
+            - p50_delay_min  : point estimate (legacy field name)
+            - p90_delay_min  : upper conformal interval bound (legacy field name)
             - anomaly_flag   : bool — True if anomaly gate fired
             - uncertainty_mode : bool — True if anomaly gate fired (suppress point est)
             - shap_explanation : dict of top feature importances
@@ -353,46 +354,82 @@ def train_and_calibrate(
     features: list[str] = DEFAULT_FEATURES,
     target:   str = "actual_delay_minutes",
     save_path: Optional[str | Path] = None,
+    model_config: Optional[dict] = None,
 ) -> tuple[CalibratedETAEngine, dict]:
     """
-    Load a trained XGBoost model, do a chronological calibration split,
-    and fit CalibratedETAEngine on top.
+    Chronological calibration split → XGBoost base → MAPIE conformal intervals.
 
-    Returns (engine, metrics) where metrics includes coverage on the test set.
+    Parameters
+    ----------
+    df :
+        Full feature-engineered DataFrame (already validated).
+    features :
+        Feature columns to use; defaults to DEFAULT_FEATURES.
+    target :
+        Target column name.
+    save_path :
+        If given, save the engine here.  A dated, git-stamped filename is
+        also saved alongside it for reproducibility.
+    model_config :
+        Optional dict read from config.yaml ``model`` and ``calibration``
+        sections.  Recognised keys:
+          - ``train_fraction``    (default 0.70)
+          - ``cal_fraction``     (default 0.85, cumulative)
+          - ``coverage_target``  (default 0.90)
+          - ``anomaly_multiplier`` (default ANOMALY_MULTIPLIER)
+          - Any XGBoost hyperparameter accepted by build_model().
+
+    Returns
+    -------
+    (engine, metrics) where metrics includes coverage on the held-out test set.
     """
-    from src.models.xgboost_model import train_and_evaluate
+    from src.models.xgboost_model import build_model
+    from src.reproducibility import git_commit
+    import datetime as _dt
 
-    # --- Sort chronologically, split 70/15/15 ---------------------------
+    cfg = model_config or {}
+    train_frac      = float(cfg.get("train_fraction", 0.70))
+    cal_frac        = float(cfg.get("cal_fraction", 0.85))
+    coverage_target = float(cfg.get("coverage_target", COVERAGE_90))
+    anomaly_mult    = float(cfg.get("anomaly_multiplier", ANOMALY_MULTIPLIER))
+
+    # --- Sort chronologically, apply fractional split --------------------
     df_sorted = df.sort_values("journey_date").reset_index(drop=True)
     n = len(df_sorted)
-    train_end = int(n * 0.70)
-    cal_end   = int(n * 0.85)
+    train_end = int(n * train_frac)
+    cal_end   = int(n * cal_frac)
 
     df_train = df_sorted.iloc[:train_end]
     df_cal   = df_sorted.iloc[train_end:cal_end]
     df_test  = df_sorted.iloc[cal_end:]
 
-    logger.info(f"Split: train={len(df_train)}, cal={len(df_cal)}, test={len(df_test)}")
+    logger.info(
+        "Split (fractions %.0f/%.0f/%.0f): train=%d, cal=%d, test=%d",
+        train_frac * 100,
+        (cal_frac - train_frac) * 100,
+        (1 - cal_frac) * 100,
+        len(df_train), len(df_cal), len(df_test),
+    )
 
-    # --- Train base XGBoost model ----------------------------------------
-    model_path = Path("models/xgboost_delay_model.joblib")
-    if model_path.exists():
-        base_model = joblib.load(model_path)
-        logger.info("Loaded existing XGBoost model from disk.")
-    else:
-        logger.info("No saved model found — training from scratch.")
-        _, model_path = train_and_evaluate(df_train, target_col=target)
-        base_model = joblib.load(model_path)
+    # Fit only on the chronological training slice. A final all-data artifact
+    # must never be reused here because it can already contain cal/test rows.
+    base_model = build_model(cfg)
+    base_model.fit(df_train[features], df_train[target])
+    logger.info("Fitted base XGBoost on chronological training split only.")
 
     # --- Fit calibration engine ------------------------------------------
-    X_train = df_train[features] if all(f in df_train for f in features) else df_train[features]
+    X_train = df_train[features]
     y_train = df_train[target]
     X_cal   = df_cal[features]
     y_cal   = df_cal[target]
     X_test  = df_test[features]
     y_test  = df_test[target]
 
-    engine = CalibratedETAEngine(base_model=base_model, features=features)
+    engine = CalibratedETAEngine(
+        base_model=base_model,
+        features=features,
+        anomaly_multiplier=anomaly_mult,
+    )
     engine.fit(X_train, y_train, X_cal, y_cal)
 
     # --- Evaluate coverage on held-out test set --------------------------
@@ -416,14 +453,59 @@ def train_and_calibrate(
     }
 
     logger.info(
-        f"Calibration complete — "
-        f"90% coverage: {metrics['coverage_90_pct']}% (target: 90%), "
-        f"MAE p50: {metrics['mae_p50_min']} min, "
-        f"avg interval width: {metrics['avg_interval_width_min']} min"
+        "Calibration complete — coverage: %s%% (target: %.0f%%), "
+        "MAE p50: %s min, avg width: %s min",
+        metrics["coverage_90_pct"],
+        coverage_target * 100,
+        metrics["mae_p50_min"],
+        metrics["avg_interval_width_min"],
     )
 
+    # --- Save engine with versioned filename (model versioning) ----------
+    commit = git_commit()
+    timestamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    versioned_name = f"calibrated_eta_engine_{timestamp}_{commit}.joblib"
+
     if save_path:
-        engine.save(save_path)
+        save_path = Path(save_path)
+        engine.save(save_path)                     # canonical path (for API)
+        versioned_path = save_path.parent / versioned_name
+        engine.save(versioned_path)                # dated+commit tagged copy
+        logger.info("Versioned artifact: %s", versioned_path)
+        metrics["artifact_path"] = str(versioned_path)
+    else:
+        metrics["artifact_path"] = "not_saved"
+    metrics["git_commit"] = commit
+    metrics["trained_at"] = timestamp
+
+    # --- MLflow Tracking (Tier 3) ---------------------------------------
+    try:
+        from src.models.xgboost_model import setup_mlflow_run
+        import mlflow
+        setup_mlflow_run()
+        
+        with mlflow.start_run(run_name=f"run_{timestamp}"):
+            mlflow.log_params({
+                "n_train": metrics["n_train"],
+                "n_cal": metrics["n_cal"],
+                "n_test": metrics["n_test"],
+                "coverage_target": coverage_target,
+                "anomaly_multiplier": anomaly_mult,
+                "git_commit": commit,
+            })
+            mlflow.log_params({
+                k: v for k, v in cfg.items()
+                if k in {"n_estimators", "max_depth", "learning_rate", "random_state"}
+            })
+            mlflow.log_metrics({
+                "coverage_90_pct": metrics["coverage_90_pct"],
+                "mae_p50_min": metrics["mae_p50_min"],
+                "avg_interval_width": metrics["avg_interval_width_min"],
+            })
+            if save_path:
+                mlflow.log_artifact(str(save_path), artifact_path="model")
+    except Exception as exc:
+        logger.warning("Could not log to MLflow: %s", exc)
 
     return engine, metrics
 

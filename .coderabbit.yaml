@@ -1,0 +1,16 @@
+language: "en-US"
+tone: "professional"
+early_access: false
+reviews:
+  profile: "standard"
+  request_changes_workflow: false
+  high_level_summary: true
+  path_filters:
+    - "!notebooks/**"
+    - "!docs/**"
+    - "src/**"
+    - "dashboard/**"
+  instructions: |
+    - STRICT: Flag any function or API endpoint that returns a hardcoded, static, or zero value where real computation is expected. Look for proxy metrics masking as real ML output.
+    - STRICT: Flag any function claiming to perform graph propagation or conflict detection but returning a trivial flag without calling the actual algorithm.
+    - SECURITY/DATA LEAKAGE: Ensure strict data-leakage boundaries are maintained between model training and evaluation splits. Check that temporal splits (like TimeSeriesSplit) are used rather than random shuffling.

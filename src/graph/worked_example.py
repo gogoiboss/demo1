@@ -79,10 +79,10 @@ DELAYS_PPT = {
 # We use a scenario where 56789 is a very slow freight/express that departs
 # just 5 min before 12301 but takes 45 min longer on the section.
 #
-# 56789: KANPUR dep 22:25, ALLD arr 02:10 (225 min, slow train)
-# 12301: KANPUR dep 22:30, ALLD arr 01:25 (175 min, faster Rajdhani)
-# Without delays: 12301 arr ALLD = 01:25, 56789 arr ALLD = 02:10. Scheduled gap = 45 min.
-# No structural conflict on schedule.
+# 56789: KANPUR dep 22:25, ALLD arr 02:04 (219 min, slow train)  ← arr_min = 26*60+4 = 1564
+# 12301: KANPUR dep 22:30, ALLD arr 01:25 (175 min, faster Rajdhani) ← arr_min = 25*60+25 = 1525
+# Without delays: 12301 arr ALLD = 01:25, 56789 arr ALLD = 02:04. Scheduled gap = 39 min.
+# No structural conflict on schedule (56789 arrives later, so 12301 naturally trails it).
 #
 # With delays: 12301 +55, 56789 +15 min:
 #   12301 arr ALLD actual = 1525 + 55 = 1580 = 02:20
@@ -113,7 +113,7 @@ SCHEDULES_DEMO = [
         ],
     },
     {
-        # Slow express, departs 5 min before 12301 but arrives 39 min later (scheduled).
+        # Slow express, departs 5 min before 12301 but arrives 39 min later on schedule (02:04 vs 01:25).
         # With only +15 min delay vs 12301's +55, it gets in the way.
         "train_id": "56789",
         "category": "express",

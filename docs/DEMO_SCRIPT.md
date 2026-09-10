@@ -38,13 +38,13 @@ Say:
 
 Point to the platform decision, decision timer, interval width, and conflict signal. This view is denser because the station controller is acting on resource allocation, not planning a journey.
 
-### 3. Control Room conflict trace
+### 3. Control Room replayed conflict trace
 
 Click **Control Room**, then click **Trace conflict**.
 
 Say:
 
-> “This is the differentiator. The amber path is the conflict edge in the timed event graph. The API runs the corrected station-pair replay: Train 56789 at +15 minutes constrains Train 12301, adding +9 minutes and producing +64 minutes at the section exit.”
+> “This is the differentiator. The amber path is the conflict edge in the timed event graph. The API runs the corrected station-pair replay: Train 56789 at +15 minutes constrains Train 12301, adding +9 minutes and producing +64 minutes at the section exit. This is a replayed graph computation, not live network inference.”
 
 Call out the station-pair approximation note. This is a real graph computation on a replayed scenario, not a live network backtest. Do not describe it as block-level occupancy: public data does not provide that signal.
 
@@ -62,6 +62,18 @@ Open `/docs` and expand:
 Say:
 
 > “These are not cosmetic dashboard tabs. The API translates one calibrated forecast into five decision-specific contracts.”
+
+### 5. MLOps and Reproducibility (Q&A material)
+
+If judges ask "How would you tune this?" or "Is this deployable?":
+
+1. Open `config.yaml` to show that all hyperparameters, coverage targets, and anomaly thresholds are parameterized.
+2. Open `models/experiment_log.jsonl` to show that every training run is logged with its exact git commit, parameters, and metrics.
+3. Open `Dockerfile` and `.github/workflows/tests.yml` to show the project is containerized and protected by continuous integration.
+4. Call out the API provenance dict (`GET /predict/{train_id}`), which attaches the versioned model artifact name (e.g., `calibrated_eta_engine_20260906T..._<commit>.joblib`) to every prediction.
+
+Say:
+> “We built the boring 20% around the model so it reads as engineered, not assembled. It has CI, Docker, centralized configuration, and input/output monitoring gates.”
 
 ## Fallback plan
 

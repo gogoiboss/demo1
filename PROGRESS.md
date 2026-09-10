@@ -32,7 +32,7 @@
 - **2026-09-05**: Stakeholder dashboards (C6) implemented and browser-validated.
   - `dashboard/index.html`, `styles.css`, and `app.js` provide distinct Passenger, Station Controller, and Control Room views.
   - Dark control-panel design uses amber for calibrated/conflict signals and teal-gray for standard operations.
-  - Live API data loads for train 20507; the Control Room demo trace visibly changes P50 from 83.1 to 92.1 minutes with a +9-minute amber conflict edge.
+  - Live API data loads for train 20507; the Control Room replay trace is separate from the model output and shows the corrected +55 -> +64 minute graph scenario.
   - Desktop and 390px mobile browser checks passed. Setup is documented in `docs/dashboard_notes.md`.
 
 - **2026-09-05**: Final selected-route backtest completed and documented.
@@ -50,7 +50,25 @@
 
 - **2026-09-06**: End-to-end integration verified for the available public journey pipeline.
   - Added `src/pipeline.py` as the single raw CSV -> feature engineering -> XGBoost -> explicit graph boundary -> MAPIE calibration -> result orchestration path.
-  - `/predict/{train_id}` now runs through that orchestration and returns stage provenance; the real `20507` result was P10 **42.4**, P50 **83.1**, P90 **123.7** minutes.
+  - `/predict/{train_id}` now runs through that orchestration and returns stage provenance; after leakage removal, the real `20507` result is lower bound **0.0**, point estimate **35.5**, upper bound **88.8** minutes.
   - The graph stage reports `not_activated_no_station_event_state` for the journey artifact. No conflict adjustment is fabricated; paired station-event data remains required for live graph activation.
   - Removed dashboard sample predictions. With the API running, browser validation showed `API ONLINE` and the real `20507` result; with the API stopped, the dashboard shows `API UNAVAILABLE`.
   - Added `tests/test_pipeline_e2e.py`; full suite: **23 passed**.
+
+- **2026-09-06**: Hackathon-filtered MLOps credibility layer added.
+  - `config.yaml` now owns data paths and validation thresholds; input schema, missingness, and range checks run before feature engineering.
+  - Pipeline uses Python logging and returns provenance: Git commit, dataset SHA-256, model artifact SHA-256, and config path.
+  - Added `docs/LIMITATIONS.md`, explicitly connecting the anomaly gate to lightweight output monitoring and listing production-only future work.
+  - Added validation regression tests; full suite: **25 passed**.
+
+- **2026-09-06**: Research-to-code reconciliation fixes applied.
+  - Calibration now fits only on the chronological training slice; it no longer reuses an all-data model artifact during held-out calibration.
+  - Graph-enabled pipeline calls `detect_conflicts()` and applies train-specific adjustments; the default API still reports graph inactive because no station-event state is available.
+  - Corrected notebooks 01-03: continuous delay target, unique-train counting, rake-proxy wording, like-for-like held-out comparison, and original graph arithmetic.
+  - Dashboard and pitch sources now label the graph as a replay and conformal outputs as interval bounds; passenger trend is unknown without temporal observations.
+  - Full test suite after reconciliation: **26 passed**.
+
+- **2026-09-07**: Final audit verifications.
+  - **Leakage Audit**: Verified that `train_and_calibrate()` and `backtest.py` strictly build and fit fresh models on the chronological training split. The all-data `xgboost_delay_model.joblib` artifact is never loaded during evaluation. The reported MAE (28.386 min) and coverage (97.70%) are uncontaminated and genuinely measured on held-out data.
+  - **Graph Audit**: Verified that `_graph_stage()` explicitly calls `detect_conflicts()`. The `graph_adjustment_rows: 0` backtest result is strictly a data availability limitation (the journey-level historical dataset lacks concurrent station-pair state) and not a missing function call.
+
