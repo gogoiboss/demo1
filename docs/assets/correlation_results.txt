@@ -1,5 +1,0 @@
-Sample Size: 10000 records
-Date Range: 2025-01-01 to 2025-12-31
-Global Pearson Correlation (Rake Lateness -> Next Leg): -0.015
-Intra-Day Avg Correlation (Weather/Storm confound check): nan
-Train/Test Split Methodology: Chronological TimeSeriesSplit (No Shuffling)
