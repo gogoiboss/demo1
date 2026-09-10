@@ -37,4 +37,7 @@ This document details the complete backend architecture, mathematical models, an
 ## 7. The API Layer
 * **Tech Stack:** `FastAPI`, `uvicorn`, `pydantic`.
 * **Design:** Fully decoupled, event-driven REST API. It exposes 5 distinct endpoints tailored to specific railway stakeholders (`/passenger`, `/station-master`, `/crew-controller`, `/feeder-transport`, `/maintenance`).
-* **Performance:** Benchmarked to process 3,000 trains (the daily coaching fleet) in milliseconds on a single CPU, bypassing the need for expensive GPU clusters.
+* **Validated scope:** The checked-in artifact contains 10,000 journey rows covering 56 train numbers. The Phase 3A synthetic benchmark completes a cached propagation pass for 500 trains × 8 stops in 20.58 ms, with numerical equivalence to the reference implementation. This supports a zone-scale hypothesis (roughly 500–800 trains), not a national load claim.
+* **Deployment path:** The prediction service is stateless and horizontally scalable behind a load balancer. It can run on railway-controlled on-premise infrastructure or NIC/MeghRaj rather than requiring a foreign public cloud.
+* **Integration path:** The production integration target is CRIS/RTIS once access and data contracts are deployed. RailRadar and scraped NTES are prototype/replay sources, not the production plan.
+* **Access and language roadmap:** Hindi plus zone-language passenger output, and low-bandwidth/offline station-display behavior, are near-term deployment requirements; they are not claimed as implemented in this prototype.

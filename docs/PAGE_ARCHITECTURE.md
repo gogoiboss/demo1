@@ -430,6 +430,12 @@ These are not missing work — they are deliberate scoping decisions for a hacka
 | Orchestration (Airflow / Kubeflow) | The pipeline runs as a Python class; Airflow would add infrastructure without adding correctness |
 | Production model registry (MLflow server) | Experiment logging writes to local JSONL; a server-based registry is correct at multi-team scale |
 | Automated retraining triggers | Model is retrained on-demand; automated drift-triggered retraining requires sustained monitoring infrastructure |
+
+### Validated Scope And Deployment Boundary
+
+The checked-in artifact contains 10,000 journey rows covering 56 train numbers. The Phase 3A synthetic benchmark completes a cached propagation pass for 500 trains × 8 stops in 20.58 ms with numerical equivalence to the reference implementation. That supports a zone-scale hypothesis (roughly 500–800 trains), not a national load-test claim. Full national rollout is a phased infrastructure program requiring CRIS/RTIS access, zone-by-zone data contracts, operational validation, and capacity testing.
+
+The deployment path is stateless and horizontally scalable, and can run on railway-controlled on-premise infrastructure or NIC/MeghRaj rather than foreign public cloud. RailRadar and scraped NTES are prototype/replay sources; the production integration target is CRIS/RTIS once deployed. Hindi plus zone-language passenger output and low-bandwidth/offline station displays are near-term deployment requirements, not current prototype claims.
 | Block-level occupancy data | Not publicly available from NTES, RailRadar, or any accessible Indian Railways API |
 | A/B testing infrastructure | Appropriate after multiple model versions exist in production |
 | Network-wide backtest of conflict propagation | Requires paired station-event data not present in the available journey-level artifact |
