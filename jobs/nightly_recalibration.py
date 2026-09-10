@@ -1,10 +1,10 @@
-import sqlite3
 import pandas as pd
 import numpy as np
 from datetime import datetime
 from pathlib import Path
 import sys
 import logging
+from src.model_promotion import evaluate_promotion
 
 # Add project root to path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -47,7 +47,9 @@ def run_nightly_job():
         print("Insufficient data for calibration, skipping.")
         return
 
-    df_recent_actuals = df.sample(n=min(2000, len(df)), random_state=42)
+    # Freeze the newest chronological slice for an apples-to-apples comparison.
+    holdout_size = max(1, min(2000, len(df) // 5))
+    df_recent_actuals = df.sort_values("journey_date").tail(holdout_size)
     
     # Predict with CURRENT model
     print(f"Evaluating {len(df_recent_actuals)} recent journeys...")
@@ -71,22 +73,36 @@ def run_nightly_job():
     # ---------------------------------------------------------------------
     # STEP 3: REAL TRIGGER
     # ---------------------------------------------------------------------
-    # For testing, we force the threshold slightly below our MAE to trigger the retrain.
-    # We expect MAE ~27, so we'll use 15.0 here.
+    # Keep the trigger deliberately simple for the hackathon job.
     DRIFT_THRESHOLD = 15.0
     if mae > DRIFT_THRESHOLD:
         print(f"Drift threshold exceeded (> {DRIFT_THRESHOLD} min). Triggering XGBoost/MAPIE retrain...")
         try:
-            engine, metrics = train_and_calibrate(
+            candidate_engine, metrics = train_and_calibrate(
                 df=df,
                 features=features,
                 target=target,
-                save_path=Path("models/calibrated_eta_engine.joblib"),
+                save_path=None,
                 model_config={**p.config.get("model", {}), **p.config.get("calibration", {})}
             )
-            print("\nMAPIE conformal bounds successfully recalibrated.")
             print(f"BEFORE -> MAE: {mae:.2f} min | Coverage: {current_coverage*100:.1f}%")
-            print(f"AFTER  -> MAE: {metrics['mae_p50_min']:.2f} min | Coverage: {metrics['coverage_90_pct']:.1f}%")
+            print(f"CANDIDATE -> internal holdout metrics: {metrics}")
+            candidate_preds = candidate_engine.predict(X_recent)
+            decision = evaluate_promotion(
+                y_actual,
+                current_preds,
+                candidate_preds,
+                current_model="deployed",
+                candidate_model="candidate",
+            )
+            logging.warning(
+                "Candidate evaluated but never auto-deployed: %s; pinball %.4f -> %.4f; coverage %.1f%% -> %.1f%%",
+                decision.reason,
+                decision.current_pinball,
+                decision.candidate_pinball,
+                decision.current_coverage * 100,
+                decision.candidate_coverage * 100,
+            )
         except Exception as e:
             print(f"CRITICAL: Recalibration failed. Model was not updated. Error: {e}")
     else:

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Configuration & Mode
 # ---------------------------------------------------------------------------
 BASE_URL = "https://api.railradar.in/v1"
-API_KEY = "rr_live_YOUR_API_KEY"
+API_KEY = os.environ.get("RIPPLEETA_API_KEY", "")
 MIN_REQUEST_INTERVAL_SEC = 12
 MAX_RETRIES = 3
 RETRY_BACKOFF_SEC = 30

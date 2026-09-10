@@ -10,17 +10,16 @@
 # and API contract are all tested with real synthetic scenarios — these are the
 # differentiating parts of the system and worth protecting against regression.
 
-name: tests
+name: CI
 
 on:
   push:
-    branches: [main, master]
   pull_request:
     branches: [main, master]
 
 jobs:
   test:
-    name: "Python ${{ matrix.python-version }} — unit + API tests"
+    name: "Python ${{ matrix.python-version }} — lint, types, schemas, tests"
     runs-on: ubuntu-latest
 
     strategy:
@@ -39,7 +38,16 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt ruff mypy
+
+      - name: Lint with Ruff
+        run: ruff check src/model_promotion.py tests/test_model_promotion.py jobs/nightly_recalibration.py
+
+      - name: Type check with mypy
+        run: mypy src/model_promotion.py --ignore-missing-imports
+
+      - name: Validate Phase 1D data schemas
+        run: pytest tests/test_validation.py -q
 
       - name: Run fast unit + API tests (no data required)
         run: |
