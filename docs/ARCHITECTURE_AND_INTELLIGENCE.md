@@ -31,7 +31,8 @@ This document details the complete backend architecture, mathematical models, an
 
 ## 6. Continuous Refinement Loop (MLOps)
 * **Tech Stack:** `sqlite3`, Python (`jobs/nightly_recalibration.py`).
-* **Intelligence:** Predictions and actuals are logged to `predictions_history.db`. A nightly script simulates calculating Mean Absolute Error (MAE) drift. If drift exceeds 10 minutes, it automatically triggers MAPIE to recalibrate the uncertainty bounds.
+* **Current prototype:** Predictions are logged locally, and the nightly script can evaluate a candidate in backtest mode against a deterministic chronological holdout. The candidate is not written to the deployed path, and there is no live rolling-MAE or ADWIN detector.
+* **Phase 2 roadmap:** Add live ground-truth monitoring, rolling-MAE plus ADWIN change-point detection, and an alert-driven, human-reviewed retraining process. Promotion must be gated by non-regressing pinball loss and coverage on a frozen holdout.
 
 ## 7. The API Layer
 * **Tech Stack:** `FastAPI`, `uvicorn`, `pydantic`.

@@ -4,7 +4,8 @@ This document clearly outlines the current limitations of the RippleETA prototyp
 
 ## 1. Ground Truth & MLOps Recalibration
 **Limitation:** Due to the lack of live NTES (National Train Enquiry System) or COA (Control Office Application) API keys during this hackathon, we cannot log live actual arrival times.
-**Workaround (Backtest Mode):** The nightly recalibration loop (`jobs/nightly_recalibration.py`) does not use live ground truth. Instead, it operates in "backtest mode"—computing drift and triggering MAPIE recalibrations by evaluating predictions against a held-out historical slice of the training dataset.
+**Current behavior (Backtest Mode):** `jobs/nightly_recalibration.py` evaluates the current model and an unsaved candidate against a deterministic chronological holdout from the historical dataset. It reports the comparison and never replaces the deployed artifact. It does not run live rolling-MAE monitoring, ADWIN, or automatic retraining.
+**Phase 2 roadmap:** Add live ground-truth collection, a rolling-MAE monitor, ADWIN change-point detection, and a human-reviewed retraining workflow. A candidate must beat or match the frozen holdout's pinball loss and coverage before any explicitly approved promotion; drift alerts must not silently swap models.
 
 ## 2. Real-Time Feeds (Weather, TSRs, Signal Aspects)
 **Limitation:** The Problem Statement requires adapting to dynamic real-time events like Temporary Speed Restrictions (TSRs) and signal aspects.
