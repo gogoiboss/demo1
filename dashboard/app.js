@@ -1,7 +1,7 @@
 
 async function fetchSystemMode() {
   try {
-    const res = await fetch('/system/mode');
+    const res = await fetch(`${API_BASE}/system/mode`);
     if (!res.ok) return;
     const data = await res.json();
     const badge = $('#mode-badge');
@@ -55,6 +55,52 @@ async function apiGet(path) {
   const response = await fetch(`${API_BASE}${path}`);
   if (!response.ok) throw new Error((await response.json()).detail || `API ${response.status}`);
   return response.json();
+}
+
+async function fetchPipelineStatus() {
+  const modeEl = $('#pipeline-mode');
+  const healthEl = $('#pipeline-health');
+  const modelEl = $('#pipeline-model');
+  try {
+    const [mode, health] = await Promise.all([apiGet('/system/mode'), apiGet('/health')]);
+    const replay = mode.mode === 'REPLAY';
+    $('#station-stamp').textContent = replay ? 'REPLAY SNAPSHOT' : 'LIVE SNAPSHOT';
+    const modeBadge = $('#mode-badge');
+    if (modeBadge) {
+      modeBadge.style.display = 'inline-block';
+      modeBadge.textContent = replay ? 'REPLAY MODE · recorded input' : 'LIVE MODE';
+      modeBadge.className = replay ? 'mode-replay' : 'mode-live';
+    }
+    modeEl.textContent = replay ? 'REPLAY' : 'LIVE';
+    modeEl.className = replay ? 'status-replay' : 'status-live';
+    healthEl.textContent = health.status === 'ok' ? 'ONLINE' : 'DEGRADED';
+    healthEl.className = health.status === 'ok' ? 'status-live' : 'status-degraded';
+    modelEl.textContent = health.model_loaded ? 'READY' : 'DEGRADED';
+    modelEl.className = health.model_loaded ? 'status-live' : 'status-degraded';
+    $('#pipeline-explanation').textContent = replay
+      ? 'Recorded input path; prediction is real, data source is replay.'
+      : 'Live input path; prediction is served by the active API.';
+  } catch (error) {
+    modeEl.textContent = 'UNKNOWN';
+    healthEl.textContent = 'OFFLINE';
+    modelEl.textContent = 'UNAVAILABLE';
+    modeEl.className = healthEl.className = modelEl.className = 'status-degraded';
+    $('#pipeline-explanation').textContent = 'API unavailable; no operational prediction is being displayed.';
+  }
+}
+
+function renderPipelineStatus() {
+  const prediction = state.prediction;
+  const modelEl = $('#pipeline-model');
+  if (!modelEl || !prediction) return;
+  const degraded = prediction.degraded || prediction.anomaly_flag || String(prediction.status).includes('SUSPENDED');
+  modelEl.textContent = degraded ? 'DEGRADED / GUARDED' : 'READY';
+  modelEl.className = degraded ? 'status-degraded' : 'status-live';
+  if (degraded) {
+    $('#pipeline-explanation').textContent = prediction.anomaly_flag
+      ? 'Anomaly gate active; manual control charts required.'
+      : 'Degraded prediction path; confidence is explicitly limited.';
+  }
 }
 
 // ── Build feeder cutoff ISO string from local time input ──────────────────────
@@ -113,34 +159,25 @@ async function loadData() {
   state.tracing = false;
   showNotice('Refreshing calibrated signal…');
 
-  const cutoffISO = encodeURIComponent(getFeederCutoffISO());
   const id = encodeURIComponent(state.trainId);
 
   try {
-    const [prediction, passenger, station, graphDemo, crew, feeder, maintenance] = await Promise.all([
+    const [prediction, station, graphDemo] = await Promise.all([
       apiGet(`/predict/${id}`),
-      apiGet(`/predict/${id}/passenger`),
       apiGet(`/predict/${id}/station-master`),
       apiGet('/graph/demo'),
-      apiGet(`/predict/${id}/crew-controller`),
-      apiGet(`/predict/${id}/feeder-transport?cutoff_time=${cutoffISO}`),
-      apiGet(`/predict/${id}/maintenance`),
     ]);
-    Object.assign(state, { prediction, passenger, station, graphDemo, crew, feeder, maintenance });
+    Object.assign(state, { prediction, station, graphDemo });
     setConnection(true);
     showNotice('');
   } catch (error) {
-    Object.assign(state, {
-      prediction: DEMO_PREDICTION, passenger: DEMO_PASSENGER,
-      station: DEMO_STATION, graphDemo: DEMO_GRAPH,
-      crew: DEMO_CREW, feeder: DEMO_FEEDER, maintenance: DEMO_MAINTENANCE,
-    });
+    Object.assign(state, { prediction: null, station: null, graphDemo: null });
     setConnection(false);
-    showNotice(`API unavailable: ${error.message}. Showing realistic demo data.`);
+    showNotice(`API unavailable: ${error.message}. Station Master controls are suspended.`);
   }
 
   renderAll();
-  loadJunctionTable(); // fire separately — non-blocking
+  renderPipelineStatus();
 }
 
 // ── Re-fetch feeder only (when time picker changes) ───────────────────────────
@@ -295,9 +332,21 @@ function renderPassenger() {
 function renderStation() {
   const p = state.prediction;
   const station = state.station;
-  if (!p || !station) return;
+  if (!p || !station) {
+    $('#station-decision').textContent = 'OFFLINE';
+    $('#station-decision').style.color = 'var(--red)';
+    $('#station-message').textContent = 'No API prediction available. Platform commitment is suspended.';
+    $('#station-p10').textContent = '--';
+    $('#station-p50').textContent = '--';
+    $('#station-p90').textContent = '--';
+    $('#station-width').textContent = '--';
+    $('#station-deadline').textContent = '--';
+    $('#station-state').textContent = 'API OFFLINE';
+    return;
+  }
 
   const isSuspended = p.anomaly_flag || p.status.includes('SUSPENDED');
+  $('#station-train-label').textContent = p.train_id || state.trainId;
   
   const card = document.querySelector('#station-decision-card');
   const decisionEl = $('#station-decision');
@@ -311,6 +360,7 @@ function renderStation() {
     msgEl.textContent = "Unusual conditions detected — prediction suspended. Use manual control charts.";
     
     $('#station-p10').textContent = '--';
+    $('#station-p50').textContent = '--';
     $('#station-p90').textContent = '--';
     $('#station-width').textContent = '--';
   } else {
@@ -320,6 +370,7 @@ function renderStation() {
     msgEl.textContent = station.message;
     
     $('#station-p10').textContent = p.p10_delay_min == null ? '--' : p.p10_delay_min.toFixed(1);
+    $('#station-p50').textContent = p.p50_delay_min == null ? '--' : p.p50_delay_min.toFixed(1);
     $('#station-p90').textContent = p.p90_delay_min == null ? '--' : p.p90_delay_min.toFixed(1);
     $('#station-width').textContent = p.p10_delay_min == null ? '--' : `${(p.p90_delay_min - p.p10_delay_min).toFixed(1)} min`;
   }
@@ -483,7 +534,7 @@ function renderNetwork() {
   $('#network-canvas').classList.toggle('is-tracing', state.tracing);
   $('#trace-conflict').textContent = state.tracing ? '⏹ CLEAR REPLAY' : '▶ SCENARIO REPLAY — station-pair conflict example';
   $('#conflict-path span').textContent = hasGraph ? `+${graph.conflict_addition_min.toFixed(0)} MIN PROPAGATED (SCENARIO)` : 'GRAPH UNAVAILABLE';
-  const hasRealConflict = p.conflict_adjustment_min > 0;
+  const hasRealConflict = p && p.conflict_adjustment_min > 0;
   $('#passenger-conflict').textContent = hasRealConflict
     ? `Prediction includes +${p.conflict_adjustment_min.toFixed(1)} min conflict adjustment`
     : 'No conflict in current prediction (live data lacks paired station state)';
@@ -491,11 +542,7 @@ function renderNetwork() {
 
 // ── Render all ────────────────────────────────────────────────────────────────
 function renderAll() {
-  renderPassenger();
   renderStation();
-  renderCrew();
-  renderFeeder();
-  renderMaintenance();
   renderNetwork();
 }
 
@@ -521,4 +568,5 @@ $('#trace-passenger').addEventListener('click', () => { state.tracing = true; se
 $('#feeder-cutoff-input').addEventListener('change', reloadFeeder);
 
 startClock();
+fetchPipelineStatus();
 loadData();

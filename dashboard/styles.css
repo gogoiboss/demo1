@@ -30,6 +30,8 @@ button { cursor: pointer; }
 .topbar-status { color: var(--muted); display: flex; align-items: center; gap: 10px; }
 .status-dot, .live-pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 4px #f5b84b1f; }
 .status-dot.is-online { background: var(--teal); box-shadow: 0 0 0 4px #61c5bd1f; }
+.mode-live { background: var(--teal) !important; color: var(--ink) !important; }
+.mode-replay { background: var(--amber) !important; color: var(--ink) !important; }
 .separator { width: 1px; height: 13px; background: var(--line); }
 .command-bar { padding: 54px 0 30px; display: flex; align-items: end; justify-content: space-between; }
 .eyebrow { color: var(--teal); margin: 0 0 10px; }
@@ -47,6 +49,22 @@ h2 { font-size: clamp(25px, 3vw, 40px); line-height: 1; letter-spacing: -.04em; 
 .tab:hover, .tab.is-active { color: var(--text); border-bottom-color: var(--amber); }
 .notice { min-height: 28px; color: var(--amber); font-family: var(--mono); font-size: 11px; padding-top: 13px; }
 .notice:empty { padding-top: 0; }
+.pipeline-strip { display: grid; grid-template-columns: repeat(3, minmax(120px, .7fr)) minmax(260px, 1.8fr); gap: 1px; margin-top: 18px; border: 1px solid var(--line); background: var(--line); }
+.pipeline-cell { min-height: 66px; padding: 13px 15px; background: var(--panel); }
+.pipeline-label { display: block; color: var(--muted); font: 9px var(--mono); letter-spacing: .12em; margin-bottom: 8px; }
+.pipeline-cell strong { color: var(--amber); font: 600 12px var(--mono); }
+.pipeline-cell span:last-child { color: #b8c6c1; font-size: 12px; line-height: 1.35; }
+.status-live { color: var(--teal) !important; }
+.status-replay { color: var(--amber) !important; }
+.status-degraded { color: var(--red) !important; }
+.station-live-note { display: flex; align-items: center; gap: 10px; margin: -14px 0 22px; padding: 11px 13px; border: 1px solid var(--teal-deep); background: #102426; color: var(--muted); font: 11px var(--mono); }
+.station-live-note strong { color: var(--teal); font-size: 10px; letter-spacing: .1em; }
+.station-live-note b { color: var(--text); }
+.wireframe-banner { display: flex; align-items: baseline; gap: 14px; padding: 14px 16px; margin-bottom: 26px; border: 1px dashed var(--amber-soft); background: #171a16; }
+.wireframe-banner span { color: var(--amber); font: 10px var(--mono); letter-spacing: .1em; }
+.wireframe-banner strong { color: var(--text); font-size: 16px; }
+.wireframe-banner small { color: var(--muted); font-size: 12px; }
+.tab-wireframe { color: #8a8171; }
 .view-panel { padding: 35px 0 55px; animation: reveal .35s ease-out both; }
 .is-hidden { display: none; }
 @keyframes reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -111,7 +129,9 @@ h2 { font-size: clamp(25px, 3vw, 40px); line-height: 1; letter-spacing: -.04em; 
 .network-detail { margin-top: 13px; padding: 19px 22px; gap: 25px; justify-content: flex-start; }.network-detail > div { flex: 1; }.network-detail strong { display: block; font-family: var(--mono); font-size: 13px; }.trace-arrow { flex: 0 0 auto !important; color: var(--amber); font-size: 23px; }.amber-detail { border-left: 1px solid var(--amber-soft); padding-left: 20px; }.amber-detail strong { color: var(--amber); }.amber-detail small { display: block; color: var(--muted); margin-top: 7px; font-size: 11px; }.demo-caption { color: #617777; font: 9px var(--mono); letter-spacing: .08em; margin-top: 13px; }
 .footer { border-top: 1px solid var(--line); color: #56706f; margin-top: auto; padding: 17px 0; display: flex; justify-content: space-between; }
 @media (max-width: 800px) { .app-shell { padding: 0 18px; }.topbar-status { font-size: 0; }.topbar-status .status-dot { margin-right: 4px; }.command-bar { padding-top: 38px; display: block; }.controls { margin-top: 24px; }.passenger-layout { display: block; min-height: 0; }.passenger-side { grid-template-columns: 1fr 1fr; margin-top: 18px; }.hero-delay { font-size: 82px; }.station-grid { grid-template-columns: 1fr 1fr; }.decision-card-large { grid-column: span 2; grid-row: auto; }.signal-table { grid-column: span 2; }.network-summary { flex-wrap: wrap; }.network-summary > div { min-width: 42%; }.network-detail { align-items: flex-start; }.footer { display: block; line-height: 1.8; }.footer span { display: block; } }
+@media (max-width: 800px) { .pipeline-strip { grid-template-columns: repeat(3, 1fr); }.pipeline-explanation { grid-column: 1 / -1; }.station-live-note { align-items: flex-start; flex-wrap: wrap; } }
 @media (max-width: 520px) { .brand small { display: none; }.view-tabs { overflow-x: auto; }.tab { white-space: nowrap; padding-inline: 12px; }.passenger-side { display: block; }.quiet-card { margin-bottom: 12px; }.station-grid { grid-template-columns: 1fr; }.decision-card-large, .signal-table { grid-column: auto; }.network-detail { display: block; }.trace-arrow { padding: 13px 0; transform: rotate(90deg); }.network-canvas { min-height: 350px; }.station-node { font-size: 8px; }.node-kanpur { left: 17%; }.node-allahabad { left: 51%; }.node-mughal { left: 85%; } }
+@media (max-width: 520px) { .pipeline-strip { grid-template-columns: 1fr 1fr; }.pipeline-explanation { grid-column: 1 / -1; }.wireframe-banner { display: block; }.wireframe-banner strong, .wireframe-banner small { display: block; margin-top: 6px; } }
 
 /* ═══════════════════════════════════════════════════════════════════════
    GHOST TRAIN SANDBOX — 3D isometric scene with live API data

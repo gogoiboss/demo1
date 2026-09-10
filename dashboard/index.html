@@ -38,18 +38,26 @@
       </section>
 
       <nav class="view-tabs" aria-label="Stakeholder views">
-        <button class="tab is-active" data-view="passenger">Passenger</button>
-        <button class="tab" data-view="station">Station Controller</button>
-        <button class="tab tab-crew" data-view="crew">Crew Controller</button>
-        <button class="tab tab-feeder" data-view="feeder">Feeder Transport</button>
-        <button class="tab tab-maintenance" data-view="maintenance">Maintenance Yard</button>
+        <button class="tab is-active" data-view="station">Station Master · Live</button>
+        <button class="tab tab-wireframe" data-view="passenger">Passenger · Wireframe</button>
+        <button class="tab tab-wireframe" data-view="crew">Crew · Wireframe</button>
+        <button class="tab tab-wireframe" data-view="feeder">Feeder · Wireframe</button>
+        <button class="tab tab-wireframe" data-view="maintenance">Maintenance · Wireframe</button>
         <button class="tab" data-view="network">Control Room</button>
         <button class="tab tab-sandbox" data-view="sandbox">⬡ Ghost Train Sandbox</button>
       </nav>
 
       <div id="notice" class="notice" role="status"></div>
 
-      <section id="passenger-view" class="view-panel" data-panel="passenger">
+      <section class="pipeline-strip" aria-label="Pipeline status">
+        <div class="pipeline-cell"><span class="pipeline-label">DATA PATH</span><strong id="pipeline-mode">CHECKING</strong></div>
+        <div class="pipeline-cell"><span class="pipeline-label">API HEALTH</span><strong id="pipeline-health">CHECKING</strong></div>
+        <div class="pipeline-cell"><span class="pipeline-label">MODEL STATE</span><strong id="pipeline-model">CHECKING</strong></div>
+        <div class="pipeline-cell pipeline-explanation"><span class="pipeline-label">OPERATING CONTRACT</span><span id="pipeline-explanation">Loading replay-safe prediction path.</span></div>
+      </section>
+
+      <section id="passenger-view" class="view-panel is-hidden wireframe-panel" data-panel="passenger">
+        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Passenger decision surface</strong><small>Design intent only. This screen does not call the passenger endpoint.</small></div>
         <div class="passenger-layout">
           <div class="passenger-main">
             <div class="section-kicker"><span class="live-pulse"></span> PASSENGER SIGNAL <span id="passenger-updated">UPDATED --</span></div>
@@ -76,8 +84,9 @@
         </div>
       </section>
 
-      <section id="station-view" class="view-panel is-hidden" data-panel="station">
+      <section id="station-view" class="view-panel" data-panel="station">
         <div class="view-heading"><div><p class="eyebrow">JUNCTION OPERATIONS / PLATFORM ALLOCATION</p><h2>Commit with evidence.</h2></div><span class="data-stamp" id="station-stamp">LIVE SNAPSHOT</span></div>
+        <div class="station-live-note"><span class="live-pulse"></span><strong>FUNCTIONAL SCREEN</strong><span>Live or replay prediction from the actual API · selected train <b id="station-train-label">20507</b></span></div>
         <div class="station-grid">
           <article class="decision-card decision-card-large" id="station-decision-card">
             <span class="card-label">PLATFORM COMMITMENT</span>
@@ -93,41 +102,15 @@
           </article>
           <article class="metric-card"><span class="card-label">LOWER INTERVAL BOUND</span><strong id="station-p10">--</strong><span>minutes</span></article>
           <article class="metric-card"><span class="card-label">UPPER INTERVAL BOUND</span><strong id="station-p90">--</strong><span>minutes</span></article>
+          <article class="metric-card"><span class="card-label">P50 EXPECTED DELAY</span><strong id="station-p50">--</strong><span>minutes</span></article>
           <article class="signal-table"><div class="table-title">DECISION SIGNALS</div><div class="signal-row"><span>Interval width</span><strong id="station-width">-- min</strong></div><div class="signal-row"><span>Conflict propagation</span><strong id="station-conflict">--</strong></div><div class="signal-row"><span>Prediction state</span><strong id="station-state">--</strong></div><div class="signal-row"><span>Recommended line</span><strong>HOLD ALTERNATE</strong></div></article>
         </div>
 
-        <!-- Multi-train junction view -->
-        <article class="junction-table">
-          <div class="junction-header">
-            <div>
-              <span class="card-label">MULTI-TRAIN JUNCTION VIEW</span>
-              <strong class="junction-title">Arriving trains — next departure window</strong>
-            </div>
-            <span class="data-stamp junction-demo-badge">DEMO SCENARIO</span>
-          </div>
-          <div class="junction-scroll">
-            <table class="junction-grid" id="junction-grid">
-              <thead>
-                <tr>
-                  <th>TRAIN</th>
-                  <th>P50 DELAY</th>
-                  <th>INTERVAL</th>
-                  <th>COMMIT</th>
-                  <th>DEADLINE</th>
-                  <th class="bar-col"></th>
-                </tr>
-              </thead>
-              <tbody id="junction-body">
-                <tr><td colspan="6" class="junction-loading">Loading junction data…</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="demo-caption">DEMO SCENARIO — 5 hardcoded train IDs run in parallel · does not reflect live block-occupancy data</p>
-        </article>
       </section>
 
       <!-- ═══ CREW CONTROLLER VIEW ═══════════════════════════════════════════ -->
-      <section id="crew-view" class="view-panel is-hidden" data-panel="crew">
+      <section id="crew-view" class="view-panel is-hidden wireframe-panel" data-panel="crew">
+        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Crew dispatch surface</strong><small>Design intent only. The functional API path is Station Master.</small></div>
         <div class="view-heading">
           <div>
             <p class="eyebrow">CREW OPERATIONS / RELIEF DISPATCH PLANNING</p>
@@ -165,7 +148,8 @@
       </section>
 
       <!-- ═══ FEEDER TRANSPORT VIEW ════════════════════════════════════════ -->
-      <section id="feeder-view" class="view-panel is-hidden" data-panel="feeder">
+      <section id="feeder-view" class="view-panel is-hidden wireframe-panel" data-panel="feeder">
+        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Feeder coordination surface</strong><small>Design intent only. The functional API path is Station Master.</small></div>
         <div class="view-heading">
           <div>
             <p class="eyebrow">FEEDER BUS / METRO COORDINATOR</p>
@@ -222,7 +206,8 @@
       </section>
 
       <!-- ═══ MAINTENANCE YARD VIEW ════════════════════════════════════════ -->
-      <section id="maintenance-view" class="view-panel is-hidden" data-panel="maintenance">
+      <section id="maintenance-view" class="view-panel is-hidden wireframe-panel" data-panel="maintenance">
+        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Maintenance turnaround surface</strong><small>Design intent only. The functional API path is Station Master.</small></div>
         <div class="view-heading">
           <div>
             <p class="eyebrow">MAINTENANCE YARD / RAKE TURNAROUND PLANNING</p>
