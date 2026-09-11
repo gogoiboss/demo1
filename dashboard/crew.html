@@ -17,7 +17,17 @@
       <div class="divider"></div>
       <span class="view-title">CREW INTELLIGENCE</span>
     </div>
-    <div class="topbar-right">
+        <div class="topbar-right">
+      <div class="topbar-actions">
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="hi">HI</button>
+        </div>
+        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
+          <span style="font-weight:bold;">?</span>
+          <span data-i18n="helpFaq">FAQ</span>
+        </button>
+      </div>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
       <div class="clock" id="clock">--:-- IST</div>
@@ -29,12 +39,12 @@
       
       <header class="view-header">
         <div class="header-left">
-          <h1 class="view-headline">Duty Limits</h1>
-          <p class="view-subhead">Relief timing against the model's P50/P90 arrival window.</p>
+          <h1 class="view-headline" data-i18n="crewTitle">Duty Limits</h1>
+          <p class="view-subhead" data-i18n="crewSubhead">Relief timing against the model's P50/P90 arrival window.</p>
         </div>
         <div class="header-right">
           <div class="train-input-group">
-            <label for="train-id">FOCAL TRAIN</label>
+            <label for="train-id" data-i18n="focalTrain">FOCAL TRAIN</label>
             <input type="text" id="train-id" class="train-input" value="20507">
             <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
@@ -46,7 +56,7 @@
       <section class="view-panel is-active" id="crew-view" data-panel="crew">
         
         <div class="hoer-overlap-container">
-            <h2 class="hoer-title">HOER vs Arrival Overlap</h2>
+            <h2 class="hoer-title" data-i18n="crewOverlapTitle">HOER vs Arrival Overlap</h2>
             <p class="hoer-sub" id="hoer-train-label">Evaluating focal train...</p>
             
             <div class="hoer-track" id="hoer-track">

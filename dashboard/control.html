@@ -17,7 +17,17 @@
       <div class="divider"></div>
       <span class="view-title">NETWORK INTELLIGENCE</span>
     </div>
-    <div class="topbar-right">
+        <div class="topbar-right">
+      <div class="topbar-actions">
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="hi">HI</button>
+        </div>
+        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
+          <span style="font-weight:bold;">?</span>
+          <span data-i18n="helpFaq">FAQ</span>
+        </button>
+      </div>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
       <div class="clock" id="clock">--:-- IST</div>
@@ -29,8 +39,8 @@
       
       <header class="view-header">
         <div class="header-left">
-          <h1 class="view-headline">Network Radar</h1>
-          <p class="view-subhead">Network replay, calibrated risk, and traceable prediction provenance.</p>
+          <h1 class="view-headline" data-i18n="controlTitle">Network Radar</h1>
+          <p class="view-subhead" data-i18n="controlSubhead">Network replay, calibrated risk, and traceable prediction provenance.</p>
         </div>
         <div class="header-right">
           <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
@@ -42,12 +52,12 @@
       <section class="view-panel is-active" id="network-view" data-panel="network">
         
         <div class="odometer-container">
-            <p class="odometer-label">Predictions Served (All Modes)</p>
+            <p class="odometer-label" data-i18n="controlOdometerLabel">Predictions Served (All Modes)</p>
             <div class="odometer-counter" id="prediction-count">--</div>
         </div>
         
         <div class="ripple-radar">
-            <h3 class="timeline-title">Propagation Radar</h3>
+            <h3 class="timeline-title" data-i18n="controlRadarTitle">Propagation Radar</h3>
             <p style="font-family:var(--sans); color:var(--text); margin-bottom: 1rem;" id="radar-status">Awaiting conflict data...</p>
             <p style="font-family:var(--mono); color:var(--muted); margin-bottom: 2rem;" id="radar-source">Source status: --</p>
             
@@ -63,6 +73,8 @@
         </div>
         <a class="back-link role-link" data-role="station_master" href="station-master.html">Open station decision</a>
         
+        <!-- Route/Corridor Map with Train Type Differentiation -->
+        <div id="route-map-mount"></div>
       </section>
 
     </main>

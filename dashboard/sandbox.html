@@ -17,7 +17,17 @@
       <div class="divider"></div>
       <span class="view-title">GHOST TRAIN SANDBOX</span>
     </div>
-    <div class="topbar-right">
+        <div class="topbar-right">
+      <div class="topbar-actions">
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="hi">HI</button>
+        </div>
+        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
+          <span style="font-weight:bold;">?</span>
+          <span data-i18n="helpFaq">FAQ</span>
+        </button>
+      </div>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
       <div class="clock" id="clock">--:-- IST</div>
@@ -29,8 +39,8 @@
       
       <header class="view-header">
         <div class="header-left">
-          <h1 class="view-headline">Scenario Injection</h1>
-          <p class="view-subhead">Test conflict propagation and threshold triggering.</p>
+          <h1 class="view-headline" data-i18n="sandboxTitle">Scenario Injection</h1>
+          <p class="view-subhead" data-i18n="sandboxSubhead">Test conflict propagation and threshold triggering.</p>
         </div>
       </header>
 
@@ -39,7 +49,7 @@
         <div class="sandbox-container">
             <div class="sandbox-header">
                 <div>
-                    <h2 class="sandbox-title">Delay Injection Simulator</h2>
+                    <h2 class="sandbox-title" data-i18n="sandboxHeading">Delay Injection Simulator</h2>
                     <p style="font-family:var(--sans); color:var(--muted);">Inject hypothetical delay into EXPRESS 56789</p>
                 </div>
                 <div class="sandbox-badge">[ REPLAY SIMULATION ]</div>
@@ -61,7 +71,7 @@
             <!-- Delay injection slider -->
             <div class="sandbox-control">
               <div class="slider-header" style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
-                <span class="card-label" style="font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted);">INJECT DELAY ON EXPRESS 56789</span>
+                <span class="card-label" style="font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted);" data-i18n="sandboxInjectLabel">INJECT DELAY ON EXPRESS 56789</span>
                 <strong id="sandbox-slider-value" class="slider-value" style="font-family:var(--mono); color:var(--primary); font-size: 1.2rem;">0 min</strong>
               </div>
               <div class="slider-track-container" style="position:relative; margin-bottom: 2rem;">

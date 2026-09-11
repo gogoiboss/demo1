@@ -17,7 +17,17 @@
       <div class="divider"></div>
       <span class="view-title">FEEDER INTELLIGENCE</span>
     </div>
-    <div class="topbar-right">
+        <div class="topbar-right">
+      <div class="topbar-actions">
+        <div class="lang-selector">
+          <button class="lang-btn active" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="hi">HI</button>
+        </div>
+        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
+          <span style="font-weight:bold;">?</span>
+          <span data-i18n="helpFaq">FAQ</span>
+        </button>
+      </div>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
       <div class="clock" id="clock">--:-- IST</div>
@@ -29,15 +39,15 @@
       
       <header class="view-header">
         <div class="header-left">
-          <h1 class="view-headline">Connection Trade-off</h1>
-          <p class="view-subhead">Probability of arrival before cutoff from the calibrated interval.</p>
+          <h1 class="view-headline" data-i18n="feederTitle">Connection Trade-off</h1>
+          <p class="view-subhead" data-i18n="feederSubhead">Probability of arrival before cutoff from the calibrated interval.</p>
         </div>
         <div class="header-right">
           <div class="train-input-group">
-            <label for="train-id">FOCAL TRAIN</label>
+            <label for="train-id" data-i18n="focalTrain">FOCAL TRAIN</label>
             <input type="text" id="train-id" class="train-input" value="20507">
             
-            <label for="feeder-cutoff-input" style="margin-left: 1rem;">CUTOFF TIME</label>
+            <label for="feeder-cutoff-input" style="margin-left: 1rem;" data-i18n="feederCutoffLabel">CUTOFF TIME</label>
             <input type="time" id="feeder-cutoff-input" class="train-input" value="14:40">
             
             <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
@@ -51,20 +61,20 @@
         
         <div class="cost-tradeoff-panel">
             <div class="cost-tradeoff-left">
-                <p class="tradeoff-title">Probability of Arrival Before Cutoff</p>
+                <p class="tradeoff-title" data-i18n="feederProbLabel">Probability of Arrival Before Cutoff</p>
                 <h2 class="prob-hero-val" id="feeder-prob">--<span>%</span></h2>
                 <p style="font-family:var(--sans); color:var(--text); max-width: 300px;" id="feeder-train-lbl">Evaluating train...</p>
                 
             </div>
             <div class="cost-tradeoff-right">
-                <p class="tradeoff-title" style="color:rgba(255,255,255,0.5);">Expected Cost Matrix</p>
+                <p class="tradeoff-title" style="color:rgba(255,255,255,0.5);" data-i18n="feederMatrixLabel">Expected Cost Matrix</p>
                 <div class="tradeoff-matrix">
                     <div class="tradeoff-row">
-                        <span class="tradeoff-label">Cost of Waiting (if train delays)</span>
+                        <span class="tradeoff-label" data-i18n="feederCostWait">Cost of Waiting (if train delays)</span>
                         <span class="tradeoff-cost" id="cost-wait">--</span>
                     </div>
                     <div class="tradeoff-row">
-                        <span class="tradeoff-label">Cost of Abandonment (if train arrives)</span>
+                        <span class="tradeoff-label" data-i18n="feederCostAbandon">Cost of Abandonment (if train arrives)</span>
                         <span class="tradeoff-cost" id="cost-abandon">--</span>
                     </div>
                 </div>
