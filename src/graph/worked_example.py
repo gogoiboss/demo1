@@ -49,20 +49,40 @@ SCHEDULES_PPT = [
         "train_id": "12301",
         "category": "rajdhani",
         "stops": [
-            {"station": "NDLS",      "arr_min": None,       "dep_min": 16*60+55},   # 16:55
-            {"station": "KANPUR",    "arr_min": 22*60+25,   "dep_min": 22*60+30},   # 22:25/22:30
-            {"station": "ALLAHABAD", "arr_min": 25*60+25,   "dep_min": 25*60+30},   # 01:25/01:30
-            {"station": "MUGHAL",    "arr_min": 28*60+10,   "dep_min": 28*60+15},   # 04:10/04:15
-            {"station": "HWH",       "arr_min": 34*60+0,    "dep_min": None},       # 10:00
+            {"station": "NDLS", "arr_min": None, "dep_min": 16 * 60 + 55},  # 16:55
+            {
+                "station": "KANPUR",
+                "arr_min": 22 * 60 + 25,
+                "dep_min": 22 * 60 + 30,
+            },  # 22:25/22:30
+            {
+                "station": "ALLAHABAD",
+                "arr_min": 25 * 60 + 25,
+                "dep_min": 25 * 60 + 30,
+            },  # 01:25/01:30
+            {
+                "station": "MUGHAL",
+                "arr_min": 28 * 60 + 10,
+                "dep_min": 28 * 60 + 15,
+            },  # 04:10/04:15
+            {"station": "HWH", "arr_min": 34 * 60 + 0, "dep_min": None},  # 10:00
         ],
     },
     {
         "train_id": "56789",
         "category": "express",
         "stops": [
-            {"station": "KANPUR",    "arr_min": None,       "dep_min": 22*60+15},   # 22:15 (15 min earlier)
-            {"station": "ALLAHABAD", "arr_min": 24*60+46,   "dep_min": 24*60+56},   # 00:46/00:56
-            {"station": "VARANASI",  "arr_min": 27*60+30,   "dep_min": None},
+            {
+                "station": "KANPUR",
+                "arr_min": None,
+                "dep_min": 22 * 60 + 15,
+            },  # 22:15 (15 min earlier)
+            {
+                "station": "ALLAHABAD",
+                "arr_min": 24 * 60 + 46,
+                "dep_min": 24 * 60 + 56,
+            },  # 00:46/00:56
+            {"station": "VARANASI", "arr_min": 27 * 60 + 30, "dep_min": None},
         ],
     },
 ]
@@ -105,11 +125,23 @@ SCHEDULES_DEMO = [
         "train_id": "12301",
         "category": "rajdhani",
         "stops": [
-            {"station": "NDLS",      "arr_min": None,       "dep_min": 16*60+55},   # 16:55
-            {"station": "KANPUR",    "arr_min": 22*60+25,   "dep_min": 22*60+30},   # 22:25/22:30
-            {"station": "ALLAHABAD", "arr_min": 25*60+25,   "dep_min": 25*60+30},   # 01:25/01:30
-            {"station": "MUGHAL",    "arr_min": 28*60+10,   "dep_min": 28*60+15},   # 04:10/04:15
-            {"station": "HWH",       "arr_min": 34*60+0,    "dep_min": None},       # 10:00
+            {"station": "NDLS", "arr_min": None, "dep_min": 16 * 60 + 55},  # 16:55
+            {
+                "station": "KANPUR",
+                "arr_min": 22 * 60 + 25,
+                "dep_min": 22 * 60 + 30,
+            },  # 22:25/22:30
+            {
+                "station": "ALLAHABAD",
+                "arr_min": 25 * 60 + 25,
+                "dep_min": 25 * 60 + 30,
+            },  # 01:25/01:30
+            {
+                "station": "MUGHAL",
+                "arr_min": 28 * 60 + 10,
+                "dep_min": 28 * 60 + 15,
+            },  # 04:10/04:15
+            {"station": "HWH", "arr_min": 34 * 60 + 0, "dep_min": None},  # 10:00
         ],
     },
     {
@@ -118,9 +150,17 @@ SCHEDULES_DEMO = [
         "train_id": "56789",
         "category": "express",
         "stops": [
-            {"station": "KANPUR",    "arr_min": None,       "dep_min": 22*60+25},   # 22:25 (same as 12301 arr)
-            {"station": "ALLAHABAD", "arr_min": 26*60+4,    "dep_min": 26*60+14},   # 02:04/02:14 (slow)
-            {"station": "VARANASI",  "arr_min": 28*60+30,   "dep_min": None},
+            {
+                "station": "KANPUR",
+                "arr_min": None,
+                "dep_min": 22 * 60 + 25,
+            },  # 22:25 (same as 12301 arr)
+            {
+                "station": "ALLAHABAD",
+                "arr_min": 26 * 60 + 4,
+                "dep_min": 26 * 60 + 14,
+            },  # 02:04/02:14 (slow)
+            {"station": "VARANASI", "arr_min": 28 * 60 + 30, "dep_min": None},
         ],
     },
 ]
@@ -131,7 +171,7 @@ DELAYS_DEMO = {
 }
 
 PPT_CLAIMED_CONFLICT_ADDITION = 9.0
-PPT_CLAIMED_FINAL_DELAY       = 57.0
+PPT_CLAIMED_FINAL_DELAY = 57.0
 
 
 def run_worked_example(verbose: bool = True) -> dict:
@@ -142,22 +182,34 @@ def run_worked_example(verbose: bool = True) -> dict:
     G_ppt = build_timed_event_graph(SCHEDULES_PPT, min_headway=10.0)
     conflicts_ppt = detect_conflicts(G_ppt, DELAYS_PPT)
     alld_ppt = G_ppt.nodes["12301__ALLAHABAD__arr"]["event"].delay_min
-    hwh_ppt  = G_ppt.nodes["12301__HWH__arr"]["event"].delay_min
-    conflict_ppt = next((c["propagated_delay_min"] for c in conflicts_ppt
-                         if c["affected_train"] == "12301"), 0.0)
+    hwh_ppt = G_ppt.nodes["12301__HWH__arr"]["event"].delay_min
+    conflict_ppt = next(
+        (
+            c["propagated_delay_min"]
+            for c in conflicts_ppt
+            if c["affected_train"] == "12301"
+        ),
+        0.0,
+    )
 
     # --- Scenario B: Corrected demo with real conflict ---
     G_demo = build_timed_event_graph(SCHEDULES_DEMO, min_headway=10.0)
     conflicts_demo = detect_conflicts(G_demo, DELAYS_DEMO)
     alld_demo = G_demo.nodes["12301__ALLAHABAD__arr"]["event"].delay_min
-    hwh_demo  = G_demo.nodes["12301__HWH__arr"]["event"].delay_min
-    conflict_demo = next((c["propagated_delay_min"] for c in conflicts_demo
-                          if c["affected_train"] == "12301"), 0.0)
+    hwh_demo = G_demo.nodes["12301__HWH__arr"]["event"].delay_min
+    conflict_demo = next(
+        (
+            c["propagated_delay_min"]
+            for c in conflicts_demo
+            if c["affected_train"] == "12301"
+        ),
+        0.0,
+    )
 
     if verbose:
-        print("\n" + "="*64)
+        print("\n" + "=" * 64)
         print("  WORKED EXAMPLE — Timed Event Graph Conflict Propagation")
-        print("="*64)
+        print("=" * 64)
 
         print("\n  [SCENARIO A] — PPT's exact inputs (Train 12301 +55, 56789 +40)")
         print(f"    12301 delay at Allahabad:    +{alld_ppt:.1f} min")
@@ -184,15 +236,21 @@ def run_worked_example(verbose: bool = True) -> dict:
             print("     Update pitch to use Scenario B inputs.")
         else:
             print("\n  MISMATCH — Update pitch materials with Scenario B numbers:")
-            print(f"     Conflict addition: {conflict_demo:.1f} min (not {PPT_CLAIMED_CONFLICT_ADDITION:.0f})")
+            print(
+                f"     Conflict addition: {conflict_demo:.1f} min (not {PPT_CLAIMED_CONFLICT_ADDITION:.0f})"
+            )
             print(f"     Final delay at Allahabad: +{alld_demo:.1f} min")
-            print(f"     Pitch should say: base +55 -> conflict adds +{conflict_demo:.1f} -> total +{alld_demo:.1f}")
+            print(
+                f"     Pitch should say: base +55 -> conflict adds +{conflict_demo:.1f} -> total +{alld_demo:.1f}"
+            )
 
         if conflicts_demo:
             print("\n  Active conflicts in Scenario B:")
             for c in conflicts_demo:
-                print(f"    Train {c['delaying_train']} (+{c['source_delay_min']:.0f} min) "
-                      f"--> Train {c['affected_train']}: +{c['propagated_delay_min']:.1f} min added")
+                print(
+                    f"    Train {c['delaying_train']} (+{c['source_delay_min']:.0f} min) "
+                    f"--> Train {c['affected_train']}: +{c['propagated_delay_min']:.1f} min added"
+                )
         print()
 
     return {
@@ -213,5 +271,6 @@ def run_worked_example(verbose: bool = True) -> dict:
 
 if __name__ == "__main__":
     import logging
+
     logging.basicConfig(level=logging.WARNING)
     run_worked_example(verbose=True)

@@ -15,10 +15,10 @@ from src.graph.timed_event_graph import (
     detect_conflicts,
 )
 
-
 # ---------------------------------------------------------------------------
 # Shared test fixtures
 # ---------------------------------------------------------------------------
+
 
 def _two_train_schedules(same_section: bool) -> list[dict]:
     """
@@ -31,8 +31,8 @@ def _two_train_schedules(same_section: bool) -> list[dict]:
         "category": "rajdhani",
         "stops": [
             {"station": "A", "arr_min": None, "dep_min": 0},
-            {"station": "B", "arr_min": 60,   "dep_min": 65},
-            {"station": "C", "arr_min": 130,  "dep_min": None},
+            {"station": "B", "arr_min": 60, "dep_min": 65},
+            {"station": "C", "arr_min": 130, "dep_min": None},
         ],
     }
     if same_section:
@@ -40,11 +40,11 @@ def _two_train_schedules(same_section: bool) -> list[dict]:
         # so there's no structural conflict with a 10 min min_headway
         sched_b = {
             "train_id": "TRAIN_B",
-            "category": "express",   # lower precedence than rajdhani
+            "category": "express",  # lower precedence than rajdhani
             "stops": [
                 {"station": "A", "arr_min": None, "dep_min": 10},
-                {"station": "B", "arr_min": 70,   "dep_min": 75},
-                {"station": "D", "arr_min": 140,  "dep_min": None},
+                {"station": "B", "arr_min": 70, "dep_min": 75},
+                {"station": "D", "arr_min": 140, "dep_min": None},
             ],
         }
     else:
@@ -54,8 +54,8 @@ def _two_train_schedules(same_section: bool) -> list[dict]:
             "category": "express",
             "stops": [
                 {"station": "A", "arr_min": None, "dep_min": 10},
-                {"station": "E", "arr_min": 70,   "dep_min": 75},
-                {"station": "F", "arr_min": 140,  "dep_min": None},
+                {"station": "E", "arr_min": 70, "dep_min": 75},
+                {"station": "F", "arr_min": 140, "dep_min": None},
             ],
         }
     return [sched_a, sched_b]
@@ -64,6 +64,7 @@ def _two_train_schedules(same_section: bool) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Test 1: No-conflict case — delay stays isolated
 # ---------------------------------------------------------------------------
+
 
 class TestNoConflict:
     def test_delay_does_not_propagate_to_other_train(self):
@@ -77,15 +78,15 @@ class TestNoConflict:
 
         # TRAIN_A downstream should be delayed
         train_a_c = G.nodes["TRAIN_A__C__arr"]["event"]
-        assert train_a_c.delay_min == pytest.approx(30.0), (
-            "TRAIN_A final delay should equal injected delay with no recovery."
-        )
+        assert train_a_c.delay_min == pytest.approx(
+            30.0
+        ), "TRAIN_A final delay should equal injected delay with no recovery."
 
         # TRAIN_B should be completely unaffected
         train_b_f = G.nodes["TRAIN_B__F__arr"]["event"]
-        assert train_b_f.delay_min == pytest.approx(0.0), (
-            "TRAIN_B must not be affected when trains share no section."
-        )
+        assert train_b_f.delay_min == pytest.approx(
+            0.0
+        ), "TRAIN_B must not be affected when trains share no section."
 
     def test_no_conflict_edges_in_graph(self):
         """Graph with no shared sections should have zero conflict edges."""
@@ -94,14 +95,15 @@ class TestNoConflict:
         conflict_edges = [
             (u, v) for u, v, d in G.edges(data=True) if d.get("edge_type") == "conflict"
         ]
-        assert len(conflict_edges) == 0, (
-            "No conflict edges expected when trains run on separate sections."
-        )
+        assert (
+            len(conflict_edges) == 0
+        ), "No conflict edges expected when trains run on separate sections."
 
 
 # ---------------------------------------------------------------------------
 # Test 2: Conflict case — delay propagates via max-plus rule
 # ---------------------------------------------------------------------------
+
 
 class TestConflictPropagation:
     def test_conflict_edge_exists_on_shared_section(self):
@@ -109,11 +111,13 @@ class TestConflictPropagation:
         schedules = _two_train_schedules(same_section=True)
         G = build_timed_event_graph(schedules, min_headway=10.0)
         conflict_edges = [
-            (u, v, d) for u, v, d in G.edges(data=True) if d.get("edge_type") == "conflict"
+            (u, v, d)
+            for u, v, d in G.edges(data=True)
+            if d.get("edge_type") == "conflict"
         ]
-        assert len(conflict_edges) >= 1, (
-            "At least one conflict edge expected on shared section A→B."
-        )
+        assert (
+            len(conflict_edges) >= 1
+        ), "At least one conflict edge expected on shared section A→B."
 
     def test_max_plus_rule_applied_correctly(self):
         """
@@ -154,7 +158,9 @@ class TestConflictPropagation:
         schedules = _two_train_schedules(same_section=True)
         G = build_timed_event_graph(schedules, min_headway=10.0)
         conflict_edges = [
-            (u, v, d) for u, v, d in G.edges(data=True) if d.get("edge_type") == "conflict"
+            (u, v, d)
+            for u, v, d in G.edges(data=True)
+            if d.get("edge_type") == "conflict"
         ]
         assert len(conflict_edges) >= 1
         source_node = conflict_edges[0][0]
@@ -169,31 +175,46 @@ class TestConflictPropagation:
         schedules = _two_train_schedules(same_section=True)
         G = build_timed_event_graph(schedules, min_headway=10.0)
         # Both trains late enough to activate the conflict
-        conflicts = detect_conflicts(G, {
-            "TRAIN_A__A__dep": 60.0,
-            "TRAIN_B__A__dep": 5.0,
-        })
-        assert len(conflicts) >= 1, (
-            "Expected at least one conflict to be detected with both trains delayed."
+        conflicts = detect_conflicts(
+            G,
+            {
+                "TRAIN_A__A__dep": 60.0,
+                "TRAIN_B__A__dep": 5.0,
+            },
         )
+        assert (
+            len(conflicts) >= 1
+        ), "Expected at least one conflict to be detected with both trains delayed."
 
     def test_detect_conflicts_returns_empty_without_delay(self):
         """If no trains are delayed, no conflicts should be activated."""
         schedules = _two_train_schedules(same_section=True)
         G = build_timed_event_graph(schedules, min_headway=10.0)
-        conflicts = detect_conflicts(G, {})   # no delays injected
-        assert len(conflicts) == 0, (
-            "No conflicts should be active when all trains are on schedule."
-        )
+        conflicts = detect_conflicts(G, {})  # no delays injected
+        assert (
+            len(conflicts) == 0
+        ), "No conflicts should be active when all trains are on schedule."
 
     def test_detect_conflicts_accepts_current_positions_dataframe(self):
         """Live train-position rows can be passed directly to the detector."""
         schedules = _two_train_schedules(same_section=True)
         G = build_timed_event_graph(schedules, min_headway=10.0)
-        current_positions = pd.DataFrame([
-            {"train_id": "TRAIN_A", "station": "A", "event_type": "dep", "delay_min": 60.0},
-            {"train_id": "TRAIN_B", "station": "A", "event_type": "dep", "delay_min": 5.0},
-        ])
+        current_positions = pd.DataFrame(
+            [
+                {
+                    "train_id": "TRAIN_A",
+                    "station": "A",
+                    "event_type": "dep",
+                    "delay_min": 60.0,
+                },
+                {
+                    "train_id": "TRAIN_B",
+                    "station": "A",
+                    "event_type": "dep",
+                    "delay_min": 5.0,
+                },
+            ]
+        )
 
         conflicts = detect_conflicts(G, current_positions)
 
@@ -212,7 +233,7 @@ class TestConflictPropagation:
                 "category": "express",
                 "stops": [
                     {"station": "X", "arr_min": None, "dep_min": 0},
-                    {"station": "Y", "arr_min": 60,   "dep_min": None},
+                    {"station": "Y", "arr_min": 60, "dep_min": None},
                 ],
             }
         ]
@@ -221,6 +242,6 @@ class TestConflictPropagation:
         result = propagate_delays(G)
 
         y_arr_delay = result.get("ONLY_TRAIN__Y__arr", 0.0)
-        assert y_arr_delay == pytest.approx(25.0, abs=0.1), (
-            "Single running-time edge: delay should propagate exactly through one edge."
-        )
+        assert y_arr_delay == pytest.approx(
+            25.0, abs=0.1
+        ), "Single running-time edge: delay should propagate exactly through one edge."

@@ -16,19 +16,33 @@ class FakePredictionService:
 
     def predict(self, train_id: str, prediction_variance: float | None = None) -> dict:
         if train_id == "missing":
-            raise TrainNotFoundError("Train 'missing' was not found in the current data snapshot.")
+            raise TrainNotFoundError(
+                "Train 'missing' was not found in the current data snapshot."
+            )
         anomaly = prediction_variance is not None and prediction_variance > 100.0
         return {
             "train_id": train_id,
-            "status": "PREDICTION SUSPENDED — anomalous conditions" if anomaly else "PREDICTION ACTIVE",
+            "status": (
+                "PREDICTION SUSPENDED — anomalous conditions"
+                if anomaly
+                else "PREDICTION ACTIVE"
+            ),
             "p10_delay_min": None if anomaly else 20.0,
             "p50_delay_min": None if anomaly else 35.0,
             "p90_delay_min": 55.0,
             "anomaly_flag": anomaly,
             "uncertainty_mode": anomaly,
             "conflict_adjustment_min": 5.0,
-            "shap_explanation": None if anomaly else {"prior_leg_delay": 55.0, "schedule_buffer_hours": 30.0},
-            "shap_text": "Explanation unavailable." if anomaly else "55% rake delay; 30% schedule buffer",
+            "shap_explanation": (
+                None
+                if anomaly
+                else {"prior_leg_delay": 55.0, "schedule_buffer_hours": 30.0}
+            ),
+            "shap_text": (
+                "Explanation unavailable."
+                if anomaly
+                else "55% rake delay; 30% schedule buffer"
+            ),
         }
 
 
@@ -89,11 +103,19 @@ def test_stakeholder_endpoints_are_distinct():
         )
         assert login.status_code == 200
         responses.append(
-            client.get(path, params={"cutoff_time": cutoff} if role == "feeder_transport" else {})
+            client.get(
+                path,
+                params={"cutoff_time": cutoff} if role == "feeder_transport" else {},
+            )
         )
 
     assert all(response.status_code == 200 for response in responses)
-    assert responses[0].json()["trend"] in {"unknown", "stable", "worsening", "improving"}
+    assert responses[0].json()["trend"] in {
+        "unknown",
+        "stable",
+        "worsening",
+        "improving",
+    }
     assert "platform_commit" in responses[1].json()
     assert "relief_dispatch_deadline" in responses[2].json()
     assert "maintenance_window_adequate" in responses[3].json()

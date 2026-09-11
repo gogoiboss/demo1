@@ -39,12 +39,16 @@ def validate_input_frame(
     if missing:
         raise DataValidationError(f"Missing required columns: {', '.join(missing)}")
     if len(frame) < min_rows:
-        raise DataValidationError(f"Expected at least {min_rows} rows; found {len(frame)}.")
+        raise DataValidationError(
+            f"Expected at least {min_rows} rows; found {len(frame)}."
+        )
 
     missing_fraction = frame[list(REQUIRED_COLUMNS)].isna().mean()
     bad_missing = missing_fraction[missing_fraction > max_missing_fraction]
     if not bad_missing.empty:
-        details = ", ".join(f"{name}={value:.1%}" for name, value in bad_missing.items())
+        details = ", ".join(
+            f"{name}={value:.1%}" for name, value in bad_missing.items()
+        )
         raise DataValidationError(f"Missing-value fraction exceeds limit: {details}")
 
     checked_ranges: list[str] = []

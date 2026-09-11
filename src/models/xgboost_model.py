@@ -40,9 +40,18 @@ def build_model(params: dict[str, Any] | None = None) -> xgb.XGBRegressor:
         by XGBRegressor are silently dropped.  Defaults to ``_DEFAULT_PARAMS``.
     """
     xgb_keys = {
-        "n_estimators", "max_depth", "learning_rate", "random_state",
-        "n_jobs", "objective", "subsample", "colsample_bytree", "gamma",
-        "min_child_weight", "reg_alpha", "reg_lambda",
+        "n_estimators",
+        "max_depth",
+        "learning_rate",
+        "random_state",
+        "n_jobs",
+        "objective",
+        "subsample",
+        "colsample_bytree",
+        "gamma",
+        "min_child_weight",
+        "reg_alpha",
+        "reg_lambda",
     }
     merged = {**_DEFAULT_PARAMS, **(params or {})}
     filtered = {k: v for k, v in merged.items() if k in xgb_keys}
@@ -74,9 +83,18 @@ def train_and_evaluate(
     df = df.sort_values(by=date_col).reset_index(drop=True)
 
     features = [
-        "scheduled_travel_hours", "distance_km", "zone_congestion_index",
-        "monsoon_flag", "fog_risk", "coach_count", "loco_age_years",
-        "prior_leg_delay", "schedule_buffer_hours", "day_of_week", "month", "is_weekend",
+        "scheduled_travel_hours",
+        "distance_km",
+        "zone_congestion_index",
+        "monsoon_flag",
+        "fog_risk",
+        "coach_count",
+        "loco_age_years",
+        "prior_leg_delay",
+        "schedule_buffer_hours",
+        "day_of_week",
+        "month",
+        "is_weekend",
     ]
 
     X = df[features]
@@ -120,7 +138,9 @@ def train_and_evaluate(
 def setup_mlflow_run(experiment_name: str = "RippleETA") -> None:
     """Set up the MLflow experiment."""
     if "MLFLOW_TRACKING_URI" not in os.environ:
-        logger.info("MLFLOW_TRACKING_URI not set; MLflow will log to local ./mlruns directory.")
+        logger.info(
+            "MLFLOW_TRACKING_URI not set; MLflow will log to local ./mlruns directory."
+        )
     mlflow.set_experiment(experiment_name)
 
 
@@ -128,7 +148,9 @@ def setup_mlflow_run(experiment_name: str = "RippleETA") -> None:
 # Standalone entry point
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+    )
 
     from src.features.engineering import engineer_all_features
 
@@ -137,4 +159,6 @@ if __name__ == "__main__":
 
     avg_mae, path = train_and_evaluate(df)
     logger.info("XGBoost CV MAE: %.2f minutes", avg_mae)
-    logger.info("Model saved to %s (ignored in git; regenerate by running this script)", path)
+    logger.info(
+        "Model saved to %s (ignored in git; regenerate by running this script)", path
+    )

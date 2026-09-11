@@ -18,7 +18,9 @@ class PromotionDecision:
     candidate_coverage: float
 
 
-def _metrics(y_true: np.ndarray, predictions: Sequence[dict[str, Any]]) -> tuple[float, float]:
+def _metrics(
+    y_true: np.ndarray, predictions: Sequence[dict[str, Any]]
+) -> tuple[float, float]:
     quantiles = (("p10_delay_min", 0.1), ("p50_delay_min", 0.5), ("p90_delay_min", 0.9))
     losses = []
     for field, alpha in quantiles:
@@ -43,7 +45,9 @@ def evaluate_promotion(
     actual = np.asarray(y_true, dtype=float)
     current_pinball, current_coverage = _metrics(actual, current_predictions)
     candidate_pinball, candidate_coverage = _metrics(actual, candidate_predictions)
-    promote = candidate_pinball <= current_pinball and candidate_coverage >= current_coverage
+    promote = (
+        candidate_pinball <= current_pinball and candidate_coverage >= current_coverage
+    )
     reason = (
         f"{candidate_model} improves or matches pinball loss and coverage versus {current_model}"
         if promote

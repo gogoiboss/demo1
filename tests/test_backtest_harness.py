@@ -4,11 +4,12 @@ import pytest
 
 from eval.backtest_harness import run_backtest
 
-
 DATA_PATH = Path("data/processed/kaggle_competition_cleaned.parquet")
 
 
-@pytest.mark.skipif(not DATA_PATH.exists(), reason="checked-in historical artifact is optional locally")
+@pytest.mark.skipif(
+    not DATA_PATH.exists(), reason="checked-in historical artifact is optional locally"
+)
 def test_one_day_backtest_reports_pipeline_metrics():
     metrics = run_backtest(DATA_PATH)
 

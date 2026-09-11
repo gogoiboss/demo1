@@ -55,27 +55,32 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 try:
     from mapie.regression import SplitConformalRegressor
+
     MAPIE_AVAILABLE = True
-except ImportError:                                    # pragma: no cover
+except ImportError:  # pragma: no cover
     SplitConformalRegressor = None
     MAPIE_AVAILABLE = False
-    logger.warning("MAPIE not installed — conformal intervals unavailable. "
-                   "Run: pip install mapie")
+    logger.warning(
+        "MAPIE not installed — conformal intervals unavailable. "
+        "Run: pip install mapie"
+    )
 
 try:
     import shap
+
     SHAP_AVAILABLE = True
-except ImportError:                                    # pragma: no cover
+except ImportError:  # pragma: no cover
     shap = None
     SHAP_AVAILABLE = False
-    logger.warning("SHAP not installed — explanations unavailable. "
-                   "Run: pip install shap")
+    logger.warning(
+        "SHAP not installed — explanations unavailable. " "Run: pip install shap"
+    )
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-ANOMALY_MULTIPLIER   = 3.0    # gate fires if rate > 3× historical p90
-COVERAGE_90          = 0.90   # target coverage for outer interval
+ANOMALY_MULTIPLIER = 3.0  # gate fires if rate > 3× historical p90
+COVERAGE_90 = 0.90  # target coverage for outer interval
 
 DEFAULT_FEATURES = [
     "scheduled_travel_hours",
@@ -145,7 +150,9 @@ def per_bucket_coverage(
         report[bucket_label(bucket_id, edges)] = {
             "n": n,
             "coverage_pct": coverage_pct,
-            "avg_interval_width_min": round(float(np.mean(p90s[mask] - p10s[mask])), 1) if n else 0.0,
+            "avg_interval_width_min": (
+                round(float(np.mean(p90s[mask] - p10s[mask])), 1) if n else 0.0
+            ),
         }
     return report
 
@@ -178,23 +185,27 @@ class CalibratedETAEngine:
         mondrian_feature: str = "prior_leg_delay",
         mondrian_bucket_edges: list[float] = MONDRIAN_BUCKET_EDGES,
     ):
-        self.features             = features
-        self.anomaly_multiplier   = anomaly_multiplier
-        self.base_model           = base_model          # fitted XGBRegressor
-        self.mapie_90_: Any       = None                # fitted SplitConformalRegressor (90%, pooled)
-        self.explainer_: Any      = None                # shap.TreeExplainer
-        self.delay_p90_rate_: float | None = None       # historical 90th-percentile delay rate
-        self.anomaly_gate_        = AnomalyGate(multiplier=anomaly_multiplier)
-        self.fitted_              = False
+        self.features = features
+        self.anomaly_multiplier = anomaly_multiplier
+        self.base_model = base_model  # fitted XGBRegressor
+        self.mapie_90_: Any = None  # fitted SplitConformalRegressor (90%, pooled)
+        self.explainer_: Any = None  # shap.TreeExplainer
+        self.delay_p90_rate_: float | None = (
+            None  # historical 90th-percentile delay rate
+        )
+        self.anomaly_gate_ = AnomalyGate(multiplier=anomaly_multiplier)
+        self.fitted_ = False
 
         # Mondrian (conditional) conformal calibration — optional, off by
         # default. When enabled, calibration is stratified by
         # `mondrian_feature` magnitude so coverage is reported (and held)
         # per delay-severity bucket rather than only pooled/marginal.
-        self.use_mondrian         = use_mondrian
-        self.mondrian_feature     = mondrian_feature
+        self.use_mondrian = use_mondrian
+        self.mondrian_feature = mondrian_feature
         self.mondrian_bucket_edges = list(mondrian_bucket_edges)
-        self.mapie_buckets_: dict[int, Any] = {}        # bucket_id -> fitted SplitConformalRegressor
+        self.mapie_buckets_: dict[int, Any] = (
+            {}
+        )  # bucket_id -> fitted SplitConformalRegressor
 
     # ------------------------------------------------------------------
     # Fitting
@@ -203,8 +214,8 @@ class CalibratedETAEngine:
         self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
-        X_cal:   pd.DataFrame,
-        y_cal:   pd.Series,
+        X_cal: pd.DataFrame,
+        y_cal: pd.Series,
     ) -> "CalibratedETAEngine":
         """
         Fit MAPIE calibration layer on top of pre-trained base_model.
@@ -220,17 +231,19 @@ class CalibratedETAEngine:
         if not MAPIE_AVAILABLE:
             raise ImportError("MAPIE not installed. Run: pip install mapie")
 
-        X_cal_f   = X_cal[self.features]
+        X_cal_f = X_cal[self.features]
 
         # ----- Compute anomaly threshold from calibration residuals ------
-        cal_preds   = self.base_model.predict(X_cal_f)
-        cal_resids  = np.abs(y_cal.values - cal_preds)
+        cal_preds = self.base_model.predict(X_cal_f)
+        cal_resids = np.abs(y_cal.values - cal_preds)
         # Delay rate = absolute residual as a fraction of predicted delay
         # Use p90 of absolute residuals as baseline; gate fires at 3× that.
         self.delay_p90_rate_ = float(np.percentile(cal_resids, 90))
         self.anomaly_gate_.fit(cal_resids)
-        logger.info(f"Anomaly gate threshold: {self.delay_p90_rate_:.1f} min "
-                    f"(p90 abs residual on calibration set)")
+        logger.info(
+            f"Anomaly gate threshold: {self.delay_p90_rate_:.1f} min "
+            f"(p90 abs residual on calibration set)"
+        )
 
         # ----- Fit MAPIE (90% coverage) ----------------------------------
         self.mapie_90_ = SplitConformalRegressor(
@@ -287,7 +300,9 @@ class CalibratedETAEngine:
                 logger.warning(
                     "Mondrian bucket %d has only %d calibration rows (< %d); "
                     "falling back to the pooled calibrator for this bucket.",
-                    bucket_id, n, min_bucket_size,
+                    bucket_id,
+                    n,
+                    min_bucket_size,
                 )
                 continue
             X_bucket_f = X_cal.loc[mask, self.features]
@@ -351,14 +366,20 @@ class CalibratedETAEngine:
         X_f = X[self.features]
 
         # ----- MAPIE intervals -------------------------------------------
-        if self.use_mondrian and self.mapie_buckets_ and self.mondrian_feature in X.columns:
+        if (
+            self.use_mondrian
+            and self.mapie_buckets_
+            and self.mondrian_feature in X.columns
+        ):
             # Route each row to its bucket-specific calibrator (falling back
             # to the pooled one for buckets that had too few calibration
             # rows), so interval width reflects delay-magnitude-conditional
             # coverage rather than one marginal average.
-            bucket_ids = X[self.mondrian_feature].apply(
-                lambda v: mondrian_bucket(v, self.mondrian_bucket_edges)
-            ).values
+            bucket_ids = (
+                X[self.mondrian_feature]
+                .apply(lambda v: mondrian_bucket(v, self.mondrian_bucket_edges))
+                .values
+            )
             y_pred_90 = np.empty(len(X_f))
             lower_90 = np.empty(len(X_f))
             upper_90 = np.empty(len(X_f))
@@ -399,26 +420,30 @@ class CalibratedETAEngine:
             p10 = max(0.0, p10)
 
             # ----- Anomaly gate ------------------------------------------
-            anomaly_flag     = False
+            anomaly_flag = False
             uncertainty_mode = False
             if current_prediction_variance is not None:
-                gate_result = self.anomaly_gate_.evaluate_variance(current_prediction_variance)
+                gate_result = self.anomaly_gate_.evaluate_variance(
+                    current_prediction_variance
+                )
                 anomaly_flag = bool(gate_result["suspended"])
             elif current_delay_rate is not None and self.delay_p90_rate_ is not None:
-                anomaly_flag = current_delay_rate > self.anomaly_multiplier * self.delay_p90_rate_
+                anomaly_flag = (
+                    current_delay_rate > self.anomaly_multiplier * self.delay_p90_rate_
+                )
             if anomaly_flag:
-                anomaly_flag     = True
+                anomaly_flag = True
                 uncertainty_mode = True
                 assert p50 is not None
                 interval_width = p90 - p10
                 # In uncertainty mode: widen interval significantly, suppress p50
                 p10 = max(0.0, p50 - 3 * interval_width)
                 p90 = p50 + 3 * interval_width
-                p50 = None   # suppressed — do not display point estimate
+                p50 = None  # suppressed — do not display point estimate
 
             # ----- SHAP explanation --------------------------------------
             shap_explanation: dict[str, float] = {}
-            shap_text        = "Explanation unavailable."
+            shap_text = "Explanation unavailable."
             if self.explainer_ is not None and not anomaly_flag:
                 try:
                     shap_vals = self.explainer_.shap_values(X_f.iloc[[i]])
@@ -427,28 +452,32 @@ class CalibratedETAEngine:
                     total_abs = sum(abs(v) for v in sv_dict.values()) or 1.0
                     shap_explanation = {
                         k: round(abs(v) / total_abs * 100, 1)
-                        for k, v in sorted(sv_dict.items(),
-                                           key=lambda x: -abs(x[1]))
+                        for k, v in sorted(sv_dict.items(), key=lambda x: -abs(x[1]))
                     }
                     # Plain-language text (top 2 drivers)
                     top2 = list(shap_explanation.items())[:2]
                     shap_text = "; ".join(
-                        f"{pct:.0f}% {_readable_feature(feat)}"
-                        for feat, pct in top2
+                        f"{pct:.0f}% {_readable_feature(feat)}" for feat, pct in top2
                     )
                 except Exception as e:
                     logger.debug(f"SHAP computation failed for row {i}: {e}")
 
-            results.append({
-                "p10_delay_min":    round(p10, 1),
-                "p50_delay_min":    round(p50, 1) if p50 is not None else None,
-                "p90_delay_min":    round(p90, 1),
-                "anomaly_flag":     anomaly_flag,
-                "uncertainty_mode": uncertainty_mode,
-                "status": "PREDICTION SUSPENDED — anomalous conditions" if anomaly_flag else "PREDICTION ACTIVE",
-                "shap_explanation": shap_explanation,
-                "shap_text":        shap_text,
-            })
+            results.append(
+                {
+                    "p10_delay_min": round(p10, 1),
+                    "p50_delay_min": round(p50, 1) if p50 is not None else None,
+                    "p90_delay_min": round(p90, 1),
+                    "anomaly_flag": anomaly_flag,
+                    "uncertainty_mode": uncertainty_mode,
+                    "status": (
+                        "PREDICTION SUSPENDED — anomalous conditions"
+                        if anomaly_flag
+                        else "PREDICTION ACTIVE"
+                    ),
+                    "shap_explanation": shap_explanation,
+                    "shap_text": shap_text,
+                }
+            )
 
         return results
 
@@ -474,18 +503,18 @@ class CalibratedETAEngine:
 def _readable_feature(name: str) -> str:
     """Map technical feature name to plain-language label for SHAP text."""
     mapping = {
-        "prior_leg_delay":        "rake delay",
-        "schedule_buffer_hours":  "schedule buffer",
-        "zone_congestion_index":  "zone congestion",
-        "fog_risk":               "fog risk",
-        "monsoon_flag":           "monsoon conditions",
-        "distance_km":            "journey distance",
+        "prior_leg_delay": "rake delay",
+        "schedule_buffer_hours": "schedule buffer",
+        "zone_congestion_index": "zone congestion",
+        "fog_risk": "fog risk",
+        "monsoon_flag": "monsoon conditions",
+        "distance_km": "journey distance",
         "scheduled_travel_hours": "scheduled travel time",
-        "coach_count":            "train length",
-        "loco_age_years":         "locomotive age",
-        "day_of_week":            "day of week",
-        "month":                  "time of year",
-        "is_weekend":             "weekend travel",
+        "coach_count": "train length",
+        "loco_age_years": "locomotive age",
+        "day_of_week": "day of week",
+        "month": "time of year",
+        "is_weekend": "weekend travel",
     }
     return mapping.get(name, name.replace("_", " "))
 
@@ -496,7 +525,7 @@ def _readable_feature(name: str) -> str:
 def train_and_calibrate(
     df: pd.DataFrame,
     features: list[str] = DEFAULT_FEATURES,
-    target:   str = "actual_delay_minutes",
+    target: str = "actual_delay_minutes",
     save_path: Optional[str | Path] = None,
     model_config: Optional[dict] = None,
 ) -> tuple[CalibratedETAEngine, dict]:
@@ -532,28 +561,30 @@ def train_and_calibrate(
     import datetime as _dt
 
     cfg = model_config or {}
-    train_frac      = float(cfg.get("train_fraction", 0.70))
-    cal_frac        = float(cfg.get("cal_fraction", 0.85))
+    train_frac = float(cfg.get("train_fraction", 0.70))
+    cal_frac = float(cfg.get("cal_fraction", 0.85))
     coverage_target = float(cfg.get("coverage_target", COVERAGE_90))
-    anomaly_mult    = float(cfg.get("anomaly_multiplier", ANOMALY_MULTIPLIER))
-    use_mondrian    = bool(cfg.get("use_mondrian", False))
+    anomaly_mult = float(cfg.get("anomaly_multiplier", ANOMALY_MULTIPLIER))
+    use_mondrian = bool(cfg.get("use_mondrian", False))
 
     # --- Sort chronologically, apply fractional split --------------------
     df_sorted = df.sort_values("journey_date").reset_index(drop=True)
     n = len(df_sorted)
     train_end = int(n * train_frac)
-    cal_end   = int(n * cal_frac)
+    cal_end = int(n * cal_frac)
 
     df_train = df_sorted.iloc[:train_end]
-    df_cal   = df_sorted.iloc[train_end:cal_end]
-    df_test  = df_sorted.iloc[cal_end:]
+    df_cal = df_sorted.iloc[train_end:cal_end]
+    df_test = df_sorted.iloc[cal_end:]
 
     logger.info(
         "Split (fractions %.0f/%.0f/%.0f): train=%d, cal=%d, test=%d",
         train_frac * 100,
         (cal_frac - train_frac) * 100,
         (1 - cal_frac) * 100,
-        len(df_train), len(df_cal), len(df_test),
+        len(df_train),
+        len(df_cal),
+        len(df_test),
     )
 
     # Fit only on the chronological training slice. A final all-data artifact
@@ -565,10 +596,10 @@ def train_and_calibrate(
     # --- Fit calibration engine ------------------------------------------
     X_train = df_train[features]
     y_train = df_train[target]
-    X_cal   = df_cal[features]
-    y_cal   = df_cal[target]
-    X_test  = df_test[features]
-    y_test  = df_test[target]
+    X_cal = df_cal[features]
+    y_cal = df_cal[target]
+    X_test = df_test[features]
+    y_test = df_test[target]
 
     engine = CalibratedETAEngine(
         base_model=base_model,
@@ -580,22 +611,24 @@ def train_and_calibrate(
 
     # --- Evaluate coverage on held-out test set --------------------------
     preds = engine.predict(X_test)
-    p10s  = np.array([r["p10_delay_min"] for r in preds])
-    p90s  = np.array([r["p90_delay_min"] for r in preds])
+    p10s = np.array([r["p10_delay_min"] for r in preds])
+    p90s = np.array([r["p90_delay_min"] for r in preds])
     y_arr = y_test.values
 
     coverage_90 = float(np.mean((y_arr >= p10s) & (y_arr <= p90s)))
-    p50s        = np.array([r["p50_delay_min"] for r in preds if r["p50_delay_min"] is not None])
-    mae_p50     = float(np.mean(np.abs(y_arr[:len(p50s)] - p50s)))
-    avg_width   = float(np.mean(p90s - p10s))
+    p50s = np.array(
+        [r["p50_delay_min"] for r in preds if r["p50_delay_min"] is not None]
+    )
+    mae_p50 = float(np.mean(np.abs(y_arr[: len(p50s)] - p50s)))
+    avg_width = float(np.mean(p90s - p10s))
 
     metrics: dict[str, Any] = {
-        "coverage_90_pct":        round(coverage_90 * 100, 1),
-        "mae_p50_min":            round(mae_p50, 2),
+        "coverage_90_pct": round(coverage_90 * 100, 1),
+        "mae_p50_min": round(mae_p50, 2),
         "avg_interval_width_min": round(avg_width, 1),
-        "n_train":                len(df_train),
-        "n_cal":                  len(df_cal),
-        "n_test":                 len(df_test),
+        "n_train": len(df_train),
+        "n_cal": len(df_cal),
+        "n_test": len(df_test),
     }
 
     if use_mondrian:
@@ -619,9 +652,9 @@ def train_and_calibrate(
 
     if save_path:
         save_path = Path(save_path)
-        engine.save(save_path)                     # canonical path (for API)
+        engine.save(save_path)  # canonical path (for API)
         versioned_path = save_path.parent / versioned_name
-        engine.save(versioned_path)                # dated+commit tagged copy
+        engine.save(versioned_path)  # dated+commit tagged copy
         logger.info("Versioned artifact: %s", versioned_path)
         metrics["artifact_path"] = str(versioned_path)
     else:
@@ -633,26 +666,35 @@ def train_and_calibrate(
     try:
         from src.models.xgboost_model import setup_mlflow_run
         import mlflow
+
         setup_mlflow_run()
-        
+
         with mlflow.start_run(run_name=f"run_{timestamp}"):
-            mlflow.log_params({
-                "n_train": metrics["n_train"],
-                "n_cal": metrics["n_cal"],
-                "n_test": metrics["n_test"],
-                "coverage_target": coverage_target,
-                "anomaly_multiplier": anomaly_mult,
-                "git_commit": commit,
-            })
-            mlflow.log_params({
-                k: v for k, v in cfg.items()
-                if k in {"n_estimators", "max_depth", "learning_rate", "random_state"}
-            })
-            mlflow.log_metrics({
-                "coverage_90_pct": metrics["coverage_90_pct"],
-                "mae_p50_min": metrics["mae_p50_min"],
-                "avg_interval_width": metrics["avg_interval_width_min"],
-            })
+            mlflow.log_params(
+                {
+                    "n_train": metrics["n_train"],
+                    "n_cal": metrics["n_cal"],
+                    "n_test": metrics["n_test"],
+                    "coverage_target": coverage_target,
+                    "anomaly_multiplier": anomaly_mult,
+                    "git_commit": commit,
+                }
+            )
+            mlflow.log_params(
+                {
+                    k: v
+                    for k, v in cfg.items()
+                    if k
+                    in {"n_estimators", "max_depth", "learning_rate", "random_state"}
+                }
+            )
+            mlflow.log_metrics(
+                {
+                    "coverage_90_pct": metrics["coverage_90_pct"],
+                    "mae_p50_min": metrics["mae_p50_min"],
+                    "avg_interval_width": metrics["avg_interval_width_min"],
+                }
+            )
             if save_path:
                 mlflow.log_artifact(str(save_path), artifact_path="model")
     except Exception as exc:
@@ -666,8 +708,10 @@ def train_and_calibrate(
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     import logging
-    logging.basicConfig(level=logging.INFO,
-                        format="%(levelname)s  %(name)s  %(message)s")
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(levelname)s  %(name)s  %(message)s"
+    )
 
     processed_path = Path("data/processed/kaggle_competition_cleaned.parquet")
     if not processed_path.exists():
@@ -676,6 +720,7 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     from src.features.engineering import engineer_all_features
+
     df = pd.read_parquet(processed_path)
     df = engineer_all_features(df)
     df = df.dropna(subset=DEFAULT_FEATURES + ["actual_delay_minutes"])
@@ -695,8 +740,10 @@ if __name__ == "__main__":
     results = engine.predict(sample)
     print("\n=== Sample Predictions ===")
     for i, r in enumerate(results):
-        print(f"  Row {i}: p10={r['p10_delay_min']:.1f}  "
-              f"p50={r['p50_delay_min']}  "
-              f"p90={r['p90_delay_min']:.1f}  "
-              f"anomaly={r['anomaly_flag']}")
+        print(
+            f"  Row {i}: p10={r['p10_delay_min']:.1f}  "
+            f"p50={r['p50_delay_min']}  "
+            f"p90={r['p90_delay_min']:.1f}  "
+            f"anomaly={r['anomaly_flag']}"
+        )
         print(f"         SHAP: {r['shap_text']}")

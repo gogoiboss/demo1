@@ -30,13 +30,23 @@ PROCESSED_DIR = Path("data/processed")
 
 # Columns we expect (superset across Kaggle variants — loader adapts)
 EXPECTED_COLS_COMPETITION = [
-    "train_number", "scheduled_travel_hours", "distance_km",
-    "zone_congestion_index", "monsoon_flag", "fog_risk",
-    "coach_count", "loco_age_years", "delayed_gt_15min",
+    "train_number",
+    "scheduled_travel_hours",
+    "distance_km",
+    "zone_congestion_index",
+    "monsoon_flag",
+    "fog_risk",
+    "coach_count",
+    "loco_age_years",
+    "delayed_gt_15min",
 ]
 EXPECTED_COLS_2025 = [
-    "train_no", "train_name", "station_code", "station_name",
-    "avg_delay_min", "pct_right_time",
+    "train_no",
+    "train_name",
+    "station_code",
+    "station_name",
+    "avg_delay_min",
+    "pct_right_time",
 ]
 
 
@@ -72,8 +82,12 @@ def print_summary(df: pd.DataFrame, variant: str) -> None:
 
     # Look for rake / rolling-stock linkage fields
     rake_cols = [
-        c for c in df.columns
-        if any(kw in c.lower() for kw in ["rake", "coach", "loco", "rolling", "stock", "consist"])
+        c
+        for c in df.columns
+        if any(
+            kw in c.lower()
+            for kw in ["rake", "coach", "loco", "rolling", "stock", "consist"]
+        )
     ]
     if rake_cols:
         print(f"  ⚙ Rake/rolling-stock columns found: {rake_cols}")
@@ -125,7 +139,9 @@ def main(csv_path: str) -> None:
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     out_path = PROCESSED_DIR / f"kaggle_{variant}_cleaned.parquet"
     df.to_parquet(out_path, index=False)
-    print(f"✓ Saved cleaned data → {out_path}  ({out_path.stat().st_size / 1e6:.1f} MB)")
+    print(
+        f"✓ Saved cleaned data → {out_path}  ({out_path.stat().st_size / 1e6:.1f} MB)"
+    )
 
 
 if __name__ == "__main__":

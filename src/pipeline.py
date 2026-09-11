@@ -42,7 +42,9 @@ class RippleETAPipeline:
         self.config_path = Path(config_path)
         self.config = self._load_config()
         data_config = self.config.get("data", {})
-        self.raw_data_path = Path(raw_data_path or data_config.get("raw_path", "data/raw/train_delay.csv"))
+        self.raw_data_path = Path(
+            raw_data_path or data_config.get("raw_path", "data/raw/train_delay.csv")
+        )
         self.processed_data_path = Path(
             processed_data_path
             or data_config.get(
@@ -57,13 +59,17 @@ class RippleETAPipeline:
     def _load_config(self) -> dict[str, Any]:
         logging_config = {}
         if not self.config_path.exists():
-            logger.warning("Config file %s not found; using code defaults.", self.config_path)
+            logger.warning(
+                "Config file %s not found; using code defaults.", self.config_path
+            )
             return {}
         with self.config_path.open(encoding="utf-8") as stream:
             config = yaml.safe_load(stream) or {}
         logging_config = config.get("logging", {})
         logging.basicConfig(
-            level=getattr(logging, str(logging_config.get("level", "INFO")).upper(), logging.INFO),
+            level=getattr(
+                logging, str(logging_config.get("level", "INFO")).upper(), logging.INFO
+            ),
             format="%(asctime)s %(levelname)s %(name)s: %(message)s",
         )
         return config
@@ -108,7 +114,11 @@ class RippleETAPipeline:
             ranges=validation.get("ranges", {}),
         )
         self._stages["validation"] = f"passed:{summary.rows} rows"
-        logger.info("Input validation passed: %s rows, ranges=%s", summary.rows, summary.checked_ranges)
+        logger.info(
+            "Input validation passed: %s rows, ranges=%s",
+            summary.rows,
+            summary.checked_ranges,
+        )
 
         if "journey_date" in raw.columns:
             raw["journey_date"] = pd.to_datetime(raw["journey_date"], errors="coerce")
@@ -121,12 +131,13 @@ class RippleETAPipeline:
         self._stages["features"] = f"engineered:{len(data)} rows"
         logger.info("Features engineered: %s usable rows", len(data))
 
-        model_config = {**self.config.get("model", {}), **self.config.get("calibration", {})}
+        model_config = {
+            **self.config.get("model", {}),
+            **self.config.get("calibration", {}),
+        }
         engine, metrics = train_and_calibrate(data, model_config=model_config or None)
         self._stages["model"] = "xgboost:fitted"
-        self._stages["calibration"] = (
-            f"mapie:coverage={metrics['coverage_90_pct']}%"
-        )
+        self._stages["calibration"] = f"mapie:coverage={metrics['coverage_90_pct']}%"
         self._versioned_artifact = metrics.get("artifact_path", "not_saved")
         self._data = data
         self._prediction_pipeline = CalibratedPredictionPipeline(engine)
@@ -150,7 +161,7 @@ class RippleETAPipeline:
             conflicts = self.graph.detect_conflicts(current_state)
         else:
             conflicts = detect_conflicts(self.graph, current_state)
-            
+
         adjustments: dict[str, float] = {}
         for conflict in conflicts:
             affected = str(conflict["affected_train"])
@@ -199,15 +210,25 @@ class RippleETAPipeline:
             result["p90_delay_min"] = round(result["p90_delay_min"] + adjustment, 1)
         result["graph_status"] = graph_result["status"]
         result["pipeline_stages"] = dict(self._stages)
-        source_path = self.raw_data_path if self.raw_data_path.exists() else self.processed_data_path
+        source_path = (
+            self.raw_data_path
+            if self.raw_data_path.exists()
+            else self.processed_data_path
+        )
         model_path = Path("models/calibrated_eta_engine.joblib")
         result["provenance"] = {
             "git_commit": git_commit(),
             "dataset_sha256": sha256_file(source_path),
-            "saved_model_artifact_sha256": sha256_file(model_path) if model_path.exists() else "absent",
+            "saved_model_artifact_sha256": (
+                sha256_file(model_path) if model_path.exists() else "absent"
+            ),
             "versioned_artifact": self._versioned_artifact,
             "fit_policy": "calibration_model_fit_on_chronological_training_split",
             "config_path": str(self.config_path),
         }
-        logger.info("Prediction complete for train %s; graph=%s", train_id, graph_result["status"])
+        logger.info(
+            "Prediction complete for train %s; graph=%s",
+            train_id,
+            graph_result["status"],
+        )
         return result

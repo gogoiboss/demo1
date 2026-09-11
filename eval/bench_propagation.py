@@ -70,18 +70,22 @@ def generate_synthetic_network(
             if i > 0:
                 current_time += rng.randint(2, 5)  # dwell time
             dep_min = current_time if i < len(route_stations) - 1 else None
-            stops.append({
-                "station": stn,
-                "arr_min": arr_min,
-                "dep_min": dep_min,
-            })
+            stops.append(
+                {
+                    "station": stn,
+                    "arr_min": arr_min,
+                    "dep_min": dep_min,
+                }
+            )
             current_time += rng.randint(20, 90)  # running time to next
 
-        schedules.append({
-            "train_id": train_id,
-            "category": category,
-            "stops": stops,
-        })
+        schedules.append(
+            {
+                "train_id": train_id,
+                "category": category,
+                "stops": stops,
+            }
+        )
 
         # Inject delay into ~30% of trains at their first departure
         if rng.random() < 0.3:
@@ -104,7 +108,9 @@ def benchmark_reference(G, delays: dict[str, float], iterations: int = 5) -> flo
     return min(times)
 
 
-def benchmark_cached_full(engine: CachedPropagationEngine, delays: dict, iterations: int = 5) -> float:
+def benchmark_cached_full(
+    engine: CachedPropagationEngine, delays: dict, iterations: int = 5
+) -> float:
     """Time the cached engine's full propagation pass."""
     times = []
     for _ in range(iterations):
@@ -131,7 +137,9 @@ def benchmark_cached_incremental(
     return min(times)
 
 
-def verify_numerical_equivalence(G, engine: CachedPropagationEngine, delays: dict) -> bool:
+def verify_numerical_equivalence(
+    G, engine: CachedPropagationEngine, delays: dict
+) -> bool:
     """
     Confirm the cached engine produces numerically identical results
     to the reference implementation.
@@ -145,7 +153,9 @@ def verify_numerical_equivalence(G, engine: CachedPropagationEngine, delays: dic
     cached_result = engine.propagate(delays)
 
     # Cached incremental (with all delays as "changed")
-    incremental_result = engine.propagate_incremental(delays, changed_nodes=set(delays.keys()))
+    incremental_result = engine.propagate_incremental(
+        delays, changed_nodes=set(delays.keys())
+    )
 
     # Compare
     all_ok = True
@@ -155,10 +165,14 @@ def verify_numerical_equivalence(G, engine: CachedPropagationEngine, delays: dic
         incr_val = incremental_result.get(nid, float("nan"))
 
         if abs(ref_val - cached_val) > 1e-9:
-            print(f"  MISMATCH (cached) at {nid}: ref={ref_val:.6f} cached={cached_val:.6f}")
+            print(
+                f"  MISMATCH (cached) at {nid}: ref={ref_val:.6f} cached={cached_val:.6f}"
+            )
             all_ok = False
         if abs(ref_val - incr_val) > 1e-9:
-            print(f"  MISMATCH (incremental) at {nid}: ref={ref_val:.6f} incr={incr_val:.6f}")
+            print(
+                f"  MISMATCH (incremental) at {nid}: ref={ref_val:.6f} incr={incr_val:.6f}"
+            )
             all_ok = False
 
     return all_ok
@@ -181,9 +195,13 @@ def main():
 
         num_nodes = G.number_of_nodes()
         num_edges = G.number_of_edges()
-        conflict_edges = sum(1 for _, _, d in G.edges(data=True) if d.get("edge_type") == "conflict")
+        conflict_edges = sum(
+            1 for _, _, d in G.edges(data=True) if d.get("edge_type") == "conflict"
+        )
 
-        print(f"  Graph: {num_nodes} nodes, {num_edges} edges ({conflict_edges} conflict)")
+        print(
+            f"  Graph: {num_nodes} nodes, {num_edges} edges ({conflict_edges} conflict)"
+        )
         print(f"  Delays injected: {len(delays)} trains")
         print(f"  Graph build time: {build_time*1000:.1f} ms")
 
@@ -209,17 +227,29 @@ def main():
         incr_time = benchmark_cached_incremental(engine, delays, changed)
 
         print(f"\n  Reference (NetworkX propagate_delays):  {ref_time*1000:.2f} ms")
-        print(f"  Cached full (NumPy arrays):             {cached_time*1000:.2f} ms  ({ref_time/cached_time:.1f}x faster)")
-        print(f"  Cached incremental (1 train changed):   {incr_time*1000:.2f} ms  ({ref_time/incr_time:.1f}x faster)")
+        print(
+            f"  Cached full (NumPy arrays):             {cached_time*1000:.2f} ms  ({ref_time/cached_time:.1f}x faster)"
+        )
+        print(
+            f"  Cached incremental (1 train changed):   {incr_time*1000:.2f} ms  ({ref_time/incr_time:.1f}x faster)"
+        )
 
         # Zone-scale feasibility check
         if cached_time < 0.050:  # 50ms
-            print(f"  [PASS] Zone-scale feasible: {cached_time*1000:.1f} ms < 50 ms target")
+            print(
+                f"  [PASS] Zone-scale feasible: {cached_time*1000:.1f} ms < 50 ms target"
+            )
         elif cached_time < 0.200:
-            print(f"  [WARN] Marginal: {cached_time*1000:.1f} ms (consider rustworkx if this grows)")
+            print(
+                f"  [WARN] Marginal: {cached_time*1000:.1f} ms (consider rustworkx if this grows)"
+            )
         else:
-            print(f"  [FAIL] TOO SLOW: {cached_time*1000:.1f} ms — NetworkX is the bottleneck.")
-            print("    Recommendation: replace with rustworkx for topo sort + adjacency.")
+            print(
+                f"  [FAIL] TOO SLOW: {cached_time*1000:.1f} ms — NetworkX is the bottleneck."
+            )
+            print(
+                "    Recommendation: replace with rustworkx for topo sort + adjacency."
+            )
 
     print("\n" + "=" * 72)
     print("  BENCHMARK COMPLETE")

@@ -47,14 +47,14 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 DEFAULT_PRECEDENCE_RANK: dict[str, int] = {
     "vande_bharat": 7,
-    "rajdhani":     6,
-    "shatabdi":     5,
-    "duronto":      5,
-    "superfast":    4,
-    "mail":         3,
-    "express":      3,
-    "passenger":    2,
-    "goods":        1,
+    "rajdhani": 6,
+    "shatabdi": 5,
+    "duronto": 5,
+    "superfast": 4,
+    "mail": 3,
+    "express": 3,
+    "passenger": 2,
+    "goods": 1,
 }
 
 # Minimum headway in minutes between two trains on the same station-pair section.
@@ -74,13 +74,14 @@ class TrainEvent:
     Represents a train arriving at or departing from a station.
     Node ID convention: f"{train_id}__{station}__arr" or f"...__dep"
     """
-    train_id:       str
-    station:        str
-    event_type:     str          # "arr" | "dep"
-    scheduled_min:  float        # minutes from midnight (or from journey start)
-    actual_min:     float | None = field(default=None)   # filled during propagation
-    delay_min:      float = field(default=0.0)    # current observed/propagated delay
-    category:       str  = field(default="express")
+
+    train_id: str
+    station: str
+    event_type: str  # "arr" | "dep"
+    scheduled_min: float  # minutes from midnight (or from journey start)
+    actual_min: float | None = field(default=None)  # filled during propagation
+    delay_min: float = field(default=0.0)  # current observed/propagated delay
+    category: str = field(default="express")
 
     @property
     def node_id(self) -> str:
@@ -141,20 +142,26 @@ def build_timed_event_graph(
 
             if stop.get("arr_min") is not None:
                 ev = TrainEvent(
-                    train_id=tid, station=stn, event_type="arr",
+                    train_id=tid,
+                    station=stn,
+                    event_type="arr",
                     scheduled_min=stop["arr_min"],
-                    actual_min=stop["arr_min"],   # will be updated during propagation
-                    delay_min=0.0, category=cat,
+                    actual_min=stop["arr_min"],  # will be updated during propagation
+                    delay_min=0.0,
+                    category=cat,
                 )
                 G.add_node(ev.node_id, event=ev)
                 events_by_id[ev.node_id] = ev
 
             if stop.get("dep_min") is not None:
                 ev = TrainEvent(
-                    train_id=tid, station=stn, event_type="dep",
+                    train_id=tid,
+                    station=stn,
+                    event_type="dep",
                     scheduled_min=stop["dep_min"],
                     actual_min=stop["dep_min"],
-                    delay_min=0.0, category=cat,
+                    delay_min=0.0,
+                    category=cat,
                 )
                 G.add_node(ev.node_id, event=ev)
                 events_by_id[ev.node_id] = ev
@@ -179,10 +186,13 @@ def build_timed_event_graph(
                 arr_ev = events_by_id[arr_id]
                 dep_ev = events_by_id[dep_id]
                 dwell = dep_ev.scheduled_min - arr_ev.scheduled_min
-                G.add_edge(arr_id, dep_id,
-                           edge_type="dwell",
-                           weight=max(0.0, dwell),
-                           label=f"dwell@{stn}")
+                G.add_edge(
+                    arr_id,
+                    dep_id,
+                    edge_type="dwell",
+                    weight=max(0.0, dwell),
+                    label=f"dwell@{stn}",
+                )
 
             # dep@current → arr@next (running time edge)
             if i < len(stops) - 1:
@@ -195,10 +205,13 @@ def build_timed_event_graph(
                     dep_ev = events_by_id[dep_id]
                     next_arr_ev = events_by_id[next_arr_id]
                     run_time = next_arr_ev.scheduled_min - dep_ev.scheduled_min
-                    G.add_edge(dep_id, next_arr_id,
-                               edge_type="running_time",
-                               weight=max(0.0, run_time),
-                               label=f"run:{stn}→{next_stn}")
+                    G.add_edge(
+                        dep_id,
+                        next_arr_id,
+                        edge_type="running_time",
+                        weight=max(0.0, run_time),
+                        label=f"run:{stn}→{next_stn}",
+                    )
 
     # ----- Step 2.5: Add HARD conflict edges (Rake reuse / Crew handoff) ----
     # Deterministic dependencies explicitly supported by data.
@@ -208,10 +221,10 @@ def build_timed_event_graph(
             v_train = link["target_train_id"]
             stn = link["station"]
             weight = link.get("min_turnaround_min", 60.0)
-            
+
             u_node = f"{u_train}__{stn}__arr"
             v_node = f"{v_train}__{stn}__dep"
-            
+
             if u_node in events_by_id and v_node in events_by_id:
                 G.add_edge(
                     u_node,
@@ -219,7 +232,7 @@ def build_timed_event_graph(
                     edge_type="conflict",
                     conflict_type="hard",
                     weight=weight,
-                    label=f"hard_conflict:rake_crew_{stn}"
+                    label=f"hard_conflict:rake_crew_{stn}",
                 )
 
     # ----- Step 3: Add conflict edges (cross-train, shared station-pair) ----
@@ -244,12 +257,14 @@ def build_timed_event_graph(
             if dep_id in events_by_id and arr_id in events_by_id:
                 dep_ev = events_by_id[dep_id]
                 arr_ev = events_by_id[arr_id]
-                section_users.setdefault(key, []).append({
-                    "train_id": tid,
-                    "category": sched.get("category", "express"),
-                    "dep_ev": dep_ev,
-                    "arr_ev": arr_ev,
-                })
+                section_users.setdefault(key, []).append(
+                    {
+                        "train_id": tid,
+                        "category": sched.get("category", "express"),
+                        "dep_ev": dep_ev,
+                        "arr_ev": arr_ev,
+                    }
+                )
 
     for section_key, users in section_users.items():
         if len(users) < 2:
@@ -381,7 +396,7 @@ def propagate_delays(G: nx.DiGraph) -> dict[str, float]:
         if pinned is not None:
             predecessor_constraint = pinned
         elif G.in_degree(node_id) == 0:
-            predecessor_constraint = ev.actual_min   # source node, already set
+            predecessor_constraint = ev.actual_min  # source node, already set
         else:
             predecessor_constraint = ev.scheduled_min  # will be pushed by preds
 
@@ -465,7 +480,8 @@ def detect_conflicts(
     # 1. Run propagation without conflict edges to establish baseline
     G_no_conflict = copy.deepcopy(G)
     conflict_edges = [
-        (u, v) for u, v, d in G_no_conflict.edges(data=True)
+        (u, v)
+        for u, v, d in G_no_conflict.edges(data=True)
         if d.get("edge_type") == "conflict"
     ]
     G_no_conflict.remove_edges_from(conflict_edges)
@@ -493,16 +509,18 @@ def detect_conflicts(
 
         if conflict_constraint > baseline_v_actual:
             edge_contribution = conflict_constraint - baseline_v_actual
-            conflicts.append({
-                "section":               data.get("label", ""),
-                "delaying_train":        u_ev.train_id,
-                "affected_train":        v_ev.train_id,
-                "source_delay_min":      u_ev.delay_min,
-                "propagated_delay_min":  edge_contribution,
-                "conflict_type":         data.get("conflict_type", "unknown"),
-                "affected_node":         v,
-                "source_node":           u,
-            })
+            conflicts.append(
+                {
+                    "section": data.get("label", ""),
+                    "delaying_train": u_ev.train_id,
+                    "affected_train": v_ev.train_id,
+                    "source_delay_min": u_ev.delay_min,
+                    "propagated_delay_min": edge_contribution,
+                    "conflict_type": data.get("conflict_type", "unknown"),
+                    "affected_node": v,
+                    "source_node": u,
+                }
+            )
 
     return conflicts
 
@@ -561,9 +579,7 @@ class CachedPropagationEngine:
         try:
             self._topo_order: list[str] = list(nx.topological_sort(G))
         except nx.NetworkXUnfeasible:
-            raise ValueError(
-                "Graph contains a cycle — schedule data is inconsistent."
-            )
+            raise ValueError("Graph contains a cycle — schedule data is inconsistent.")
 
         n = len(self._topo_order)
         self._n = n
@@ -784,8 +800,11 @@ class CachedPropagationEngine:
         # the sandbox's 15-minute scenario).
         baseline_actual = self._actual.copy()
         self._run_pass_with_preds(
-            baseline_actual, pinned_baseline,
-            self._nc_pred_ptr, self._nc_pred_indices, self._nc_pred_weights,
+            baseline_actual,
+            pinned_baseline,
+            self._nc_pred_ptr,
+            self._nc_pred_indices,
+            self._nc_pred_weights,
         )
 
         # --- Pass 2: full propagation WITH conflict edges ---
@@ -809,16 +828,19 @@ class CachedPropagationEngine:
 
             if conflict_constraint > baseline_v_actual:
                 edge_contribution = conflict_constraint - baseline_v_actual
-                conflicts.append({
-                    "section":              edge_data.get("label", ""),
-                    "delaying_train":       u_ev.train_id,
-                    "affected_train":       v_ev.train_id,
-                    "source_delay_min":     self._actual[u_idx] - self._scheduled[u_idx],
-                    "propagated_delay_min": edge_contribution,
-                    "conflict_type":        edge_data.get("conflict_type", "unknown"),
-                    "affected_node":        v_nid,
-                    "source_node":          u_nid,
-                })
+                conflicts.append(
+                    {
+                        "section": edge_data.get("label", ""),
+                        "delaying_train": u_ev.train_id,
+                        "affected_train": v_ev.train_id,
+                        "source_delay_min": self._actual[u_idx]
+                        - self._scheduled[u_idx],
+                        "propagated_delay_min": edge_contribution,
+                        "conflict_type": edge_data.get("conflict_type", "unknown"),
+                        "affected_node": v_nid,
+                        "source_node": u_nid,
+                    }
+                )
 
         return conflicts
 
@@ -879,4 +901,3 @@ class CachedPropagationEngine:
             ev: TrainEvent = G.nodes[nid]["event"]
             ev.actual_min = self._actual[i]
             ev.delay_min = self._actual[i] - self._scheduled[i]
-

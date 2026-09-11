@@ -17,6 +17,7 @@ class PredictionService:
     def __init__(self):
         from src.graph.timed_event_graph import CachedPropagationEngine
         from src.graph.worked_example import SCHEDULES_DEMO
+
         graph = CachedPropagationEngine(SCHEDULES_DEMO)
         self._pipeline = RippleETAPipeline(graph=graph)
 
@@ -44,5 +45,9 @@ class PredictionService:
         self._pipeline._load()
         if self._pipeline._data is None:
             return []
-        column = "train_number" if "train_number" in self._pipeline._data.columns else "train_id"
+        column = (
+            "train_number"
+            if "train_number" in self._pipeline._data.columns
+            else "train_id"
+        )
         return sorted(self._pipeline._data[column].astype(str).unique().tolist())

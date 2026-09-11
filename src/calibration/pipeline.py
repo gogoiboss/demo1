@@ -38,7 +38,10 @@ class CalibratedPredictionPipeline:
             # real prior_leg_delay and will silently default to 0 instead
             # of the true value (see
             # tests/test_features.py::test_isolated_single_row_reengineering_cannot_reproduce_batch_prior_leg_delay).
-            if "train_number" in state.columns and state["train_number"].value_counts().max() < 2:
+            if (
+                "train_number" in state.columns
+                and state["train_number"].value_counts().max() < 2
+            ):
                 logger.warning(
                     "engineer_all_features() called on a DataFrame with < 2 rows "
                     "for at least one train_number; prior_leg_delay cannot be "
@@ -52,7 +55,7 @@ class CalibratedPredictionPipeline:
                 conflicts = self.graph.detect_conflicts(current_state)
             else:
                 conflicts = detect_conflicts(self.graph, current_state)
-                
+
             for conflict in conflicts:
                 train_id = conflict["affected_train"]
                 adjustments[train_id] = adjustments.get(train_id, 0.0) + float(
@@ -75,7 +78,9 @@ class CalibratedPredictionPipeline:
             result = results[index]
             if result["p50_delay_min"] is not None:
                 result["p50_delay_min"] = round(result["p50_delay_min"] + adjustment, 1)
-                result["p10_delay_min"] = round(max(0.0, result["p10_delay_min"] + adjustment), 1)
+                result["p10_delay_min"] = round(
+                    max(0.0, result["p10_delay_min"] + adjustment), 1
+                )
                 result["p90_delay_min"] = round(result["p90_delay_min"] + adjustment, 1)
             result["conflict_adjustment_min"] = round(adjustment, 1)
         return results

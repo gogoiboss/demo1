@@ -64,14 +64,22 @@ def test_anomaly_gate_uses_three_times_historical_variance():
 def test_pipeline_adds_active_conflict_to_affected_train():
     engine, X_test = _fitted_engine()
     schedules = [
-        {"train_id": "A", "category": "rajdhani", "stops": [
-            {"station": "A", "arr_min": None, "dep_min": 0},
-            {"station": "B", "arr_min": 60, "dep_min": None},
-        ]},
-        {"train_id": "B", "category": "express", "stops": [
-            {"station": "A", "arr_min": None, "dep_min": 10},
-            {"station": "B", "arr_min": 70, "dep_min": None},
-        ]},
+        {
+            "train_id": "A",
+            "category": "rajdhani",
+            "stops": [
+                {"station": "A", "arr_min": None, "dep_min": 0},
+                {"station": "B", "arr_min": 60, "dep_min": None},
+            ],
+        },
+        {
+            "train_id": "B",
+            "category": "express",
+            "stops": [
+                {"station": "A", "arr_min": None, "dep_min": 10},
+                {"station": "B", "arr_min": 70, "dep_min": None},
+            ],
+        },
     ]
     graph = build_timed_event_graph(schedules, min_headway=10.0)
     state = X_test.iloc[:2].copy()
@@ -100,7 +108,9 @@ def test_mondrian_calibration_holds_per_bucket_coverage_floor():
     other_features = {
         f: rng.normal(size=n) for f in DEFAULT_FEATURES if f != "prior_leg_delay"
     }
-    X = pd.DataFrame({**other_features, "prior_leg_delay": prior_leg_delay})[DEFAULT_FEATURES]
+    X = pd.DataFrame({**other_features, "prior_leg_delay": prior_leg_delay})[
+        DEFAULT_FEATURES
+    ]
 
     noise_scale = np.select(
         [prior_leg_delay < 15, prior_leg_delay < 60],
@@ -124,13 +134,17 @@ def test_mondrian_calibration_holds_per_bucket_coverage_floor():
 
     preds = engine.predict(X_test)
     report = per_bucket_coverage(
-        X_test, y_test.values, preds, engine.mondrian_feature, engine.mondrian_bucket_edges
+        X_test,
+        y_test.values,
+        preds,
+        engine.mondrian_feature,
+        engine.mondrian_bucket_edges,
     )
 
     assert report
     for bucket, stats in report.items():
         if stats["n"] == 0:
             continue
-        assert stats["coverage_pct"] >= 75.0, (
-            f"bucket {bucket} coverage {stats['coverage_pct']}% (n={stats['n']}) below floor"
-        )
+        assert (
+            stats["coverage_pct"] >= 75.0
+        ), f"bucket {bucket} coverage {stats['coverage_pct']}% (n={stats['n']}) below floor"

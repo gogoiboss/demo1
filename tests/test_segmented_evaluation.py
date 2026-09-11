@@ -17,7 +17,11 @@ def test_segment_metrics_splits_rows_into_correct_segments_with_right_counts():
     y_actual = np.array([5.0, 6.0, 7.0, 80.0, 90.0, 100.0])
     perfect_preds = y_actual.copy()
     models = {
-        "Perfect Model": {"p10": perfect_preds, "p50": perfect_preds, "p90": perfect_preds},
+        "Perfect Model": {
+            "p10": perfect_preds,
+            "p50": perfect_preds,
+            "p90": perfect_preds,
+        },
     }
     segment_labels = np.array(["low", "low", "low", "high", "high", "high"])
 
@@ -56,12 +60,18 @@ def test_segment_metrics_computes_real_per_segment_mae_and_pinball():
     # Cross-check pinball loss against the standalone pinball_loss() function
     # directly on the "low" segment slice.
     low_mask = segment_labels == "low"
-    expected_pinball_low = float(np.mean([
-        pinball_loss(y_actual[low_mask], p10[low_mask], 0.1),
-        pinball_loss(y_actual[low_mask], p50[low_mask], 0.5),
-        pinball_loss(y_actual[low_mask], p90[low_mask], 0.9),
-    ]))
-    assert report["low"]["Model A"]["pinball"] == pytest.approx(expected_pinball_low, abs=0.01)
+    expected_pinball_low = float(
+        np.mean(
+            [
+                pinball_loss(y_actual[low_mask], p10[low_mask], 0.1),
+                pinball_loss(y_actual[low_mask], p50[low_mask], 0.5),
+                pinball_loss(y_actual[low_mask], p90[low_mask], 0.9),
+            ]
+        )
+    )
+    assert report["low"]["Model A"]["pinball"] == pytest.approx(
+        expected_pinball_low, abs=0.01
+    )
 
 
 def test_segment_metrics_compares_multiple_models_within_the_same_segment():
@@ -77,7 +87,10 @@ def test_segment_metrics_compares_multiple_models_within_the_same_segment():
     report = segment_metrics(y_actual, models, segment_labels)
 
     assert set(report["only_segment"].keys()) == {"Good Model", "Bad Model"}
-    assert report["only_segment"]["Good Model"]["mae"] < report["only_segment"]["Bad Model"]["mae"]
+    assert (
+        report["only_segment"]["Good Model"]["mae"]
+        < report["only_segment"]["Bad Model"]["mae"]
+    )
 
 
 def test_segment_metrics_omits_empty_segments():

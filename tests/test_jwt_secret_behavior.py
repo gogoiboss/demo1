@@ -29,6 +29,7 @@ def _restore_auth_module():
     """
     yield
     import os
+
     os.environ.pop("JWT_SECRET", None)
     importlib.reload(auth_module)
 
@@ -37,7 +38,9 @@ def test_session_token_is_ripple_etas_own_jwt_not_the_google_credential():
     """Confirms the premise: per-request auth checks RippleETA's own signed
     token, not Google's ID token directly."""
     token = auth_module.create_session_token("judge@example.com", "passenger")
-    decoded = pyjwt.decode(token, auth_module.JWT_SECRET, algorithms=[auth_module.JWT_ALGORITHM])
+    decoded = pyjwt.decode(
+        token, auth_module.JWT_SECRET, algorithms=[auth_module.JWT_ALGORITHM]
+    )
     assert decoded["sub"] == "judge@example.com"
     assert decoded["role"] == "passenger"
     # A real session lifetime, not a short-lived token — this is exactly
@@ -77,7 +80,9 @@ def test_jwt_secret_falls_back_to_random_only_when_unset(monkeypatch):
     assert auth_module.JWT_SECRET != secret_when_unset
 
 
-def test_documented_tradeoff_unconfigured_restart_invalidates_prior_sessions(monkeypatch):
+def test_documented_tradeoff_unconfigured_restart_invalidates_prior_sessions(
+    monkeypatch,
+):
     """This is the honest, acceptable-by-design failure mode: an
     unconfigured deployment (JWT_SECRET never set) generates a fresh random
     secret every process start, so a token from before a restart no longer
@@ -91,4 +96,6 @@ def test_documented_tradeoff_unconfigured_restart_invalidates_prior_sessions(mon
     importlib.reload(auth_module)
 
     with pytest.raises(pyjwt.InvalidTokenError):
-        pyjwt.decode(token, auth_module.JWT_SECRET, algorithms=[auth_module.JWT_ALGORITHM])
+        pyjwt.decode(
+            token, auth_module.JWT_SECRET, algorithms=[auth_module.JWT_ALGORITHM]
+        )

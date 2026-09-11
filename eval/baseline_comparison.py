@@ -18,6 +18,7 @@ from src.pipeline import RippleETAPipeline
 # per-journey regression that only sees static facts about this one journey.
 SINGLE_TRAIN_FEATURES = [f for f in DEFAULT_FEATURES if f != "prior_leg_delay"]
 
+
 def pinball_loss(y_true, y_pred, alpha):
     """Computes the quantile (pinball) loss."""
     diff = y_true - y_pred
@@ -62,9 +63,12 @@ def segment_metrics(
             p90 = np.asarray(preds["p90"])[mask]
             mae = float(np.mean(np.abs(y_seg - p50)))
             avg_pinball = float(
-                (pinball_loss(y_seg, p10, 0.1)
-                 + pinball_loss(y_seg, p50, 0.5)
-                 + pinball_loss(y_seg, p90, 0.9)) / 3.0
+                (
+                    pinball_loss(y_seg, p10, 0.1)
+                    + pinball_loss(y_seg, p50, 0.5)
+                    + pinball_loss(y_seg, p90, 0.9)
+                )
+                / 3.0
             )
             report[segment][model_name] = {
                 "n": n,
@@ -74,26 +78,31 @@ def segment_metrics(
     return report
 
 
-def print_segment_table(title: str, report: dict[str, dict[str, dict[str, float]]]) -> None:
+def print_segment_table(
+    title: str, report: dict[str, dict[str, dict[str, float]]]
+) -> None:
     print(f"\n### {title}\n")
     print("| Segment | Model | N | MAE (mins) | Pinball Loss |")
     print("| :--- | :--- | ---: | ---: | ---: |")
     for segment, model_stats in report.items():
         for model_name, stats in model_stats.items():
-            print(f"| {segment} | {model_name} | {stats['n']} | {stats['mae']:.2f} | {stats['pinball']:.2f} |")
+            print(
+                f"| {segment} | {model_name} | {stats['n']} | {stats['mae']:.2f} | {stats['pinball']:.2f} |"
+            )
+
 
 def run_comparison():
     print("Loading data and recreating chronological test split...")
-    
+
     # 1. Load Data & Engineer Features
     processed_path = Path("data/processed/kaggle_competition_cleaned.parquet")
     df = pd.read_parquet(processed_path)
     df = engineer_all_features(df)
     target = "actual_delay_minutes"
-    
+
     df = df.dropna(subset=DEFAULT_FEATURES + [target])
     df_sorted = df.sort_values("journey_date").reset_index(drop=True)
-    
+
     # 2. Slice the exact chronological train / holdout split (matches
     #    config.yaml: train_fraction=0.70, cal_fraction=0.85)
     with open("config.yaml") as f:
@@ -143,49 +152,55 @@ def run_comparison():
 
     models = {
         "Scheduled ETA (Zero Delay)": {
-            "p10": scheduled_preds, "p50": scheduled_preds, "p90": scheduled_preds
+            "p10": scheduled_preds,
+            "p50": scheduled_preds,
+            "p90": scheduled_preds,
         },
         "Prior-Leg Baseline (Naive)": {
-            "p10": prior_leg_preds, "p50": prior_leg_preds, "p90": prior_leg_preds
+            "p10": prior_leg_preds,
+            "p50": prior_leg_preds,
+            "p90": prior_leg_preds,
         },
         "Per-Train Regression (No Network Features)": {
-            "p10": single_train_preds, "p50": single_train_preds, "p90": single_train_preds
+            "p10": single_train_preds,
+            "p50": single_train_preds,
+            "p90": single_train_preds,
         },
         "RippleETA (XGBoost + MAPIE)": {
-            "p10": ripple_p10, "p50": ripple_p50, "p90": ripple_p90
-        }
+            "p10": ripple_p10,
+            "p50": ripple_p50,
+            "p90": ripple_p90,
+        },
     }
-    
+
     baseline_mae = None
-    
+
     for name, preds in models.items():
         # MAE is calculated on P50 / Point Estimate
         mae = np.mean(np.abs(y_actual - preds["p50"]))
-        
+
         if name == "Prior-Leg Baseline (Naive)":
             baseline_mae = mae
-            
+
         # Pinball loss averaged across P10, P50, P90 bounds
         loss_p10 = pinball_loss(y_actual, preds["p10"], 0.1)
         loss_p50 = pinball_loss(y_actual, preds["p50"], 0.5)
         loss_p90 = pinball_loss(y_actual, preds["p90"], 0.9)
         avg_pinball = (loss_p10 + loss_p50 + loss_p90) / 3.0
-        
-        results.append({
-            "Model": name,
-            "MAE (mins)": mae,
-            "Pinball Loss": avg_pinball
-        })
-        
+
+        results.append({"Model": name, "MAE (mins)": mae, "Pinball Loss": avg_pinball})
+
     # 8. Print Markdown Table
-    print(f"\n### Baseline Comparison Results ({len(df_test)}-row chronological held-out set)\n")
+    print(
+        f"\n### Baseline Comparison Results ({len(df_test)}-row chronological held-out set)\n"
+    )
     print("| Model | MAE (mins) | Pinball Loss | vs Prior-Leg (%) |")
     print("| :--- | :--- | :--- | :--- |")
-    
+
     for r in results:
         mae = r["MAE (mins)"]
         pb = r["Pinball Loss"]
-        
+
         if baseline_mae is not None and baseline_mae > 0:
             diff_pct = ((mae - baseline_mae) / baseline_mae) * 100
             if diff_pct > 0:
@@ -196,23 +211,33 @@ def run_comparison():
                 vs_base = "Baseline"
         else:
             vs_base = "N/A"
-            
+
         print(f"| {r['Model']} | {mae:.2f} | {pb:.2f} | {vs_base} |")
 
     # 9. Segmented evaluation — by delay magnitude, forecast horizon, and zone
-    delay_segments = pd.cut(
-        pd.Series(y_actual), bins=[-np.inf, 15, 60, np.inf],
-        labels=["0-15 min", "15-60 min", "60+ min"],
-    ).astype(str).values
+    delay_segments = (
+        pd.cut(
+            pd.Series(y_actual),
+            bins=[-np.inf, 15, 60, np.inf],
+            labels=["0-15 min", "15-60 min", "60+ min"],
+        )
+        .astype(str)
+        .values
+    )
     print_segment_table(
         "Segmented Evaluation — by Delay Magnitude",
         segment_metrics(y_actual, models, delay_segments),
     )
 
-    horizon_segments = pd.cut(
-        df_test["scheduled_travel_hours"], bins=[-np.inf, 4, 12, np.inf],
-        labels=["Near-term (<4 hrs)", "Medium (4-12 hrs)", "Long-range (>12 hrs)"],
-    ).astype(str).values
+    horizon_segments = (
+        pd.cut(
+            df_test["scheduled_travel_hours"],
+            bins=[-np.inf, 4, 12, np.inf],
+            labels=["Near-term (<4 hrs)", "Medium (4-12 hrs)", "Long-range (>12 hrs)"],
+        )
+        .astype(str)
+        .values
+    )
     print_segment_table(
         "Segmented Evaluation — by Forecast Horizon",
         segment_metrics(y_actual, models, horizon_segments),
@@ -230,6 +255,7 @@ def run_comparison():
         "Segmented Evaluation — by Route (Zone Proxy — no true zone identifier in this dataset)",
         segment_metrics(y_actual, models, zone_segments),
     )
+
 
 if __name__ == "__main__":
     run_comparison()

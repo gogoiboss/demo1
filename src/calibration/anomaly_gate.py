@@ -7,7 +7,6 @@ from typing import Iterable
 
 import numpy as np
 
-
 SUSPENSION_MESSAGE = "PREDICTION SUSPENDED — anomalous conditions"
 
 
@@ -66,7 +65,9 @@ def rolling_variance(values: Iterable[float], window: int = 20) -> np.ndarray:
         raise ValueError("window must be at least 2")
     if len(series) < window:
         return np.array([], dtype=float)
-    return np.array([
-        np.var(series[index - window:index], ddof=1)
-        for index in range(window, len(series) + 1)
-    ])
+    return np.array(
+        [
+            np.var(series[index - window : index], ddof=1)
+            for index in range(window, len(series) + 1)
+        ]
+    )

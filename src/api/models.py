@@ -16,14 +16,14 @@ class PredictionResponse(BaseModel):
     p90_delay_min: float | None = None
     anomaly_flag: bool
     uncertainty_mode: bool
-    
+
     # Problem Statement Explicit Features (Added to prove compliance)
     downstream_congestion_score: float = 0.0
     weather_risk_flag: Literal["none", "monsoon", "fog", "extreme"] = "none"
     signal_aspect_restriction: bool = False
     tsr_active: bool = False
     unscheduled_maintenance_block: bool = False
-    
+
     conflict_adjustment_min: float = 0.0
     graph_status: str = "not_activated_no_station_event_state"
     pipeline_stages: dict[str, str] = Field(default_factory=dict)
@@ -81,7 +81,6 @@ class SystemStatusResponse(BaseModel):
     model_loaded: bool
 
 
-
 class PassengerResponse(BaseModel):
     train_id: str
     status: str
@@ -105,7 +104,7 @@ class StationMasterResponse(BaseModel):
     urgency_rank: Literal["critical", "high", "normal", "low"] = "normal"
     cost_asymmetry_applied: bool = True
     historical_stations: list[StationHistory] = Field(default_factory=list)
-    
+
     # Prescriptive & Tier 1-3 Features
     ripple_score: int = 0
     cross_train_attribution: str = ""
@@ -124,7 +123,9 @@ class FeederTransportResponse(BaseModel):
     train_id: str
     status: str
     cutoff_time: datetime
-    probability_arrival_before_cutoff: float | None = Field(default=None, ge=0.0, le=1.0)
+    probability_arrival_before_cutoff: float | None = Field(
+        default=None, ge=0.0, le=1.0
+    )
     recommendation: Literal["WAIT", "DEPART", "USE JUDGMENT", "SUSPEND"]
     message: str
 

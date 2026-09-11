@@ -27,7 +27,9 @@ def rake_delay_inheritance(
     df = df.sort_values(by=[train_number_col, date_col])
     df["prior_leg_delay"] = df.groupby(train_number_col)[delay_col].shift(1)
     df["prior_leg_delay"] = df["prior_leg_delay"].fillna(0)
-    logger.debug("rake_delay_inheritance: computed prior_leg_delay for %d rows", len(df))
+    logger.debug(
+        "rake_delay_inheritance: computed prior_leg_delay for %d rows", len(df)
+    )
     return df
 
 
@@ -41,10 +43,12 @@ def remaining_schedule_buffer(df, timetable=None):
     df = df.copy()
     MPS_KMH = 110.0
     min_possible_hours = df["distance_km"] / MPS_KMH
-    df["schedule_buffer_hours"] = (df["scheduled_travel_hours"] - min_possible_hours).clip(
-        lower=0
+    df["schedule_buffer_hours"] = (
+        df["scheduled_travel_hours"] - min_possible_hours
+    ).clip(lower=0)
+    logger.debug(
+        "remaining_schedule_buffer: computed schedule_buffer_hours for %d rows", len(df)
     )
-    logger.debug("remaining_schedule_buffer: computed schedule_buffer_hours for %d rows", len(df))
     return df
 
 
@@ -56,7 +60,8 @@ def generate_standard_features(df, date_col: str = "journey_date"):
         df["month"] = df[date_col].dt.month
         df["is_weekend"] = df["day_of_week"].isin([5, 6]).astype(int)
     logger.debug(
-        "generate_standard_features: added day_of_week/month/is_weekend for %d rows", len(df)
+        "generate_standard_features: added day_of_week/month/is_weekend for %d rows",
+        len(df),
     )
     return df
 

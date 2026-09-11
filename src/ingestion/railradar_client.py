@@ -34,18 +34,24 @@ try:
         _df = pd.read_parquet(_timetable_path, columns=["station_code"])
         _KNOWN_STATIONS = set(_df["station_code"].dropna().unique())
         # For replay mock stations:
-        _KNOWN_STATIONS.update(["NDLS", "KANPUR", "ALLAHABAD", "MUGHAL", "HWH", "MMCT", "SURAT", "BRC"])
+        _KNOWN_STATIONS.update(
+            ["NDLS", "KANPUR", "ALLAHABAD", "MUGHAL", "HWH", "MMCT", "SURAT", "BRC"]
+        )
 except Exception:
     pass
 
 _VALIDATION_METRICS = {
-    "live_status_processed": 0, "live_status_rejected": 0,
-    "route_processed": 0, "route_rejected": 0,
-    "dedup_rejected": 0, "stale_rejected": 0
+    "live_status_processed": 0,
+    "live_status_rejected": 0,
+    "route_processed": 0,
+    "route_rejected": 0,
+    "dedup_rejected": 0,
+    "stale_rejected": 0,
 }
 
 _WATERMARKS = {}
 _PROCESSED_PINGS = set()
+
 
 def get_validation_metrics():
     return _VALIDATION_METRICS.copy()
@@ -60,8 +66,8 @@ class LiveStatusSchema(BaseModel):
     last_updated: Optional[str] = None
     journey_date: Optional[str] = None
     event_type: Optional[str] = None
-    
-    @model_validator(mode='after')
+
+    @model_validator(mode="after")
     def validate_geo_and_station(self):
         if self.lat is not None and self.lng is not None:
             if not (6.0 <= self.lat <= 36.0 and 68.0 <= self.lng <= 98.0):
@@ -70,29 +76,32 @@ class LiveStatusSchema(BaseModel):
             raise ValueError(f"Station {self.current_station} not known.")
         return self
 
+
 class RouteStationSchema(BaseModel):
     station_code: str
     seq: int
     arrival_min: Optional[float] = None
     departure_min: Optional[float] = None
-    
-    @model_validator(mode='after')
+
+    @model_validator(mode="after")
     def validate_known_station(self):
         if _KNOWN_STATIONS and self.station_code not in _KNOWN_STATIONS:
             raise ValueError(f"Station {self.station_code} not known.")
         return self
 
+
 class RouteSchema(BaseModel):
     train_number: Optional[str] = None
     stations: list[RouteStationSchema]
-    
-    @model_validator(mode='after')
+
+    @model_validator(mode="after")
     def validate_monotonic_seq(self):
         if self.stations:
             seqs = [st.seq for st in self.stations]
-            if not all(seqs[i] < seqs[i+1] for i in range(len(seqs)-1)):
+            if not all(seqs[i] < seqs[i + 1] for i in range(len(seqs) - 1)):
                 raise ValueError("Sequence numbers not strictly monotonic.")
         return self
+
 
 class _RateLimiter:
     def __init__(self, min_interval: float = MIN_REQUEST_INTERVAL_SEC):
@@ -105,14 +114,21 @@ class _RateLimiter:
             time.sleep(self.min_interval - elapsed)
         self._last_call = time.time()
 
+
 _limiter = _RateLimiter()
+
 
 def _get(endpoint: str, params: Optional[dict] = None) -> dict:
     url = f"{BASE_URL}{endpoint}"
     for attempt in range(1, MAX_RETRIES + 1):
         _limiter.wait()
         try:
-            resp = requests.get(url, headers={"Authorization": f"Bearer {API_KEY}"}, params=params, timeout=15)
+            resp = requests.get(
+                url,
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                params=params,
+                timeout=15,
+            )
         except requests.ConnectionError:
             if attempt < MAX_RETRIES:
                 time.sleep(RETRY_BACKOFF_SEC)
@@ -132,24 +148,27 @@ def _load_replay_fixture(filename: str) -> dict:
     parts = filename.replace(".json", "").split("_")
     if len(parts) < 2:
         raise FileNotFoundError(f"Invalid replay filename: {filename}")
-        
+
     train_number = parts[0]
     table = "live_status" if parts[1] == "live" else "route"
-    
+
     db_path = Path("data/replay/ntes_capture.db")
     if not db_path.exists():
-        raise FileNotFoundError(f"Seeded database {db_path} not found. Run 'make seed' first.")
-        
+        raise FileNotFoundError(
+            f"Seeded database {db_path} not found. Run 'make seed' first."
+        )
+
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute(f"SELECT data FROM {table} WHERE train_number=?", (train_number,))
     row = c.fetchone()
     conn.close()
-    
+
     if row is None:
         raise FileNotFoundError(f"Replay data for {train_number} not found in DB.")
-        
+
     return json.loads(row[0])
+
 
 # ---------------------------------------------------------------------------
 # Public API
@@ -162,7 +181,7 @@ def get_live_status(train_number: str) -> Optional[dict]:
             return None
     else:
         raw_data = _get(f"/trains/{train_number}/live")
-        
+
     _VALIDATION_METRICS["live_status_processed"] += 1
     try:
         valid_ping = LiveStatusSchema(**raw_data).model_dump()
@@ -176,7 +195,7 @@ def get_live_status(train_number: str) -> Optional[dict]:
     journey_date = valid_ping.get("journey_date")
     event_type = valid_ping.get("event_type")
     last_updated_str = valid_ping.get("last_updated")
-    
+
     # Step 1: Deduplication
     if journey_date and event_type and station:
         ping_key = (train_number, journey_date, station, event_type)
@@ -190,19 +209,23 @@ def get_live_status(train_number: str) -> Optional[dict]:
     if last_updated_str:
         try:
             from datetime import datetime
+
             ping_time = datetime.fromisoformat(last_updated_str.replace("Z", "+00:00"))
             watermark = _WATERMARKS.get(train_number)
-            
+
             if watermark and ping_time < watermark:
-                logger.warning(f"[WATERMARK REJECT] Stale ping for {train_number}. Ping time: {ping_time}, Watermark: {watermark}")
+                logger.warning(
+                    f"[WATERMARK REJECT] Stale ping for {train_number}. Ping time: {ping_time}, Watermark: {watermark}"
+                )
                 _VALIDATION_METRICS["stale_rejected"] += 1
                 return None
-                
+
             _WATERMARKS[train_number] = ping_time
         except ValueError:
             pass
 
     return valid_ping
+
 
 def get_route(train_number: str) -> Optional[dict]:
     if RIPPLEETA_MODE == "replay":
@@ -212,7 +235,7 @@ def get_route(train_number: str) -> Optional[dict]:
             return None
     else:
         raw_data = _get(f"/trains/{train_number}/route")
-        
+
     _VALIDATION_METRICS["route_processed"] += 1
     try:
         return RouteSchema(**raw_data).model_dump()

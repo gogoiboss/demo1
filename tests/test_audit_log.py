@@ -65,11 +65,22 @@ def test_prediction_audit_log_persists_real_provenance_and_input_features(
     finally:
         conn.close()
 
-    assert row is not None, "a real, queryable audit record must exist after the request"
+    assert (
+        row is not None
+    ), "a real, queryable audit record must exist after the request"
     (
-        train_id, status, degraded, anomaly_flag, p10, p50, p90,
-        git_commit, dataset_sha256, model_artifact_sha256,
-        input_features_json, shap_text,
+        train_id,
+        status,
+        degraded,
+        anomaly_flag,
+        p10,
+        p50,
+        p90,
+        git_commit,
+        dataset_sha256,
+        model_artifact_sha256,
+        input_features_json,
+        shap_text,
     ) = row
 
     assert train_id == "12301"
@@ -80,7 +91,10 @@ def test_prediction_audit_log_persists_real_provenance_and_input_features(
     assert git_commit == "abc1234"
     assert dataset_sha256 == "deadbeef" * 8
     assert model_artifact_sha256 == "cafef00d" * 8
-    assert json.loads(input_features_json) == {"prior_leg_delay": 12.5, "distance_km": 500.0}
+    assert json.loads(input_features_json) == {
+        "prior_leg_delay": 12.5,
+        "distance_km": 500.0,
+    }
     assert shap_text == "60% rake delay; 25% schedule buffer"
 
 

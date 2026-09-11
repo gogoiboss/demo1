@@ -3,7 +3,7 @@ import warnings
 
 from src.pipeline import RippleETAPipeline
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 def run_scalability_test():
@@ -16,9 +16,13 @@ def run_scalability_test():
         "\nSampling batch of 3,000 train journeys (simulating daily IR coaching "
         "traffic) from the already feature-engineered dataset..."
     )
-    test_batch = p._data.sample(n=3000, replace=True, random_state=42).reset_index(drop=True)
+    test_batch = p._data.sample(n=3000, replace=True, random_state=42).reset_index(
+        drop=True
+    )
 
-    print("Running batch inference (XGBoost + MAPIE bounds + SHAP), one row at a time...")
+    print(
+        "Running batch inference (XGBoost + MAPIE bounds + SHAP), one row at a time..."
+    )
     start_time = time.time()
 
     success_count = 0
