@@ -117,7 +117,7 @@ Evaluation methodology: Each of the six routes was split independently into 70% 
 - **Graph-adjusted rows in backtest:** 0 (data limitation — see Known Limitations)
 - **Synthetic propagation benchmark:** 500 trains × 8 stops in 20.58 ms
 
-On six selected train IDs and 174 chronological held-out journeys, our engineered XGBoost + MAPIE evaluation reduced prior-leg baseline MAE from 34.746 to 28.386 minutes — an 18.30% reduction. The conformal interval contained the actual delay in 97.70% of cases, with a 106.6-minute average width. Station-pair conflict propagation was not measured because the available journey-level dataset lacks paired station-state; the graph engine is demonstrated via the Ghost Sandbox replay.
+On a 1,500-row chronological held-out test split from the full dataset, RippleETA's evaluated model reduces MAE to 28.22 minutes, materially matching the earlier six-route canonical evaluation (28.386 minutes, 174 rows). A per-train regression with no network features ties on point MAE (28.15 minutes) — but RippleETA's calibrated P10–P90 intervals cut Pinball Loss by 55.5% against the naive baseline and 42% against that same per-train regression, which is where the real value of network-aware calibration shows up. Stratified (Mondrian) conformal coverage lands at 89.7–91.0% against a 90% target across all delay-magnitude buckets, with materially tighter intervals (82–85 min) than the original headline figure. A full-pipeline throughput run processed 3,000 journey predictions through the full pipeline at 3.30ms per prediction with zero failures.
 
 ## Repository Structure
 

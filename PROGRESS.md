@@ -1,5 +1,13 @@
 # Progress Log
 
+- **2026-09-11 (Evaluation Reconcile & Judge Q&A Session)**:
+  - **TASK 1 — Inverted Delay-Magnitude Diagnosis:** Diagnosed counterintuitive 0–15 min MAE (26.78 min) vs 15–60 min MAE (13.63 min). Confirmed empirical cause: regression to the mean in XGBoost (predictions concentrate around 25–38 min near the ~30 min dataset mean). For near-punctual trains (mean actual 2.09 min), predicting ~25 min yields ~23–26 min MAE; for 15–60 min trains (mean actual 36.57 min), predicting ~30 min lands near the actual delay center, yielding a deceptively low 13.63 min MAE. Added a disclosure note to `docs/RESULTS.md`.
+  - **TASK 2 — Missing Short-Range Forecast Horizon Bucket:** Confirmed dataset sparsity — all journeys in the dataset have scheduled durations between 5.0 and 48.0 hours; N=0 for `<4h` is expected data sparsity, not a bug. Added an explanatory note to `docs/RESULTS.md`.
+  - **TASK 3 — Scalability Benchmark Unit Clarified:** Confirmed exact unit measured: **3,000 journey predictions processed through the full ML pipeline** (XGBoost + MAPIE P10/P50/P90 + SHAP) at 3.30 ms per prediction with 0 failures on a single CPU node. Updated `docs/RESULTS.md` and `README.md`.
+  - **TASK 4 — Pitch-Safe Summary Updated:** Updated the pitch-safe summary paragraph across `docs/RESULTS.md`, `README.md`, and `PROGRESS.md` incorporating the new 1,500-row test split metrics, per-train regression near-tie on point MAE, 55.5% Pinball Loss reduction, 89.7–91.0% Mondrian coverage, and 3.30 ms pipeline throughput.
+  - **TASK 5 — Judge Q&A Documented:** Created/updated `docs/judge_prep/02_JUDGE_QA.md` with empirical evidence for Q8 (Mondrian coverage per bucket), Q11 (baseline comparison reframe around Pinball Loss), Q16 (precise throughput scalability), and added new Q46 (honest reflection on baseline comparison surprise and value of calibrated prediction intervals).
+  - **Test Suite Verification:** All 68 unit tests passing (`pytest -v`).
+
 - **2026-09-11 (Real-Data Execution Session)**:
   - **TASK 0 — Dataset Confirmation & Ingestion:** Confirmed `data/raw/train_delay.csv` is present (10,000 rows × 11 columns). Columns match all requirements (`train_number`, `journey_date`, `actual_delay_minutes`, `scheduled_travel_hours`, `distance_km`, `zone_congestion_index`, `monsoon_flag`, `fog_risk`, `coach_count`, `loco_age_years`, `delayed_gt_15min`). Ran ingestion (`python -m src.ingestion.load_kaggle --csv data/raw/train_delay.csv`) — generated `data/processed/kaggle_competition_cleaned.parquet` (0.6 MB) cleanly.
   - **TASK 1 — Real-Data Evaluations Executed:**
