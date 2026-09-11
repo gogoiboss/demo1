@@ -156,3 +156,45 @@ Backend routes never called by any frontend/dashboard JS: `/demo-launcher` (a ma
 **CHECKPOINT COMMIT:** `security: frontend secrets, XSS, and dependency audit`
 
 ---
+
+## 3. Code cleanliness findings and fixes applied
+
+Five checkpoint commits this part (kept separate so each diff stays reviewable): dead-code/lint removal, an import-placement correction to a wrong claim made in that same commit, an isolated `black` formatting pass, a CSS/HTML corruption bugfix, and status-honesty code comments.
+
+### Dead code — fixed
+
+- **26 root-level one-off scripts removed** (`patch_*.py`, `fix_*.py`, `check.py`, `inspect_db.py`, `force_patch.py`, `mount_frontend.py`, `add_mode_endpoint.py`). Verified unreferenced by any Makefile/CI/Docker/tracked-source word-boundary grep before deleting (the two apparent hits — `check.py`, `patch.py` — were false positives: the English word "check" in CI/comments, and `unittest.mock.patch`). Read a sample of three (`check.py`, `inspect_db.py`, `patch_models.py`) in full to confirm they're genuinely disposable — `patch_models.py`'s own regex-guard (`if "degraded: bool" not in text`) confirms its edit was already applied and it would now no-op if re-run.
+- **`ruff check src/ tests/ eval/ jobs/ scripts/`**: 6 unused imports, 1 unused exception-binding variable, 7 pointless f-string prefixes — all fixed. 68/68 tests unaffected.
+- **Frontend dead-but-harmless auth path**: `frontend/js/api.js` / `dashboard/app.js` implement a `localStorage`-backed Bearer-token path that never actually receives a value in the current system (traced in Part 2 — the login responses never include a `token` field). Flagged, not removed — removing it touches live auth-adjacent frontend code beyond a "trivial, unambiguous fix."
+
+### Real bugs found while doing mechanical cleanup (not originally in scope, but surfaced by the process)
+
+- **Two silently-broken CSS declarations** in `dashboard/styles.css` (`.ticket-stub`, `.sm-lever-card` borders, and `.pax-time-input` background) had leftover fragments fused onto a valid declaration (`var(--border-300);(--brass-line);` and `var(--surface);af0;`) — invalid CSS a browser silently drops. Found via `npx prettier --check`, which refused to parse the file with a hard syntax error rather than a style warning. Fixed by removing the dead fragments.
+- **One unbalanced `<div>` in `frontend/index.html`**: the navbar's right-hand action group (3D-viewer link, language select, status pill, sign-in button, user panel) was missing its opening `<div class="nav-actions">` tag. Confirmed this was a lost tag rather than a deliberate un-wrap: the matching closing `</div>` and a real `.nav-actions` flex-layout CSS rule (`frontend/style.css:412`) both already exist. Fixed by restoring the opening tag. **Not verified in a browser** (no dev server run this session) — the fix restores markup to what the surrounding code and CSS clearly intend, but visual confirmation is still owed.
+- Corrected an inaccurate claim made in this session's own dead-code commit message (see the `fix:` commit immediately following it) — moved 3 module-level imports that were misplaced mid-file, not "deliberately lazy" as first asserted without checking each one individually.
+
+### Duplicated logic — found, flagged, not fixed (judgment call)
+
+The COMMIT/DEFER platform decision rule (`interval width ≤ 30 min → COMMIT, else DEFER`) is implemented **twice**: authoritatively in `src/api/app.py`'s `station_master()` handler (which already returns it as `platform_commit`), and independently re-derived in `dashboard/app.js` at two sites — `:442` (a display-only annotation, low stakes) and `:544` (the multi-train junction table, which actually drives each row's displayed COMMIT/DEFER badge). The junction table calls the generic `/predict/{tid}` endpoint rather than `/predict/{tid}/station-master`, so it never receives the authoritative `platform_commit` field and recomputes the same `<= 30` rule client-side instead. Today the two thresholds agree (both `30`), so there is no visible bug — but they can silently drift apart the moment the backend's cost-asymmetry tuning changes. **Not fixed**: the mechanical fix (switch the junction table to call `/station-master` and read its `platform_commit` field) changes the frontend's live network behavior, which the audit brief asks to flag rather than silently change.
+
+### Missing error handling — spot-checked
+
+- `dashboard/app.js:534`'s junction table: `Promise.all(supportedTrains.map(tid => api(...).catch(() => null)))` then `.filter(Boolean)` — if a single train's prediction fetch fails, that row **silently disappears** from the table with no error indicator, rather than showing a per-row error state. Cross-referenced in Part 6 (empty/error states).
+- The backend's `get_prediction()` (audited in depth in Part 1) already has real, tested fallback coverage for ML failure and stale feeds — this was not re-litigated here.
+- Not exhaustively swept across all 30k lines of frontend/dashboard JS or all `eval`/`jobs` scripts within this session's budget — the above are the concrete instances found, not a claim of completeness.
+
+### Formatting — isolated commit
+
+`black` had never been run on this repo (CI pins `ruff`+`mypy` only). Applied it across `src/`, `tests/`, `eval/`, `jobs/`, `scripts/` — 47 of 54 files reformatted, pure whitespace/line-wrap/quote-style, zero logic change, committed alone. `prettier` was test-run (`--check`) across all of `frontend/`, `dashboard/`, and `eta/` to gauge scope before deciding whether to apply it: **not bulk-applied**. Judgment call, not a mechanical no-brainer like `black` — the frontend/dashboard tree is ~30k lines of hand-crafted, animation-heavy UI currently in the middle of an unresolved design-system question (see Part 5), and a repo-wide reformat would produce a very large, low-value diff riding on top of that unresolved decision. It was, however, valuable as a syntax linter — see the two real bugs it surfaced above.
+
+### Status honesty in code — fixed
+
+Added code comments directly above the specific fields previously described as proxy/stub/hardcoded in `docs/LIMITATIONS.md`, so the status survives future edits without needing the external doc: `ripple_score`, `cross_train_attribution`, `financial_impact_inr` in `src/api/app.py`'s `station_master()`, the five hardcoded fields in `predict()` (`weather_risk_flag` etc. — and corrected: `LIMITATIONS.md` describes these as hash-based proxy logic, which no longer exists in this handler; they are HARDCODED, not PARTIAL), and both frontend consumption sites in `dashboard/app.js` (`ripple_score`'s always-55 fallback, `financial_impact_inr`'s undisclosed ₹1200/min constant).
+
+### Naming — not deeply audited
+
+Given the session's remaining scope for Part 4 (the centerpiece), naming consistency was not given a dedicated exhaustive pass beyond what surfaced incidentally above. No major cross-file naming inconsistency was noticed in the areas actually read (`src/`'s naming is consistent snake_case throughout; `dashboard/app.js`/`frontend/js/*.js` are consistent camelCase). Flagged as unaudited rather than claimed clean.
+
+**CHECKPOINT COMMITS:** `chore: remove dead scratch scripts, fix ruff-flagged dead code`; `fix: correct E402 misplaced imports (previous commit's claim was wrong)`; `style: apply black formatting across the Python backend`; `fix: corrupted CSS declarations and unbalanced div in frontend/dashboard`; `docs: pin REAL/PARTIAL/HARDCODED status as code comments, not just docs`
+
+---
