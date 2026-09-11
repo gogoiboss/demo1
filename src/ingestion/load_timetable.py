@@ -1,4 +1,3 @@
-import numpy as np
 """
 data.gov.in — Indian Railways Static Timetable Loader
 =====================================================
@@ -19,6 +18,7 @@ import argparse
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 

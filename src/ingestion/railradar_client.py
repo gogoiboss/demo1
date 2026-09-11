@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import sqlite3
 import time
 from typing import Optional
 from pathlib import Path
@@ -125,7 +126,6 @@ def _get(endpoint: str, params: Optional[dict] = None) -> dict:
         resp.raise_for_status()
     raise RuntimeError(f"Exhausted {MAX_RETRIES} retries for {url}")
 
-import sqlite3
 
 def _load_replay_fixture(filename: str) -> dict:
     # Example filename: "12301_live.json"

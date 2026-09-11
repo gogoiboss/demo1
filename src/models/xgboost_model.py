@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Any
 
 import joblib
+import mlflow
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -115,9 +117,6 @@ def train_and_evaluate(
 # ---------------------------------------------------------------------------
 # MLflow Tracking (Tier 3)
 # ---------------------------------------------------------------------------
-import mlflow
-import os
-
 def setup_mlflow_run(experiment_name: str = "RippleETA") -> None:
     """Set up the MLflow experiment."""
     if "MLFLOW_TRACKING_URI" not in os.environ:
