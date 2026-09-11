@@ -523,10 +523,27 @@ async function loadStation() {
   const pf4Cell = $('sm-pf4-cell');
   const pf4Tag = $('sm-pf4-tag');
 
+  // Audit follow-up (Task 6): these three lamps used to be set via
+  // hardcoded hex literals (#3D7A5C/#E8A33D/#A13D2E for "lit", darker
+  // hand-picked hex for "unlit") that happened to match docs/DESIGN_SYSTEM.md's
+  // LIGHT palette while the rest of this page uses dashboard/styles.css's
+  // actual dark-cinematic tokens — a visible on-page color clash regardless
+  // of which system eventually wins (see docs/AUDIT_REPORT.md §5). Fixed
+  // to read the page's real CSS custom properties instead of any hardcoded
+  // hex, and to signal "unlit" via opacity on the lamp's own hue rather
+  // than a second hand-picked dark literal — so this now tracks whatever
+  // palette --success/--signal/--stamp resolve to, including a future
+  // design-system change, with no further code edits needed here.
+  const setLamp = (el, cssVar, lit) => {
+    if (!el) return;
+    el.setAttribute('fill', `var(${cssVar})`);
+    el.setAttribute('fill-opacity', lit ? '1' : '0.18');
+  };
+
   if (decision === 'COMMIT') {
-    if (sigGreen) sigGreen.setAttribute('fill', '#3D7A5C');
-    if (sigAmber) sigAmber.setAttribute('fill', '#423014');
-    if (sigRed) sigRed.setAttribute('fill', '#3D1B1B');
+    setLamp(sigGreen, '--success', true);
+    setLamp(sigAmber, '--signal', false);
+    setLamp(sigRed, '--stamp', false);
     if (approachBadge) {
       approachBadge.textContent = 'LINE CLEAR • PF 04 BERTH COMMITTED';
       approachBadge.style.color = 'var(--success)';
@@ -541,9 +558,9 @@ async function loadStation() {
       pf4Tag.className = 'platform-status-tag available';
     }
   } else if (decision === 'DEFER') {
-    if (sigGreen) sigGreen.setAttribute('fill', '#1B3D2B');
-    if (sigAmber) sigAmber.setAttribute('fill', '#E8A33D');
-    if (sigRed) sigRed.setAttribute('fill', '#3D1B1B');
+    setLamp(sigGreen, '--success', false);
+    setLamp(sigAmber, '--signal', true);
+    setLamp(sigRed, '--stamp', false);
     if (approachBadge) {
       approachBadge.textContent = 'HOLD SIGNAL AT OUTER • PF 04 DEFERRED';
       approachBadge.style.color = 'var(--signal)';
@@ -558,9 +575,9 @@ async function loadStation() {
       pf4Tag.className = 'platform-status-tag deferred';
     }
   } else { // SUSPENDED
-    if (sigGreen) sigGreen.setAttribute('fill', '#1B3D2B');
-    if (sigAmber) sigAmber.setAttribute('fill', '#423014');
-    if (sigRed) sigRed.setAttribute('fill', '#A13D2E');
+    setLamp(sigGreen, '--success', false);
+    setLamp(sigAmber, '--signal', false);
+    setLamp(sigRed, '--stamp', true);
     if (approachBadge) {
       approachBadge.textContent = 'MANUAL DISPATCH • ANOMALY GATE ACTIVE';
       approachBadge.style.color = 'var(--stamp)';
