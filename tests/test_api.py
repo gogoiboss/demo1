@@ -11,6 +11,9 @@ from src.api.service import TrainNotFoundError
 class FakePredictionService:
     model_loaded = True
 
+    def supported_train_ids(self) -> list[str]:
+        return ["12301", "20507"]
+
     def predict(self, train_id: str, prediction_variance: float | None = None) -> dict:
         if train_id == "missing":
             raise TrainNotFoundError("Train 'missing' was not found in the current data snapshot.")
@@ -95,6 +98,34 @@ def test_stakeholder_endpoints_are_distinct():
     assert "relief_dispatch_deadline" in responses[2].json()
     assert "maintenance_window_adequate" in responses[3].json()
     assert "probability_arrival_before_cutoff" in responses[4].json()
+
+
+def test_system_status_reports_replay_mode_when_no_live_key_configured(monkeypatch):
+    """Backs the dashboard's LIVE/REPLAY badge (dashboard/app.js:updateMode()) —
+    proves the mode it reads is real, not a stub."""
+    monkeypatch.delenv("RIPPLEETA_API_KEY", raising=False)
+    monkeypatch.delenv("RIPPLEETA_MODE", raising=False)
+
+    response = client.get("/system/status")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "REPLAY"
+    assert body["live_feed_configured"] is False
+    assert body["supported_train_count"] == 2
+
+
+def test_system_status_reports_live_mode_when_key_and_mode_configured(monkeypatch):
+    monkeypatch.setenv("RIPPLEETA_API_KEY", "dummy-key-for-test")
+    monkeypatch.setenv("RIPPLEETA_MODE", "live")
+
+    response = client.get("/system/status")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "LIVE"
+    assert body["live_feed_configured"] is True
+    assert body["refresh_interval_seconds"] == 60
 
 
 def test_health_endpoint():
