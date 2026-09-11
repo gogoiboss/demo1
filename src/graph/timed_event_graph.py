@@ -36,7 +36,6 @@ import copy
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Optional
 
 import networkx as nx
 import numpy as np
@@ -79,7 +78,7 @@ class TrainEvent:
     station:        str
     event_type:     str          # "arr" | "dep"
     scheduled_min:  float        # minutes from midnight (or from journey start)
-    actual_min:     float = field(default=None)   # filled during propagation
+    actual_min:     float | None = field(default=None)   # filled during propagation
     delay_min:      float = field(default=0.0)    # current observed/propagated delay
     category:       str  = field(default="express")
 
@@ -703,25 +702,45 @@ class CachedPropagationEngine:
         changed_nodes: set[str],
     ) -> dict[str, float]:
         """
-        Incremental propagation: only re-traverse from the earliest changed node
-        downstream, rather than the whole network.
+        Incremental propagation: only re-traverse from the earliest
+        *currently pinned* node downstream, rather than the whole network.
 
         Parameters
         ----------
         delays : all currently active delays (not just the changed ones)
         changed_nodes : set of node_ids whose delays changed since last call
+            (advisory — see correctness note below; not itself sufficient to
+            derive the safe recompute boundary)
 
         Returns
         -------
         result : dict mapping node_id → propagated delay (identical to full pass)
+
+        Correctness note
+        -----------------
+        The recompute boundary (``start_pos``) is derived from every node in
+        ``delays``, not from ``changed_nodes`` alone. Deriving it only from
+        ``changed_nodes`` is unsafe: any *unpinned* node causally downstream
+        of a still-active but unchanged pinned delay can sort before the
+        changed node in topological order. Starting the forward pass after
+        such a node skips recomputing it, and ``_reset()`` has already
+        cleared it to zero delay — silently reporting no delay where the
+        active pinned delay should have propagated. (Verified empirically:
+        with two independent trains A and B, injecting a delay only on A and
+        passing ``changed_nodes={<a B node sorted after A's cascade>}``
+        returned 0.0 for A's downstream nodes instead of the correct
+        propagated value.) Using the minimum position over all of ``delays``
+        is always safe: every node with a lower topological position cannot
+        depend on any pinned delay by definition of topological order.
         """
         self._reset()
         pinned = np.zeros(self._n, dtype=np.int8)
         self._inject(delays, pinned)
 
-        # Find earliest topo position among changed nodes
+        # Earliest topo position among ALL currently active delays (not just
+        # changed_nodes — see correctness note above).
         start_pos = self._n  # will be min'd down
-        for nid in changed_nodes:
+        for nid in delays:
             idx = self._node_to_idx.get(nid)
             if idx is not None and idx < start_pos:
                 start_pos = idx
@@ -751,14 +770,9 @@ class CachedPropagationEngine:
         pinned_baseline = np.zeros(self._n, dtype=np.int8)
         self._inject(delays, pinned_baseline)
 
-        # Temporarily zero out conflict edge weights for baseline pass
-        saved_weights: list[tuple[int, float]] = []
-        for p_idx in range(len(self._pred_indices)):
-            # Find if this edge is a conflict edge by checking original graph
-            pass  # We need a different approach
-
-        # Simpler: run baseline by building a non-conflict pred structure once
-        # Since conflict edges don't change, we can precompute this at cache time
+        # Baseline pass runs against a precomputed non-conflict predecessor
+        # structure (conflict edges never change, so this is built once and
+        # cached rather than reconstructed per call).
         if not hasattr(self, "_nc_pred_ptr"):
             self._build_non_conflict_cache()
 
@@ -775,7 +789,9 @@ class CachedPropagationEngine:
         )
 
         # --- Pass 2: full propagation WITH conflict edges ---
-        full_result = self.propagate(delays)
+        # Return value unused here; propagate() updates self._actual in place
+        # and that side effect is what the diff loop below reads.
+        self.propagate(delays)
 
         # --- Diff: find activated conflicts ---
         conflicts: list[dict] = []
