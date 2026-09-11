@@ -1,11 +1,11 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://REPLACE_WITH_RAILWAY_URL/api/$1" },
-    { "source": "/predict/(.*)", "destination": "https://REPLACE_WITH_RAILWAY_URL/predict/$1" },
-    { "source": "/health", "destination": "https://REPLACE_WITH_RAILWAY_URL/health" },
-    { "source": "/system/(.*)", "destination": "https://REPLACE_WITH_RAILWAY_URL/system/$1" },
-    { "source": "/trains", "destination": "https://REPLACE_WITH_RAILWAY_URL/trains" },
-    { "source": "/graph/(.*)", "destination": "https://REPLACE_WITH_RAILWAY_URL/graph/$1" },
+    { "source": "/api/(.*)", "destination": "https://demo1-production-b538.up.railway.app/api/$1" },
+    { "source": "/predict/(.*)", "destination": "https://demo1-production-b538.up.railway.app/predict/$1" },
+    { "source": "/health", "destination": "https://demo1-production-b538.up.railway.app/health" },
+    { "source": "/system/(.*)", "destination": "https://demo1-production-b538.up.railway.app/system/$1" },
+    { "source": "/trains", "destination": "https://demo1-production-b538.up.railway.app/trains" },
+    { "source": "/graph/(.*)", "destination": "https://demo1-production-b538.up.railway.app/graph/$1" },
     { "source": "/dashboard/(.*)", "destination": "/dashboard/$1" },
     { "source": "/eta/(.*)", "destination": "/eta/$1" },
     { "source": "/(.*)", "destination": "/frontend/$1" }

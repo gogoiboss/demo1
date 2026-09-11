@@ -112,9 +112,11 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             "http://localhost:8000",
             "http://127.0.0.1:5500",
             "http://localhost:5500",
+            "https://demo1-production-b538.up.railway.app",
         ],
+        allow_origin_regex=r"https://.*\.vercel\.app|http://.*",
         allow_credentials=True,
-        allow_methods=["GET", "POST"],
+        allow_methods=["*"],
         allow_headers=["*"],
     )
 
