@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
@@ -205,18 +206,55 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         # LOGGING (Step 4)
         conn = sqlite3.connect('predictions_history.db')
         c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS prediction_logs 
+        c.execute('''CREATE TABLE IF NOT EXISTS prediction_logs
                      (train_id TEXT, p50 REAL, p10 REAL, p90 REAL, status TEXT, degraded BOOLEAN, model_version TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
         model_version = "rippleeta-v1.0.0"
-        c.execute('''INSERT INTO prediction_logs 
-                     (train_id, p50, p10, p90, status, degraded, model_version) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?)''', 
-                  (train_id, prediction.get("p50_delay_min"), 
-                   prediction.get("p10_delay_min"), 
-                   prediction.get("p90_delay_min"), 
-                   prediction.get("status", ""), 
-                   is_degraded, 
+        c.execute('''INSERT INTO prediction_logs
+                     (train_id, p50, p10, p90, status, degraded, model_version)
+                     VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                  (train_id, prediction.get("p50_delay_min"),
+                   prediction.get("p10_delay_min"),
+                   prediction.get("p90_delay_min"),
+                   prediction.get("status", ""),
+                   is_degraded,
                    model_version))
+
+        # Round 2 Item T: a real, queryable audit trail. prediction_logs
+        # above only ever recorded a hardcoded "model_version" placeholder —
+        # the actual provenance the pipeline computes (git commit, dataset
+        # and model artifact SHA-256) was returned in the API response and
+        # discarded once the caller moved on. Persist input features,
+        # output, and real provenance together so a specific past
+        # prediction is recoverable after the fact, not just visible in the
+        # response that produced it.
+        c.execute('''CREATE TABLE IF NOT EXISTS prediction_audit_log
+                     (train_id TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                      status TEXT, degraded BOOLEAN, anomaly_flag BOOLEAN,
+                      p10 REAL, p50 REAL, p90 REAL,
+                      stale_since TEXT, last_updated TEXT,
+                      git_commit TEXT, dataset_sha256 TEXT, model_artifact_sha256 TEXT,
+                      input_features_json TEXT, shap_text TEXT)''')
+        provenance = prediction.get("provenance") or {}
+        c.execute('''INSERT INTO prediction_audit_log
+                     (train_id, status, degraded, anomaly_flag, p10, p50, p90,
+                      stale_since, last_updated, git_commit, dataset_sha256,
+                      model_artifact_sha256, input_features_json, shap_text)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                  (train_id,
+                   prediction.get("status", ""),
+                   is_degraded,
+                   bool(prediction.get("anomaly_flag")),
+                   prediction.get("p10_delay_min"),
+                   prediction.get("p50_delay_min"),
+                   prediction.get("p90_delay_min"),
+                   stale_since,
+                   last_updated,
+                   provenance.get("git_commit"),
+                   provenance.get("dataset_sha256"),
+                   provenance.get("saved_model_artifact_sha256"),
+                   json.dumps(prediction.get("input_features")) if prediction.get("input_features") else None,
+                   prediction.get("shap_text")))
+
         conn.commit()
         conn.close()
 

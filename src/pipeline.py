@@ -72,6 +72,19 @@ class RippleETAPipeline:
     def model_loaded(self) -> bool:
         return self._prediction_pipeline is not None
 
+    def predict_features(self, X: pd.DataFrame) -> list[dict[str, Any]]:
+        """Run the calibrated engine directly on feature-complete rows.
+
+        Bypasses the per-train-ID lookup and the graph stage. Intended for
+        callers that already hold engineered rows (e.g. a slice of
+        ``self._data`` after ``_load()``), such as latency benchmarking in
+        ``jobs/scalability_benchmark.py``. Prefer ``run()`` for a normal
+        single-train prediction with graph and provenance handling.
+        """
+        self._load()
+        assert self._prediction_pipeline is not None
+        return self._prediction_pipeline.predict(X)
+
     def _load(self) -> None:
         if self._prediction_pipeline is not None:
             return
@@ -138,7 +151,7 @@ class RippleETAPipeline:
         else:
             conflicts = detect_conflicts(self.graph, current_state)
             
-        adjustments = {}
+        adjustments: dict[str, float] = {}
         for conflict in conflicts:
             affected = str(conflict["affected_train"])
             adjustments[affected] = adjustments.get(affected, 0.0) + float(
@@ -172,6 +185,12 @@ class RippleETAPipeline:
             prediction_variance=prediction_variance,
         )[0]
         result["train_id"] = str(train_id)
+        # Recoverable audit trail (see src/api/app.py's prediction_audit_log
+        # table): the exact feature values used for this prediction, not
+        # just the output.
+        result["input_features"] = {
+            f: float(row[f].iloc[0]) for f in DEFAULT_FEATURES if f in row.columns
+        }
         adjustment = float(graph_result.get("adjustments", {}).get(str(train_id), 0.0))
         result["conflict_adjustment_min"] = adjustment
         if adjustment and result["p50_delay_min"] is not None:
