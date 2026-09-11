@@ -25,7 +25,7 @@
 
 ### ML correctness
 - [ ] D. Baseline table (4-model) — 4th model (per-train regression, no network features) added to `eval/baseline_comparison.py`, but NO REAL NUMBERS yet — blocked on missing dataset in this environment
-- [x] E. Pinball loss + segmented eval — pinball loss confirmed implemented in `eval/baseline_comparison.py`; segmentation by delay bucket/horizon/zone NOT yet confirmed — verify or add
+- [x] E. Pinball loss + segmented eval — DONE THIS SESSION: added `segment_metrics()` to `eval/baseline_comparison.py`, segmenting all 4 models by delay magnitude (0-15/15-60/60+ min), forecast horizon (<4/4-12/>12 hrs), and route (documented zone proxy — the public dataset has no true IR-zone identifier). 4 synthetic tests in `tests/test_segmented_evaluation.py` prove the segmentation logic itself is correct (per-segment row counts, MAE, pinball loss); real per-segment numbers still blocked on the missing dataset in this environment
 - [x] F. Mondrian conformal — IMPLEMENTED this session: stratified by delay bucket, per-bucket coverage reporting, synthetic test passing
 
 ### Training-serving correctness
