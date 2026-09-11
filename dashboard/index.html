@@ -1182,22 +1182,11 @@
   <!-- ====================================================================
        TOP UTILITY HEADER
        ==================================================================== -->
-  <header class="top-utility-bar">
-    <div class="utility-group">
-      <a href="/eta/index.html" class="utility-btn" id="btn-back-3d" aria-label="Launch 3D Live Train View">
-        <span class="status-dot-icon dot-blue"></span> <span data-i18n="btn-3d-view">3D Live Train View</span>
-      </a>
-      <button type="button" id="btn-a11y-toggle" class="utility-btn" aria-label="Toggle Colorblind Mode">
-        <span class="status-dot-icon dot-amber"></span> <span id="a11y-label">A11Y: NORMAL</span>
-      </button>
-    </div>
-
-    <div class="utility-group">
-      <div class="telemetry-pill">
-        <span class="telemetry-pulse"></span>
-        <span id="telemetry-sys-label">SYSTEM CONNECTED</span> &bull; <span id="clock-ist">--:--:-- IST</span>
-      </div>
-    </div>
+  <header class="top-utility-bar" style="display:flex; align-items:center; justify-content:center; padding:0.85rem 1.5rem; min-height:60px;">
+    <a class="brand" href="/" aria-label="RippleETA Home" style="display:inline-flex; align-items:center; gap:0.65rem; text-decoration:none; color:var(--primary);">
+      <span class="brand-mark" style="background:var(--primary); color:#FFFFFF; width:30px; height:30px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem; font-family:var(--serif); font-weight:700; border:2px solid var(--signal, #E5B83F);">R</span>
+      <span class="brand-logotype" style="font-family:var(--display); font-weight:800; font-size:1.25rem; color:var(--primary); letter-spacing:0.02em;">RippleETA</span>
+    </a>
   </header>
 
   <!-- ====================================================================
@@ -1222,8 +1211,8 @@
             RippleETA forecasts how a train&rsquo;s delay evolves across the journey &mdash; then translates one calibrated forecast into decision-ready intelligence.
           </p>
           <div class="hero-cta-row">
-            <a href="#gateways" class="cta-primary">
-              Explore Operational Gateways &darr;
+            <a href="login.html" class="cta-primary" id="hero-login-btn">
+              Log In &rarr;
             </a>
           </div>
         </div>
@@ -1388,12 +1377,12 @@
       </div>
       <h2 class="section-title">Seven Realities. One Signal.</h2>
       <p class="section-lead">
-        One calibrated prediction becomes a completely different decision depending on who needs to act. Select a reality below to open the dedicated operational console.
+        One calibrated prediction translates into a distinct operational mandate for every stakeholder role across the rail network. Review the operational specifications below, or launch the interactive Ghost Sandbox.
       </p>
 
       <div class="gateways-grid">
         <!-- 01. Passenger -->
-        <a href="passenger.html" class="ticket-gateway-card" data-role="passenger">
+        <div class="ticket-gateway-card" data-role="passenger">
           <div class="card-top-row">
             <span class="card-kicker">01 &bull; PASSENGER ADVISORY</span>
             <span class="card-role-num">B2C</span>
@@ -1410,14 +1399,14 @@
             <span class="signal-name">P10 &ndash; P90 Spread</span>
             <span class="signal-val" id="card-pax-spread">12m &ndash; 38m</span>
           </div>
-          <div class="card-cta-row">
-            <span>OPEN PASSENGER VIEW</span>
-            <span class="cta-arrow">&rarr;</span>
+          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
+            <span>PASSENGER ADVISORY SPEC</span>
+            <span style="color:var(--success);">&#x25CF;</span>
           </div>
-        </a>
+        </div>
 
         <!-- 02. Station Master -->
-        <a href="station-master.html" class="ticket-gateway-card" data-role="station_master">
+        <div class="ticket-gateway-card" data-role="station_master">
           <div class="card-top-row">
             <span class="card-kicker">02 &bull; PLATFORM TRIAGE</span>
             <span class="card-role-num">CONTROL</span>
@@ -1434,14 +1423,14 @@
             <span class="signal-name">Triage Directive</span>
             <span class="signal-val green" id="card-sm-directive">COMMIT</span>
           </div>
-          <div class="card-cta-row">
-            <span>OPEN STATION CONTROL</span>
-            <span class="cta-arrow">&rarr;</span>
+          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
+            <span>PLATFORM TRIAGE SPEC</span>
+            <span style="color:var(--success);">&#x25CF;</span>
           </div>
-        </a>
+        </div>
 
         <!-- 03. Crew Controller -->
-        <a href="crew.html" class="ticket-gateway-card" data-role="crew_controller">
+        <div class="ticket-gateway-card" data-role="crew_controller">
           <div class="card-top-row">
             <span class="card-kicker">03 &bull; STATUTORY DUTY</span>
             <span class="card-role-num">DISPATCH</span>
@@ -1458,14 +1447,14 @@
             <span class="signal-name">Relief Deadline</span>
             <span class="signal-val amber" id="card-crew-deadline">16:45 IST</span>
           </div>
-          <div class="card-cta-row">
-            <span>OPEN CREW VIEW</span>
-            <span class="cta-arrow">&rarr;</span>
+          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
+            <span>CREW DISPATCH SPEC</span>
+            <span style="color:var(--success);">&#x25CF;</span>
           </div>
-        </a>
+        </div>
 
         <!-- 04. Feeder Transport -->
-        <a href="feeder.html" class="ticket-gateway-card" data-role="feeder_transport">
+        <div class="ticket-gateway-card" data-role="feeder_transport">
           <div class="card-top-row">
             <span class="card-kicker">04 &bull; MULTI-MODAL FLEET</span>
             <span class="card-role-num">CONNECTIVITY</span>
@@ -1482,14 +1471,14 @@
             <span class="signal-name">P(Arrival &lt; Cutoff)</span>
             <span class="signal-val amber" id="card-feeder-prob">84.5%</span>
           </div>
-          <div class="card-cta-row">
-            <span>OPEN FEEDER VIEW</span>
-            <span class="cta-arrow">&rarr;</span>
+          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
+            <span>FEEDER FLEET SPEC</span>
+            <span style="color:var(--success);">&#x25CF;</span>
           </div>
-        </a>
+        </div>
 
         <!-- 05. Maintenance -->
-        <a href="maintenance.html" class="ticket-gateway-card" data-role="maintenance">
+        <div class="ticket-gateway-card" data-role="maintenance">
           <div class="card-top-row">
             <span class="card-kicker">05 &bull; TURNAROUND BUDGET</span>
             <span class="card-role-num">YARD</span>
@@ -1506,14 +1495,14 @@
             <span class="signal-name">Available Window</span>
             <span class="signal-val green" id="card-maint-window">240m / 360m</span>
           </div>
-          <div class="card-cta-row">
-            <span>OPEN MAINTENANCE VIEW</span>
-            <span class="cta-arrow">&rarr;</span>
+          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
+            <span>YARD PROTOCOL SPEC</span>
+            <span style="color:var(--success);">&#x25CF;</span>
           </div>
-        </a>
+        </div>
 
         <!-- 06. Control Room -->
-        <a href="control.html" class="ticket-gateway-card" data-role="control_room">
+        <div class="ticket-gateway-card" data-role="control_room">
           <div class="card-top-row">
             <span class="card-kicker">06 &bull; NETWORK RADAR</span>
             <span class="card-role-num">REGIONAL</span>
@@ -1530,11 +1519,11 @@
             <span class="signal-name">Ripple Score</span>
             <span class="signal-val amber" id="card-control-ripple">42 / 100</span>
           </div>
-          <div class="card-cta-row">
-            <span>OPEN CONTROL ROOM</span>
-            <span class="cta-arrow">&rarr;</span>
+          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
+            <span>NETWORK RADAR SPEC</span>
+            <span style="color:var(--success);">&#x25CF;</span>
           </div>
-        </a>
+        </div>
 
         <!-- 07. Ghost Sandbox -->
         <a href="sandbox.html" class="ticket-gateway-card" data-role="sandbox">
@@ -2181,10 +2170,13 @@
         btn.classList.toggle('active', btn.dataset.train === activeTrainId);
       });
 
-      // Update Gateway href links to carry ?train=...
-      document.querySelectorAll('.ticket-gateway-card').forEach(card => {
-        const baseHref = card.getAttribute('href').split('?')[0];
-        card.setAttribute('href', `${baseHref}?train=${encodeURIComponent(activeTrainId)}`);
+      // Update Gateway href links to carry ?train=... (only for clickable cards like Ghost Sandbox)
+      document.querySelectorAll('.ticket-gateway-card[href]').forEach(card => {
+        const href = card.getAttribute('href');
+        if (href) {
+          const baseHref = href.split('?')[0];
+          card.setAttribute('href', `${baseHref}?train=${encodeURIComponent(activeTrainId)}`);
+        }
       });
 
       // Immediate 0ms rendering of schematic with metadata & cached/default bounds
@@ -2285,12 +2277,13 @@
     }
     loadNetworkRippleDemo();
 
-    // ── Setup Gateway Click with Transparent Demo Session ─────────────────────
-    document.querySelectorAll('.ticket-gateway-card').forEach(card => {
+    // ── Setup Gateway Click with Transparent Demo Session (Only for cards with href) ─────
+    document.querySelectorAll('.ticket-gateway-card[href]').forEach(card => {
       card.addEventListener('click', async (e) => {
         e.preventDefault();
-        const role = card.dataset.role || 'passenger';
+        const role = card.dataset.role || 'sandbox';
         const targetUrl = card.getAttribute('href');
+        if (!targetUrl) return;
 
         try {
           const res = await fetch(`${API_BASE}/api/auth/demo`, {

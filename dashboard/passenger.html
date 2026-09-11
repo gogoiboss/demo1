@@ -14,9 +14,9 @@
        ========================================================================== */
 
     :root {
-      --ticket-border: rgba(232, 237, 245, 0.15);
-      --ticket-bg: #111827;
-      --ticket-paper: #FAF6F0;
+      --ticket-border: rgba(18, 59, 93, 0.14);
+      --ticket-bg: #FFFFFF;
+      --ticket-paper: #FAF9F6;
     }
 
     .pax-container {
@@ -164,7 +164,7 @@
       background: var(--ticket-bg);
       border: 1px solid var(--ticket-border);
       border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 8px 30px rgba(18, 59, 93, 0.07);
       position: relative;
       overflow: hidden;
     }
@@ -327,7 +327,7 @@
 
     /* Calibrated Visual Interval Bar */
     .interval-section {
-      background: #FFFFFF;
+      background: var(--ticket-paper);
       border: 1px solid var(--line);
       border-radius: 6px;
       padding: 1.25rem 1.5rem;
@@ -361,10 +361,10 @@
     .interval-bar-wrap {
       position: relative;
       height: 28px;
-      background: rgba(27, 42, 74, 0.06);
+      background: rgba(18, 59, 93, 0.06);
       border-radius: 14px;
       overflow: visible;
-      border: 1px solid rgba(232, 237, 245, 0.15);
+      border: 1px solid var(--line);
       margin: 1rem 0 1.25rem;
     }
 
@@ -468,6 +468,18 @@
       font-size: 0.72rem;
       color: var(--muted);
       margin: 0;
+    }
+
+    .pax-shap-text {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--primary);
+      background: rgba(18, 59, 93, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      border-left: 3px solid var(--primary);
     }
 
     /* Anomaly Gate Alert */
@@ -836,30 +848,33 @@
     .timeline-list::before {
       content: '';
       position: absolute;
-      top: 14px;
-      bottom: 20px;
+      top: 20px;
+      bottom: 25px;
       left: 14px;
       width: 2px;
-      background: var(--line);
+      background: var(--line-strong, rgba(23, 32, 43, 0.16));
+      z-index: 0;
     }
 
     .timeline-item {
       display: flex;
       align-items: flex-start;
-      gap: 1.25rem;
       margin-bottom: 1.25rem;
       position: relative;
+      padding-left: 2.25rem;
     }
 
     .timeline-dot {
-      width: 12px;
-      height: 12px;
+      position: absolute;
+      left: 8px;
+      top: 15px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: var(--ticket-paper);
       border: 2px solid var(--muted);
-      margin-top: 5px;
       z-index: 1;
-      flex-shrink: 0;
+      box-sizing: border-box;
     }
 
     .timeline-item.is-arrived .timeline-dot {
@@ -1058,30 +1073,16 @@
 </head>
 <body class="has-grain" data-view="passenger">
 
-  <!-- ── Global Railway Command Topbar ── -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
-      <a class="brand" href="/" aria-label="RippleETA 3D Experience">
-        <span class="brand-mark">R</span>
-        <span class="brand-logotype">RippleETA</span>
-      </a>
-      <div class="divider"></div>
-      <span class="view-title" data-i18n="role-passenger">PASSENGER INTELLIGENCE</span>
-      <span class="view-badge-pill">B2C ADVISORY</span>
-    </div>
-    <div class="topbar-right">
-      <a href="/" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;" title="Launch 3D Train Simulation"><span class="status-dot-icon dot-blue"></span> <span data-i18n="btn-3d-view">3D Train</span></a>
-      <select id="lang-select" class="lang-select" aria-label="Select Language">
-        <option value="en">EN</option>
-        <option value="hi">HI (हिंदी)</option>
-        <option value="mr">MR (मराठी)</option>
-      </select>
-      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Safe Mode">A11Y</button>
-      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
-      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:--:-- IST</div>
-    </div>
+  <!-- ── Minimal Centered Logo Topbar ── -->
+  <div class="topbar" style="position:relative; display:flex; align-items:center; justify-content:center; padding:0.85rem 1.5rem; min-height:60px;">
+    <a href="login.html" class="topbar-return-btn" id="btn-return-login" aria-label="Return to Login">
+      <span style="font-size:0.95rem; line-height:1;">&larr;</span>
+      <span>Return to Login</span>
+    </a>
+    <a class="brand" href="/" aria-label="RippleETA Home" style="display:inline-flex; align-items:center; gap:0.65rem; text-decoration:none; color:var(--primary);">
+      <span class="brand-mark" style="background:var(--primary); color:#FFFFFF; width:30px; height:30px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem; font-family:var(--serif); font-weight:700; border:2px solid var(--signal, #E5B83F);">R</span>
+      <span class="brand-logotype" style="font-family:var(--display); font-weight:800; font-size:1.25rem; color:var(--primary); letter-spacing:0.02em;">RippleETA</span>
+    </a>
   </div>
 
   <div class="app-layout">
@@ -1246,8 +1247,6 @@
               <button type="button" class="quick-preset-btn" data-min="90">90m</button>
               <button type="button" class="quick-preset-btn" data-min="120">120m</button>
             </div>
-
-            <button id="leave-calc-btn" class="btn-evaluate" type="button">RE-EVALUATE</button>
           </div>
 
           <!-- Dynamic Output Banner -->
@@ -1311,10 +1310,6 @@
         <footer class="pax-footer">
           <div>
             <strong>RippleETA Passenger Portal</strong> &bull; Live Arrival Intelligence &bull; Northern Railway
-          </div>
-          <div class="pax-footer-links">
-            <a href="index.html">&larr; Portal Home</a>
-            <a href="/" target="_blank">3D Rail Experience &nearr;</a>
           </div>
         </footer>
 

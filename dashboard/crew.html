@@ -111,6 +111,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
+      min-width: 0;
     }
 
     .crew-ident-label {
@@ -123,9 +124,11 @@
 
     .crew-ident-val {
       font-family: var(--mono);
-      font-size: 0.92rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--primary);
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     /* ── Corridor Quick-Switch Bar ── */
@@ -181,9 +184,10 @@
 
     .train-chip.is-active {
       background: var(--primary);
-      color: #111827;
+      color: var(--text-inv);
       border-color: var(--primary);
       font-weight: 600;
+      box-shadow: 0 2px 6px rgba(27, 42, 74, 0.2);
     }
 
     /* Train Input Search */
@@ -1004,30 +1008,16 @@
 </head>
 <body class="has-grain" data-view="crew">
 
-  <!-- ── Global Railway Command Topbar ── -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
-      <a class="brand" href="/" aria-label="RippleETA 3D Experience">
-        <span class="brand-mark">R</span>
-        <span class="brand-logotype">RippleETA</span>
-      </a>
-      <div class="divider"></div>
-      <span class="view-title" data-i18n="role-crew">CREW CONTROLLER INTELLIGENCE</span>
-      <span class="view-badge-pill">DUTY &amp; RELIEF DESK &bull; PRYJ</span>
-    </div>
-    <div class="topbar-right">
-      <a href="/" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;" title="Launch 3D Train Simulation"><span class="status-dot-icon dot-blue"></span> <span data-i18n="btn-3d-view">3D Train</span></a>
-      <select id="lang-select" class="lang-select" aria-label="Select Language">
-        <option value="en">EN</option>
-        <option value="hi">HI (हिंदी)</option>
-        <option value="mr">MR (मराठी)</option>
-      </select>
-      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Mode">A11Y</button>
-      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
-      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:--:-- IST</div>
-    </div>
+  <!-- ── Minimal Centered Logo Topbar ── -->
+  <div class="topbar" style="position:relative; display:flex; align-items:center; justify-content:center; padding:0.85rem 1.5rem; min-height:60px;">
+    <a href="login.html" class="topbar-return-btn" id="btn-return-login" aria-label="Return to Login">
+      <span style="font-size:0.95rem; line-height:1;">&larr;</span>
+      <span>Return to Login</span>
+    </a>
+    <a class="brand" href="/" aria-label="RippleETA Home" style="display:inline-flex; align-items:center; gap:0.65rem; text-decoration:none; color:var(--primary);">
+      <span class="brand-mark" style="background:var(--primary); color:#FFFFFF; width:30px; height:30px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem; font-family:var(--serif); font-weight:700; border:2px solid var(--signal, #E5B83F);">R</span>
+      <span class="brand-logotype" style="font-family:var(--display); font-weight:800; font-size:1.25rem; color:var(--primary); letter-spacing:0.02em;">RippleETA</span>
+    </a>
   </div>
 
   <div class="app-layout">
@@ -1408,11 +1398,6 @@
         <footer style="margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--line); font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
             <span>RippleETA &bull; Crew Controller Desk &bull; PRYJ &bull; SIH 2026</span>
-            <div style="display:flex; gap:1rem;">
-              <a href="index.html" style="color:var(--primary); text-decoration:none;">Portal Home</a>
-              <a href="passenger.html" style="color:var(--primary); text-decoration:none;">Passenger View</a>
-              <a href="station-master.html" style="color:var(--primary); text-decoration:none;">Station Master</a>
-            </div>
           </div>
         </footer>
 

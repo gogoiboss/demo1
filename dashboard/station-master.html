@@ -98,7 +98,7 @@
     /* Operational Identity Block */
     .sm-identity-strip {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       gap: 0.85rem;
       background: var(--sm-paper-alt);
       border: 1px solid var(--line);
@@ -110,6 +110,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
+      min-width: 0;
     }
 
     .sm-ident-label {
@@ -122,9 +123,11 @@
 
     .sm-ident-val {
       font-family: var(--mono);
-      font-size: 0.92rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--primary);
+      word-break: break-word;
+      overflow-wrap: break-word;
     }
 
     /* ── Corridor Quick-Switch Bar ── */
@@ -189,13 +192,14 @@
 
     /* ── MAJOR VISUAL #1: Platform Approach Scene ── */
     .approach-scene-card {
-      background: var(--surface-dark);
-      color: var(--text-inv);
+      background: #FFFFFF;
+      color: var(--primary);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--signal);
       border-radius: 8px;
       padding: 1.5rem 1.75rem;
       margin-bottom: 2rem;
-      border-left: 4px solid var(--signal);
-      box-shadow: 0 4px 20px rgba(232, 237, 245, 0.08);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       position: relative;
       overflow: hidden;
     }
@@ -212,7 +216,7 @@
     .approach-title {
       font-family: var(--display);
       font-size: 1.25rem;
-      color: #111827;
+      color: var(--primary);
       margin: 0;
       font-weight: 600;
     }
@@ -220,7 +224,7 @@
     .approach-sub {
       font-family: var(--mono);
       font-size: 0.75rem;
-      color: rgba(243, 237, 227, 0.75);
+      color: var(--muted);
     }
 
     .approach-svg-container {
@@ -429,11 +433,12 @@
     }
 
     .vhf-card {
-      background: var(--primary);
-      color: var(--text-inv);
+      background: #FFFFFF;
+      color: var(--primary);
+      border: 1px solid var(--line);
       border-radius: 8px;
       padding: 1.5rem;
-      box-shadow: 0 4px 16px rgba(27, 42, 74, 0.1);
+      box-shadow: 0 4px 16px rgba(18, 59, 93, 0.06);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -441,9 +446,9 @@
     }
 
     .vhf-terminal-box {
-      background: rgba(0, 0, 0, 0.22);
-      border: 1px solid rgba(243, 237, 227, 0.12);
-      border-radius: 4px;
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      border-radius: 6px;
       padding: 1rem;
       margin: 0.85rem 0 1.25rem;
     }
@@ -451,7 +456,8 @@
     .vhf-pre {
       font-family: var(--mono);
       font-size: 0.95rem;
-      color: #111827;
+      color: var(--primary);
+      font-weight: 600;
       line-height: 1.6;
       margin: 0;
       white-space: pre-wrap;
@@ -459,21 +465,24 @@
     }
 
     .btn-copy-vhf {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #111827;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      color: var(--primary);
       padding: 0.5rem 1rem;
       border-radius: 4px;
       font-family: var(--mono);
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.2s ease;
       align-self: flex-end;
+      box-shadow: 0 1px 3px rgba(18, 59, 93, 0.06);
     }
 
     .btn-copy-vhf:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(18, 59, 93, 0.08);
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
     /* ── MAJOR VISUAL #2: Calibrated Arrival Window ── */
@@ -857,30 +866,16 @@
 </head>
 <body class="has-grain" data-view="station">
 
-  <!-- ── Global Railway Command Topbar ── -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
-      <a class="brand" href="/" aria-label="RippleETA 3D Experience">
-        <span class="brand-mark">R</span>
-        <span class="brand-logotype">RippleETA</span>
-      </a>
-      <div class="divider"></div>
-      <span class="view-title" data-i18n="role-station">STATION MASTER INTELLIGENCE</span>
-      <span class="view-badge-pill">OPERATIONAL DESK &bull; PRYJ</span>
-    </div>
-    <div class="topbar-right">
-      <a href="/" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;" title="Launch 3D Train Simulation"><span class="status-dot-icon dot-blue"></span> <span data-i18n="btn-3d-view">3D Train</span></a>
-      <select id="lang-select" class="lang-select" aria-label="Select Language">
-        <option value="en">EN</option>
-        <option value="hi">HI (हिंदी)</option>
-        <option value="mr">MR (मराठी)</option>
-      </select>
-      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Mode">A11Y</button>
-      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
-      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:--:-- IST</div>
-    </div>
+  <!-- ── Minimal Centered Logo Topbar ── -->
+  <div class="topbar" style="position:relative; display:flex; align-items:center; justify-content:center; padding:0.85rem 1.5rem; min-height:60px;">
+    <a href="login.html" class="topbar-return-btn" id="btn-return-login" aria-label="Return to Login">
+      <span style="font-size:0.95rem; line-height:1;">&larr;</span>
+      <span>Return to Login</span>
+    </a>
+    <a class="brand" href="/" aria-label="RippleETA Home" style="display:inline-flex; align-items:center; gap:0.65rem; text-decoration:none; color:var(--primary);">
+      <span class="brand-mark" style="background:var(--primary); color:#FFFFFF; width:30px; height:30px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem; font-family:var(--serif); font-weight:700; border:2px solid var(--signal, #E5B83F);">R</span>
+      <span class="brand-logotype" style="font-family:var(--display); font-weight:800; font-size:1.25rem; color:var(--primary); letter-spacing:0.02em;">RippleETA</span>
+    </a>
   </div>
 
   <div class="app-layout">
@@ -954,21 +949,21 @@
           <div class="approach-header">
             <div>
               <h2 class="approach-title">Platform Approach &amp; Interlocking Geometry</h2>
-              <span class="approach-sub">NORTHERN RAILWAY &bull; PRAYAGRAJ JUNCTION (PRYJ) &bull; UP MAIN LINE</span>
+              <span class="approach-sub" id="sm-approach-sub">NORTHERN RAILWAY &bull; PRAYAGRAJ JUNCTION (PRYJ) &bull; UP MAIN LINE</span>
             </div>
             <div id="sm-approach-badge" style="font-family:var(--mono); font-size:0.75rem; padding:0.25rem 0.65rem; border-radius:4px; background:rgba(232,163,61,0.2); border:1px solid var(--signal); color:var(--signal); font-weight:700;">
               HOLD SIGNAL AT OUTER &bull; PF 04 DEFERRED
             </div>
           </div>
 
-          <!-- Dynamic Railway SVG -->
+          <!-- Dynamic Railway SVG (Light Theme Palette) -->
           <svg class="approach-svg-container" viewBox="0 0 900 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Railway track approach diagram">
             <!-- Track Lines -->
-            <line x1="20" y1="65" x2="680" y2="65" stroke="rgba(243,237,227,0.3)" stroke-width="3" />
-            <line x1="20" y1="73" x2="680" y2="73" stroke="rgba(243,237,227,0.3)" stroke-width="3" />
+            <line x1="20" y1="65" x2="680" y2="65" stroke="rgba(18, 59, 93, 0.25)" stroke-width="3" />
+            <line x1="20" y1="73" x2="680" y2="73" stroke="rgba(18, 59, 93, 0.25)" stroke-width="3" />
             
             <!-- Sleepers -->
-            <g stroke="rgba(243,237,227,0.2)" stroke-width="2">
+            <g stroke="rgba(18, 59, 93, 0.15)" stroke-width="2">
               <line x1="60" y1="58" x2="60" y2="80" />
               <line x1="120" y1="58" x2="120" y2="80" />
               <line x1="180" y1="58" x2="180" y2="80" />
@@ -982,21 +977,21 @@
               <line x1="660" y1="58" x2="660" y2="80" />
             </g>
 
-            <!-- Crossover Turnout to Platform 04 -->
-            <path d="M 520,65 Q 580,65 620,35 L 750,35" fill="none" stroke="rgba(232,163,61,0.6)" stroke-width="2" stroke-dasharray="4,4" id="sm-turnout-path" />
+            <!-- Crossover Turnout to Target Platform -->
+            <path d="M 520,65 Q 580,65 620,35 L 750,35" fill="none" stroke="var(--signal)" stroke-width="2.5" stroke-dasharray="4,4" id="sm-turnout-path" />
 
             <!-- Train Token on Track (Animated Crawl) -->
             <g transform="translate(240, 50)" id="sm-approach-train">
-              <rect x="0" y="0" width="85" height="24" rx="4" fill="var(--primary)" stroke="var(--signal)" stroke-width="2" />
-              <text x="42" y="16" fill="#0B0F1A" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">TRAIN 20507</text>
+              <rect x="0" y="0" width="95" height="24" rx="4" fill="var(--primary)" stroke="var(--signal)" stroke-width="2" />
+              <text x="47" y="16" fill="#FFFFFF" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="700" text-anchor="middle" id="sm-svg-train-text">TRAIN 20507</text>
               <!-- Headlight -->
-              <circle cx="83" cy="12" r="3" fill="#FFE082" />
+              <circle cx="93" cy="12" r="3" fill="#FFE082" />
             </g>
 
             <!-- 4-Aspect Signal Post -->
             <g transform="translate(480, 20)">
-              <line x1="10" y1="10" x2="10" y2="45" stroke="#0B0F1A" stroke-width="3" />
-              <rect x="3" y="2" width="14" height="34" rx="3" fill="#000000" stroke="#0B0F1A" stroke-width="1" />
+              <line x1="10" y1="10" x2="10" y2="45" stroke="var(--primary)" stroke-width="3" />
+              <rect x="3" y="2" width="14" height="34" rx="3" fill="#123B5D" stroke="rgba(18, 59, 93, 0.2)" stroke-width="1" />
               <!-- Green Lens -->
               <circle cx="10" cy="8" r="3" fill="#1B3D2B" id="sm-sig-green" />
               <!-- Amber 1 Lens -->
@@ -1005,19 +1000,19 @@
               <circle cx="10" cy="24" r="3" fill="#423014" id="sm-sig-amber2" />
               <!-- Red Lens -->
               <circle cx="10" cy="32" r="3" fill="#3D1B1B" id="sm-sig-red" />
-              <text x="10" y="52" fill="rgba(243,237,227,0.7)" font-family="'IBM Plex Mono', monospace" font-size="8" text-anchor="middle">HOME S-14</text>
+              <text x="10" y="52" fill="var(--muted)" font-family="'IBM Plex Mono', monospace" font-size="8" font-weight="600" text-anchor="middle">HOME S-14</text>
             </g>
 
             <!-- Distance Marks -->
-            <text x="60" y="96" fill="rgba(243,237,227,0.5)" font-family="'IBM Plex Mono', monospace" font-size="9">KANPUR (194 km)</text>
-            <text x="300" y="96" fill="rgba(243,237,227,0.5)" font-family="'IBM Plex Mono', monospace" font-size="9">SIRATHU (45 km)</text>
-            <text x="480" y="96" fill="rgba(232,163,61,0.8)" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="600">SUBEDARGANJ (12 km)</text>
+            <text x="60" y="96" fill="var(--muted)" font-family="'IBM Plex Mono', monospace" font-size="9" id="sm-svg-stn1">KANPUR (194 km)</text>
+            <text x="300" y="96" fill="var(--muted)" font-family="'IBM Plex Mono', monospace" font-size="9" id="sm-svg-stn2">SIRATHU (45 km)</text>
+            <text x="480" y="96" fill="var(--primary)" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="700" id="sm-svg-stn3">SUBEDARGANJ (12 km)</text>
 
-            <!-- Platform 04 Terminal Berth -->
+            <!-- Target Platform Terminal Berth -->
             <g transform="translate(730, 15)">
-              <rect x="0" y="0" width="150" height="55" rx="4" fill="#0E182A" stroke="var(--signal)" stroke-width="1.5" />
-              <text x="75" y="22" fill="var(--signal)" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="700" text-anchor="middle">PLATFORM 04</text>
-              <text x="75" y="38" fill="rgba(243,237,227,0.7)" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">24-Coach Rake Capacity</text>
+              <rect x="0" y="0" width="150" height="55" rx="6" fill="#FAF9F6" stroke="var(--primary)" stroke-width="2" />
+              <text x="75" y="22" fill="var(--primary)" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="700" text-anchor="middle" id="sm-svg-platform-text">PLATFORM 04</text>
+              <text x="75" y="38" fill="var(--muted)" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle" id="sm-svg-platform-sub">Prayagraj Jn</text>
               <rect x="15" y="44" width="120" height="4" rx="2" fill="rgba(232,163,61,0.3)" />
             </g>
           </svg>
@@ -1048,7 +1043,7 @@
               <div class="decision-dominant-status defer" id="triage-decision">DEFER</div>
 
               <!-- Target Platform -->
-              <div class="decision-target-resource">
+              <div class="decision-target-resource" id="sm-target-resource">
                 TARGET: <span style="color:var(--signal);">PLATFORM 04</span> &bull; PRAYAGRAJ JN (PRYJ)
               </div>
 
@@ -1109,7 +1104,7 @@
             <!-- MAJOR VISUAL #9: VHF Radio Synthesis -->
             <div class="vhf-card">
               <div>
-                <span class="decision-kicker-tag" style="color:rgba(243,237,227,0.7);">VHF SYNTHESIS &bull; 10-WORD PROTOCOL</span>
+                <span class="decision-kicker-tag" style="color:var(--muted);">VHF SYNTHESIS &bull; 10-WORD PROTOCOL</span>
                 <div class="vhf-terminal-box">
                   <pre class="vhf-pre" id="triage-vhf">Station Master, Train 20507 estimated 26 minutes late. DEFER platform. Over.</pre>
                 </div>
@@ -1314,15 +1309,15 @@
         <section class="platform-board">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
             <div>
-              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Prayagraj Junction (PRYJ) Platform Berth Status</h2>
-              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+              <h2 id="sm-platform-board-title" style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Prayagraj Junction (PRYJ) Platform Berth Status</h2>
+              <p id="sm-platform-board-sub" style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
                 Interlocking resource allocation matrix. Platform 04 is currently designated for Train 20507.
               </p>
             </div>
-            <span style="font-family:var(--mono); font-size:0.72rem; color:var(--muted); background:rgba(232, 237, 245, 0.08); padding:3px 8px; border-radius:4px;">REPLAY / SIMULATION SNAPSHOT &bull; PRYJ INTERLOCKING CABIN</span>
+            <span id="sm-platform-board-tag" style="font-family:var(--mono); font-size:0.72rem; color:var(--muted); background:rgba(232, 237, 245, 0.08); padding:3px 8px; border-radius:4px;">REPLAY / SIMULATION SNAPSHOT &bull; PRYJ INTERLOCKING CABIN</span>
           </div>
 
-          <div class="platform-grid">
+          <div class="platform-grid" id="sm-platform-grid">
             <div class="platform-cell">
               <span class="platform-num">PF 01</span>
               <span class="platform-status-tag occupied">OCCUPIED</span>
@@ -1394,30 +1389,10 @@
           </table>
         </section>
 
-        <!-- ── Network Ahead Schematic ── -->
-        <section style="background:var(--surface-dark); color:var(--text-inv); border-radius:8px; padding:1.5rem 1.75rem; margin-bottom:2rem; border-left:4px solid var(--signal);">
-          <h3 style="font-family:var(--display); font-size:1.25rem; color:#111827; margin:0 0 0.75rem;">Network Ahead &bull; Approach Block Section</h3>
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:0.85rem 1.25rem; border-radius:6px; border:1px solid rgba(243,237,227,0.1); font-family:var(--mono); font-size:0.75rem;">
-            <div style="color:var(--signal); font-weight:700;">&#128646; TRAIN 20507</div>
-            <span style="color:rgba(243,237,227,0.4);">&rarr;</span>
-            <div>BLOCK 402 (CLEAR &bull; 2km)</div>
-            <span style="color:rgba(243,237,227,0.4);">&rarr;</span>
-            <div>SUBEDARGANJ INTERLOCKING</div>
-            <span style="color:rgba(243,237,227,0.4);">&rarr;</span>
-            <div style="color:var(--signal);">PLATFORM 04 (PRYJ)</div>
-          </div>
-        </section>
-
         <!-- ── FOOTER & AUDIT PROVENANCE ── -->
         <footer style="border-top:1px solid var(--line); padding-top:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
           <div>
             <strong>RippleETA Station Controller</strong> &bull; Goverde Max-Plus Engine &bull; Indian Railways SIH 2026
-          </div>
-          <div style="display:flex; gap:1rem;">
-            <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:600;">&larr; Roles Gateway</a>
-            <a href="passenger.html" style="color:var(--primary); text-decoration:none; font-weight:600;">Passenger View</a>
-            <a href="sandbox.html" style="color:var(--primary); text-decoration:none; font-weight:600;">Replay Sandbox</a>
-            <a href="/" style="color:var(--primary); text-decoration:none; font-weight:600;">3D Landing &nearr;</a>
           </div>
         </footer>
 

@@ -447,11 +447,78 @@ async function loadStation() {
   setText('sm-route-path', trainMeta.route);
   setText('sm-current-location', trainMeta.location || 'Corridor transit');
   setText('sm-target-berth', trainMeta.targetPlatform || 'Platform 04 · Prayagraj Jn');
-  setText('sm-status-badge', prediction.status);
+  setText('sm-status-badge', prediction.status ? prediction.status.replace(/_/g, ' ').toUpperCase() : 'PREDICTION ACTIVE');
   setText('sm-hero-delay', `+${p50.toFixed(1)} MIN DELAY`);
   setText('sm-ingest-time', new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()) + ' IST');
   renderShapText(prediction, 'sm-shap-text');
   renderDegradedStaleBadge(prediction, 'sm-degraded-stale-badge');
+
+  // Dynamic SVG Diagram Update for Selected Train
+  const platformName = (trainMeta.targetPlatform || 'Platform 04').split('·')[0].trim().toUpperCase();
+  const stationSub = trainMeta.targetPlatform ? (trainMeta.targetPlatform.split('·')[1] || 'Terminal Berth').trim() : 'Terminal Berth';
+  setText('sm-svg-train-text', `TRAIN ${prediction.train_id}`);
+  setText('sm-svg-platform-text', platformName);
+  setText('sm-svg-platform-sub', stationSub);
+
+  const routeParts = trainMeta.route.split('→').map(s => s.trim());
+  if (routeParts.length >= 3) {
+    setText('sm-svg-stn1', `${routeParts[0]} (Origin)`);
+    setText('sm-svg-stn2', `${routeParts[1]} (Transit)`);
+    setText('sm-svg-stn3', `${routeParts[2]} (Approach)`);
+  }
+
+  // Dynamic Platform Resource Board Update for Selected Train's Target Halt
+  const targetStnName = trainMeta.stationName || (trainMeta.targetPlatform ? trainMeta.targetPlatform.split('·')[1]?.trim() : 'Prayagraj Junction (PRYJ)');
+  const targetPfNum = trainMeta.platformNum || (trainMeta.targetPlatform ? 'PF ' + String(trainMeta.targetPlatform.split('·')[0].replace(/\D/g, '')).padStart(2, '0') : 'PF 04');
+  const pfNumClean = parseInt(targetPfNum.replace(/\D/g, ''), 10) || 4;
+
+  const targetResourceEl = $('sm-target-resource');
+  if (targetResourceEl) {
+    targetResourceEl.innerHTML = `TARGET: <span style="color:var(--signal);">${targetPfNum.toUpperCase()}</span> &bull; ${targetStnName.toUpperCase()}`;
+  }
+  setText('sm-approach-sub', `INDIAN RAILWAYS • ${targetStnName.toUpperCase()} • MAIN LINE APPROACH`);
+  setText('sm-approach-badge', `HOLD SIGNAL AT OUTER • ${targetPfNum} ${decision}`);
+
+  setText('sm-platform-board-title', `${targetStnName} Platform Berth Status`);
+  setText('sm-platform-board-sub', `Interlocking resource allocation matrix. ${targetPfNum} is currently designated for Train ${prediction.train_id} (${trainMeta.name}).`);
+  setText('sm-platform-board-tag', `REPLAY / SIMULATION SNAPSHOT • ${targetStnName.toUpperCase()} INTERLOCKING CABIN`);
+
+  const gridEl = $('sm-platform-grid');
+  if (gridEl) {
+    const pfList = [1, 2, 3, 4, 5, 6];
+    gridEl.innerHTML = pfList.map(pfIdx => {
+      const isTarget = pfIdx === pfNumClean;
+      const pfStr = `PF ${String(pfIdx).padStart(2, '0')}`;
+      if (isTarget) {
+        const tagClass = decision === 'COMMIT' ? 'available' : (decision === 'DEFER' ? 'deferred' : 'occupied');
+        const tagText = decision === 'COMMIT' ? 'COMMITTED' : (decision === 'DEFER' ? 'DEFERRED' : 'MANUAL');
+        return `
+          <div class="platform-cell target-candidate" id="sm-pf4-cell">
+            <span class="platform-num" style="color:var(--signal);">${pfStr}</span>
+            <span class="platform-status-tag ${tagClass}" id="sm-pf4-tag">${tagText}</span>
+            <span style="font-family:var(--sans); font-size:0.75rem; font-weight:700; color:var(--primary);">${prediction.train_id} (TARGET HALT)</span>
+          </div>
+        `;
+      } else {
+        const samples = [
+          { tag: 'OCCUPIED', tagClass: 'occupied', sub: '12428 Rewa SF' },
+          { tag: 'AVAILABLE', tagClass: 'available', sub: 'Clear • 24-Coach' },
+          { tag: 'HOLD AT LOOP', tagClass: 'deferred', sub: '12302 Rajdhani' },
+          { tag: 'AVAILABLE', tagClass: 'available', sub: 'Clear • 16-Coach Bay' },
+          { tag: 'MAINTENANCE', tagClass: 'occupied', sub: 'OHE Wire Inspection' },
+          { tag: 'AVAILABLE', tagClass: 'available', sub: 'Clear • Stabling Track' }
+        ];
+        const sample = samples[(pfIdx - 1) % samples.length];
+        return `
+          <div class="platform-cell">
+            <span class="platform-num">${pfStr}</span>
+            <span class="platform-status-tag ${sample.tagClass}">${sample.tag}</span>
+            <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">${sample.sub}</span>
+          </div>
+        `;
+      }
+    }).join('');
+  }
 
   // Dominant Decision Card
   setText('triage-decision', decision);
@@ -474,11 +541,123 @@ async function loadStation() {
   setText('triage-msg', station.message || 'Review platform allocation before deadline.');
   setText('triage-vhf', station.radio_summary || `Station Master, Train ${prediction.train_id} estimated ${Math.round(p50)} minutes late. ${decision} platform. Over.`);
 
-  // Action Buttons Active State
+  // Action Buttons Active State & Interactive Click Handlers
   const btnCommit = $('btn-action-commit');
   const btnDefer = $('btn-action-defer');
-  if (btnCommit) btnCommit.classList.toggle('is-active', decision === 'COMMIT');
-  if (btnDefer) btnDefer.classList.toggle('is-active', decision === 'DEFER');
+  const btnOverride = $('btn-action-override');
+  const btnCopyVhf = $('btn-copy-vhf');
+
+  if (btnCommit) {
+    btnCommit.classList.toggle('is-active', decision === 'COMMIT');
+    btnCommit.onclick = () => {
+      if (decEl) {
+        decEl.textContent = 'COMMIT';
+        decEl.className = 'decision-dominant-status commit';
+      }
+      if (card) {
+        card.className = 'decision-hero-card is-commit';
+      }
+      btnCommit.classList.add('is-active');
+      if (btnDefer) btnDefer.classList.remove('is-active');
+      if (btnOverride) btnOverride.classList.remove('is-active');
+      const urg = $('sm-urgency-badge');
+      if (urg) {
+        urg.textContent = 'STATUS: COMMITTED';
+        urg.style.color = 'var(--success)';
+        urg.style.borderColor = 'var(--success)';
+        urg.style.background = 'rgba(61,122,92,0.12)';
+      }
+      setText('triage-vhf', `Station Master, Train ${prediction.train_id} estimated ${Math.round(p50)} minutes late. COMMIT ${platformName}. Over.`);
+      setLamp(sigGreen, '--success', true);
+      setLamp(sigAmber, '--signal', false);
+      setLamp(sigRed, '--stamp', false);
+      if (approachBadge) {
+        approachBadge.textContent = `LINE CLEAR • ${platformName} COMMITTED`;
+        approachBadge.style.color = 'var(--success)';
+        approachBadge.style.borderColor = 'var(--success)';
+        approachBadge.style.background = 'rgba(61,122,92,0.15)';
+      }
+    };
+  }
+
+  if (btnDefer) {
+    btnDefer.classList.toggle('is-active', decision === 'DEFER');
+    btnDefer.onclick = () => {
+      if (decEl) {
+        decEl.textContent = 'DEFER';
+        decEl.className = 'decision-dominant-status defer';
+      }
+      if (card) {
+        card.className = 'decision-hero-card is-defer';
+      }
+      btnDefer.classList.add('is-active');
+      if (btnCommit) btnCommit.classList.remove('is-active');
+      if (btnOverride) btnOverride.classList.remove('is-active');
+      const urg = $('sm-urgency-badge');
+      if (urg) {
+        urg.textContent = 'URGENCY: HIGH';
+        urg.style.color = '#9c671b';
+        urg.style.borderColor = 'var(--signal)';
+        urg.style.background = 'rgba(232,163,61,0.15)';
+      }
+      setText('triage-vhf', `Station Master, Train ${prediction.train_id} estimated ${Math.round(p50)} minutes late. DEFER platform. Over.`);
+      setLamp(sigGreen, '--success', false);
+      setLamp(sigAmber, '--signal', true);
+      setLamp(sigRed, '--stamp', false);
+      if (approachBadge) {
+        approachBadge.textContent = `HOLD SIGNAL AT OUTER • ${platformName} DEFERRED`;
+        approachBadge.style.color = 'var(--signal)';
+        approachBadge.style.borderColor = 'var(--signal)';
+        approachBadge.style.background = 'rgba(232,163,61,0.15)';
+      }
+    };
+  }
+
+  if (btnOverride) {
+    btnOverride.classList.toggle('is-active', decision === 'SUSPENDED');
+    btnOverride.onclick = () => {
+      if (decEl) {
+        decEl.textContent = 'MANUAL OVERRIDE';
+        decEl.className = 'decision-dominant-status suspended';
+      }
+      if (card) {
+        card.className = 'decision-hero-card is-suspended';
+      }
+      btnOverride.classList.add('is-active');
+      if (btnCommit) btnCommit.classList.remove('is-active');
+      if (btnDefer) btnDefer.classList.remove('is-active');
+      const urg = $('sm-urgency-badge');
+      if (urg) {
+        urg.textContent = 'MANUAL OVERRIDE ACTIVE';
+        urg.style.color = 'var(--stamp)';
+        urg.style.borderColor = 'var(--stamp)';
+        urg.style.background = 'rgba(229,62,62,0.12)';
+      }
+      setText('triage-vhf', `Station Master, Train ${prediction.train_id} anomaly gate active. MANUAL OVERRIDE IN EFFECT. Over.`);
+      setLamp(sigGreen, '--success', false);
+      setLamp(sigAmber, '--signal', false);
+      setLamp(sigRed, '--stamp', true);
+      const anomalyEl = $('ticket-anomaly-alert');
+      if (anomalyEl) anomalyEl.style.display = 'block';
+    };
+  }
+
+  if (btnCopyVhf) {
+    btnCopyVhf.onclick = () => {
+      const textToCopy = $('triage-vhf')?.textContent || '';
+      if (textToCopy) {
+        navigator.clipboard.writeText(textToCopy).catch(() => {});
+        btnCopyVhf.textContent = '✓ COPIED TO CLIPBOARD!';
+        btnCopyVhf.style.background = 'var(--primary)';
+        btnCopyVhf.style.color = '#FFFFFF';
+        setTimeout(() => {
+          btnCopyVhf.textContent = 'COPY VHF DISPATCH';
+          btnCopyVhf.style.background = 'var(--surface)';
+          btnCopyVhf.style.color = 'var(--primary)';
+        }, 2000);
+      }
+    };
+  }
 
   // Decision Deadline Clock
   const deadlineDate = new Date(Date.now() + deadlineMin * 60000);
@@ -2426,8 +2605,35 @@ function startClock() {
 initA11y();
 startClock();
 
-$('refresh-button')?.addEventListener('click', refresh);
-$('train-id')?.addEventListener('change', (event) => { persistTrain(event.target.value); refresh(); });
+$('refresh-button')?.addEventListener('click', () => {
+  const tid = $('train-id')?.value;
+  if (tid) {
+    persistTrain(tid);
+    document.querySelectorAll('.train-chip').forEach(c => {
+      c.classList.toggle('is-active', c.dataset.train === tid.trim());
+    });
+  }
+  refresh();
+});
+$('train-id')?.addEventListener('change', (event) => {
+  const tid = event.target.value.trim();
+  persistTrain(tid);
+  document.querySelectorAll('.train-chip').forEach(c => {
+    c.classList.toggle('is-active', c.dataset.train === tid);
+  });
+  refresh();
+});
+$('train-id')?.addEventListener('keypress', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    const tid = event.target.value.trim();
+    persistTrain(tid);
+    document.querySelectorAll('.train-chip').forEach(c => {
+      c.classList.toggle('is-active', c.dataset.train === tid);
+    });
+    refresh();
+  }
+});
 $('feeder-cutoff-input')?.addEventListener('change', refresh);
 $('btn-sync-cutoff')?.addEventListener('click', refresh);
 
@@ -2469,19 +2675,24 @@ $('leave-calc-btn')?.addEventListener('click', () => {
 $('leave-deadline-input')?.addEventListener('input', () => {
   evaluateLeaveNow(state.lastPrediction?.p90_delay_min);
 });
-// Quick train chips
-document.querySelectorAll('.train-chip').forEach((chip) => {
-  chip.addEventListener('click', () => {
-    const tid = chip.dataset.train;
-    if (tid && $('train-id')) {
+// Quick train chips & event delegation for corridor selection
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('.train-chip');
+  if (!chip) return;
+  const tid = chip.dataset.train;
+  if (tid) {
+    if ($('train-id')) {
       $('train-id').value = tid;
-      persistTrain(tid);
-      const url = new URL(window.location);
-      url.searchParams.set('train', tid);
-      window.history.replaceState({}, '', url);
-      refresh();
     }
-  });
+    persistTrain(tid);
+    document.querySelectorAll('.train-chip').forEach(c => {
+      c.classList.toggle('is-active', c.dataset.train === tid);
+    });
+    const url = new URL(window.location);
+    url.searchParams.set('train', tid);
+    window.history.replaceState({}, '', url);
+    refresh();
+  }
 });
 
 // Quick deadline presets
