@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Control Room | RippleETA</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="has-grain" data-view="network">
+  
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
+      <a class="brand" href="#" aria-label="RippleETA home">
+        <span class="brand-mark">R</span>
+        <span class="brand-logotype">RippleETA</span>
+      </a>
+      <div class="divider"></div>
+      <span class="view-title">NETWORK INTELLIGENCE</span>
+    </div>
+    <div class="topbar-right">
+      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
+      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
+      <div class="clock" id="clock">--:-- IST</div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <main class="main-content">
+      
+      <header class="view-header">
+        <div class="header-left">
+          <h1 class="view-headline">Network Radar</h1>
+          <p class="view-subhead">Network replay, calibrated risk, and traceable prediction provenance.</p>
+        </div>
+        <div class="header-right">
+          <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="view-panel is-active" id="network-view" data-panel="network">
+        
+        <div class="odometer-container">
+            <p class="odometer-label">Predictions Served (All Modes)</p>
+            <div class="odometer-counter" id="prediction-count">--</div>
+        </div>
+        
+        <div class="ripple-radar">
+            <h3 class="timeline-title">Propagation Radar</h3>
+            <p style="font-family:var(--sans); color:var(--text); margin-bottom: 1rem;" id="radar-status">Awaiting conflict data...</p>
+            <p style="font-family:var(--mono); color:var(--muted); margin-bottom: 2rem;" id="radar-source">Source status: --</p>
+            
+            <div style="position:relative; height: 300px;">
+                <div class="radar-center"></div>
+                <div class="radar-ring" id="radar-pulse"></div>
+                
+                <div class="radar-node" id="radar-conflict-node" style="top: 20px; left: 60%; transform: translateX(-50%);"></div>
+            </div>
+            
+            <div style="text-align:center; margin-top: -3rem; position:relative; z-index:10;">
+            </div>
+        </div>
+        <a class="back-link role-link" data-role="station_master" href="station-master.html">Open station decision</a>
+        
+      </section>
+
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

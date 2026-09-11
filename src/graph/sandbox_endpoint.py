@@ -2,7 +2,7 @@
 Sandbox endpoint logic for delay propagation on the timed event graph.
 """
 from typing import Literal
-from src.graph.timed_event_graph import build_timed_event_graph, detect_conflicts
+from src.graph.timed_event_graph import CachedPropagationEngine
 from src.graph.worked_example import SCHEDULES_DEMO
 
 def compute_sandbox_propagation(source_delay_min: float) -> dict:
@@ -13,8 +13,8 @@ def compute_sandbox_propagation(source_delay_min: float) -> dict:
     }
     
     # Build graph and run conflict detection
-    G = build_timed_event_graph(SCHEDULES_DEMO)
-    conflicts = detect_conflicts(G, delays)
+    engine = CachedPropagationEngine(SCHEDULES_DEMO)
+    conflicts = engine.detect_conflicts(delays)
     
     # Extract conflict addition
     conflict_addition = 0.0

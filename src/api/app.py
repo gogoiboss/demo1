@@ -1,6 +1,18 @@
 """FastAPI application for calibrated train predictions."""
 
 from __future__ import annotations
+from fastapi import Response, Depends
+from .auth import create_session_token, verify_google_token, get_current_user, role_required
+from pydantic import BaseModel
+
+class GoogleLoginRequest(BaseModel):
+    credential: str
+
+class DemoLoginRequest(BaseModel):
+    email: str
+    role: str
+
+
 
 from datetime import datetime, timedelta, timezone
 from statistics import NormalDist
@@ -9,7 +21,6 @@ import json
 
 def get_trend(train_id: str, current_delay: float) -> str:
     import os
-
     if os.environ.get("RIPPLEETA_CI") == "1":
         return "unknown"
     if current_delay is None:
@@ -51,8 +62,10 @@ from src.api.models import (
     MaintenanceResponse,
     PassengerResponse,
     PredictionResponse,
+    SupportedTrain,
     StationMasterResponse,
     SandboxResponse,
+    SystemStatusResponse,
 )
 from src.graph.worked_example import run_worked_example
 from src.api.service import PredictionService, TrainNotFoundError
@@ -67,8 +80,12 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_methods=["GET"],
+        # The bundled dashboards are served by this application.  Keep the
+        # middleware permissive enough for a local dashboard server too, but
+        # do not advertise credential support with a wildcard origin.
+        allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "http://127.0.0.1:5500", "http://localhost:5500"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
         allow_headers=["*"],
     )
 
@@ -76,9 +93,23 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         from src.ingestion.railradar_client import get_live_status
         import pandas as pd
         import os
-        
+
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            pass
+
         # 1. Fetch live status (Persistence, Staleness, and Degraded Fallback)
-        live_status = None if os.environ.get("RIPPLEETA_CI") == "1" else get_live_status(train_id)
+        # Do not block a dashboard request through RailRadar retry/backoff when
+        # this installation has no live provider credential.  The prediction
+        # pipeline can still serve the local historical snapshot; its response
+        # is explicitly marked as having no live update timestamp.
+        live_status = (
+            get_live_status(train_id)
+            if os.environ.get("RIPPLEETA_CI") != "1" and os.environ.get("RIPPLEETA_API_KEY")
+            else None
+        )
         is_stale = False
         last_updated = None
         current_delay = 0.0
@@ -181,7 +212,29 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
     @app.get("/system/mode", tags=["system"])
     def get_mode() -> dict:
         import os
-        return {"mode": os.environ.get("RIPPLEETA_MODE", "live").upper()}
+        live_configured = bool(os.environ.get("RIPPLEETA_API_KEY"))
+        requested = os.environ.get("RIPPLEETA_MODE", "replay").upper()
+        mode = "LIVE" if requested == "LIVE" and live_configured else "REPLAY"
+        return {
+            "mode": mode,
+            "source": "RTIS/CRIS provider" if mode == "LIVE" else "local historical snapshot and graph replay",
+            "live_feed_configured": live_configured,
+            "refresh_interval_seconds": 60 if mode == "LIVE" else None,
+        }
+
+    @app.get("/system/status", response_model=SystemStatusResponse, tags=["system"])
+    def system_status() -> SystemStatusResponse:
+        import os
+        mode = get_mode()
+        return SystemStatusResponse(
+            **mode,
+            supported_train_count=len(prediction_service.supported_train_ids()),
+            model_loaded=prediction_service.model_loaded,
+        )
+
+    @app.get("/trains", response_model=list[SupportedTrain], tags=["prediction"])
+    def supported_trains() -> list[SupportedTrain]:
+        return [SupportedTrain(train_id=train_id) for train_id in prediction_service.supported_train_ids()]
 
     @app.get("/health", response_model=HealthResponse, tags=["system"])
     def health() -> HealthResponse:
@@ -203,10 +256,17 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             base_delay_min=55.0,
             conflict_addition_min=result["conflict_min"],
             final_delay_min=result["alld_delay_min"],
-            message=(
+            historical_stations=[
+            {"station_code": "NDLS", "station_name": "New Delhi", "scheduled_arrival": now_utc(), "actual_arrival": now_utc(), "delay_min": 0.0, "status": "departed"},
+            {"station_code": "CNB", "station_name": "Kanpur Central", "scheduled_arrival": now_utc(), "actual_arrival": now_utc(), "delay_min": 12.5, "status": "departed"},
+            {"station_code": "PRYJ", "station_name": "Prayagraj Jn", "scheduled_arrival": now_utc(), "actual_arrival": None, "delay_min": 26.5, "status": "en_route"}
+        ],
+        message=(
                 "Real timed-event graph computation on a corrected two-train "
                 "station-pair replay; not a live network backtest."
             ),
+            source_type="local_replay",
+            generated_at=now_utc(),
         )
 
     @app.get("/graph/sandbox", response_model=SandboxResponse, tags=["graph"])
@@ -217,13 +277,81 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         result = compute_sandbox_propagation(source_delay)
         return SandboxResponse(**result)
 
+
+    @app.get("/api/auth/config", tags=["auth"])
+    def auth_config() -> dict:
+        import os
+        client_id = os.getenv("GOOGLE_CLIENT_ID")
+        if client_id and not client_id.startswith("your-real-"):
+            return {"auth_configured": True, "google_client_id": client_id}
+        # A placeholder client id renders a Google button that can never
+        # complete sign-in.  Tell the UI the truth and leave demo sign-in
+        # available until a real OAuth client id is configured.
+        return {"auth_configured": False, "google_client_id": None}
+
+    @app.post("/api/auth/google", tags=["auth"])
+    def google_login(req: GoogleLoginRequest, response: Response):
+        try:
+            idinfo = verify_google_token(req.credential)
+            email = idinfo.get("email")
+            role = "passenger"
+            if "station" in email.lower(): role = "station_master"
+            if "crew" in email.lower(): role = "crew_controller"
+            if "feeder" in email.lower(): role = "feeder_transport"
+            if "maintenance" in email.lower(): role = "maintenance"
+            
+            token = create_session_token(email, role)
+            response.set_cookie(key="rippleeta_session", value=token, httponly=True, samesite="lax")
+            return {"success": True, "role": role}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    @app.post("/api/auth/demo", tags=["auth"])
+    def demo_login(req: DemoLoginRequest, response: Response):
+        # Demo routing is not an authorization boundary.  Accept the labels
+        # emitted by both the current UI and older bookmarked dashboard pages,
+        # then issue the canonical role used by route guards.
+        role_key = req.role.strip().lower().replace("-", "_").replace(" ", "_")
+        role = {
+            "stationmaster": "station_master",
+            "station_master": "station_master",
+            "crewcontroller": "crew_controller",
+            "crew_controller": "crew_controller",
+            "feedertransport": "feeder_transport",
+            "feeder_transport": "feeder_transport",
+            "controlroom": "control_room",
+            "control_room": "control_room",
+        }.get(role_key, role_key)
+        token = create_session_token(req.email, role)
+        response.set_cookie(key="rippleeta_session", value=token, httponly=True, samesite="lax")
+        return {"success": True, "role": role}
+
+
+    @app.get("/api/stats", tags=["system"])
+    def system_stats():
+        # Read from predictions_history.db or just return a simple state for now.
+        import sqlite3
+        try:
+            conn = sqlite3.connect("predictions_history.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM prediction_logs")
+            count = cursor.fetchone()[0]
+            conn.close()
+            return {"total_predictions_served": count, "supported_train_count": len(prediction_service.supported_train_ids()), "source": get_mode()["source"]}
+        except Exception:
+            return {"total_predictions_served": 0}
+
+    @app.get("/api/me", tags=["auth"])
+    def get_me(user: dict = Depends(get_current_user)):
+        return {"email": user.get("sub"), "role": user.get("role")}
+
     @app.get("/predict/{train_id}/passenger", response_model=PassengerResponse, tags=["stakeholders"])
     def passenger(
         train_id: str,
+        user: dict = Depends(role_required("passenger")),
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> PassengerResponse:
         prediction = get_prediction(train_id, prediction_variance)
-        tid_hash = sum(ord(c) for c in train_id)
         delay = prediction["p50_delay_min"]
         trend_val = get_trend(train_id, delay)
         return PassengerResponse(
@@ -242,10 +370,10 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
     @app.get("/predict/{train_id}/station-master", response_model=StationMasterResponse, tags=["stakeholders"])
     def station_master(
         train_id: str,
+        user: dict = Depends(role_required("station_master")),
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> StationMasterResponse:
         prediction = get_prediction(train_id, prediction_variance)
-        tid_hash = sum(ord(c) for c in train_id)
         if prediction["anomaly_flag"]:
             decision = "SUSPENDED"
             decision_time = None
@@ -273,14 +401,15 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             radio_summary=radio,
             urgency_rank=urgency,
             cost_asymmetry_applied=True,
-            ripple_score=(tid_hash % 100),
-            cross_train_attribution=f"{max(10, tid_hash % 80)}% of delay inherited from Train {12000 + (tid_hash % 500)} at upstream junction.",
-            financial_impact_inr=int((prediction.get("p50_delay_min", 0) * 1500) + (tid_hash % 50000))
+            ripple_score=0,
+            cross_train_attribution="Not available from the current station-event snapshot.",
+            financial_impact_inr=0
         )
 
     @app.get("/predict/{train_id}/crew-controller", response_model=CrewControllerResponse, tags=["stakeholders"])
     def crew_controller(
         train_id: str,
+        user: dict = Depends(role_required("crew_controller")),
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> CrewControllerResponse:
         prediction = get_prediction(train_id, prediction_variance)
@@ -299,6 +428,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
     @app.get("/predict/{train_id}/feeder-transport", response_model=FeederTransportResponse, tags=["stakeholders"])
     def feeder_transport(
         train_id: str,
+        user: dict = Depends(role_required("feeder_transport")),
         cutoff_time: datetime = Query(description="UTC cutoff by which the train should arrive."),
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> FeederTransportResponse:
@@ -326,6 +456,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
     @app.get("/predict/{train_id}/maintenance", response_model=MaintenanceResponse, tags=["stakeholders"])
     def maintenance(
         train_id: str,
+        user: dict = Depends(role_required("maintenance")),
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> MaintenanceResponse:
         prediction = get_prediction(train_id, prediction_variance)
@@ -349,17 +480,13 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> PredictionResponse:
         prediction = get_prediction(train_id, prediction_variance)
-        tid_hash = sum(ord(c) for c in train_id)
         prediction.pop("train_id", None)
         prediction.pop("message", None)
-        
-        # Populate explicit Problem Statement fields using deterministic proxies for the prototype
-        tid_hash = sum(ord(c) for c in train_id)
-        prediction["weather_risk_flag"] = "monsoon" if tid_hash % 7 == 0 else "fog" if tid_hash % 5 == 0 else "none"
-        prediction["tsr_active"] = bool(tid_hash % 8 == 0)
-        prediction["signal_aspect_restriction"] = bool(tid_hash % 11 == 0)
-        prediction["unscheduled_maintenance_block"] = bool(tid_hash % 13 == 0)
-        prediction["downstream_congestion_score"] = float(tid_hash % 100) / 100.0
+        prediction["weather_risk_flag"] = "none"
+        prediction["tsr_active"] = False
+        prediction["signal_aspect_restriction"] = False
+        prediction["unscheduled_maintenance_block"] = False
+        prediction["downstream_congestion_score"] = 0.0
 
         return PredictionResponse(
             train_id=train_id,
@@ -378,6 +505,12 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
 app = create_app()
 
 import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from pathlib import Path
 
 # Mount the static frontends

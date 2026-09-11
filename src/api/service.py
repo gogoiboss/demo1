@@ -38,3 +38,11 @@ class PredictionService:
             )
         except PipelineTrainNotFoundError as exc:
             raise TrainNotFoundError(str(exc)) from exc
+
+    def supported_train_ids(self) -> list[str]:
+        """Return IDs from the loaded snapshot, in stable display order."""
+        self._pipeline._load()
+        if self._pipeline._data is None:
+            return []
+        column = "train_number" if "train_number" in self._pipeline._data.columns else "train_id"
+        return sorted(self._pipeline._data[column].astype(str).unique().tolist())

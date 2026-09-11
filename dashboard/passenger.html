@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Passenger | RippleETA</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="has-grain" data-view="passenger">
+  
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
+      <a class="brand" href="#" aria-label="RippleETA home">
+        <span class="brand-mark">R</span>
+        <span class="brand-logotype">RippleETA</span>
+      </a>
+      <div class="divider"></div>
+      <span class="view-title">PASSENGER INTELLIGENCE</span>
+    </div>
+    <div class="topbar-right">
+      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
+      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
+      <div class="clock" id="clock">--:-- IST</div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <main class="main-content">
+      
+      <!-- Top controls -->
+      <header class="view-header">
+        <div class="header-left">
+          <h1 class="view-headline">Arrival Advisory</h1>
+          <p class="view-subhead">Calibrated delay bounds from the historical prediction snapshot.</p>
+        </div>
+        <div class="header-right">
+          <div class="train-input-group">
+            <label for="train-id">TRAIN</label>
+            <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
+            <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="view-panel is-active" id="passenger-view" data-panel="passenger" data-lang="en">
+        
+        <!-- The Honest Ticket -->
+        <div class="passenger-ticket" role="region" aria-label="Arrival window ticket" aria-live="polite">
+            <div class="ticket-header">
+                <span id="ticket-train">TRAIN --</span>
+                <span id="ticket-date">DATE --</span>
+            </div>
+            
+            <div class="ticket-window-block">
+                <span class="ticket-window-label">CALIBRATED ARRIVAL WINDOW</span>
+                <div class="ticket-window-value" id="ticket-window">
+                    -- <span>min</span> <span style="color:var(--text);font-size:3rem;margin:0 10px;">/</span> -- <span>min</span>
+                </div>
+                <span class="ticket-window-label" style="margin-top: 0.5rem;">P10 (Earliest) &nbsp;&mdash;&nbsp; P90 (Latest)</span>
+                <p id="ticket-p50" style="font-family:var(--mono); color:var(--signal); margin:.75rem 0 0;">P50: --</p>
+                <p id="ticket-provenance" style="font-family:var(--mono); color:var(--muted); margin:.5rem 0 0;">Source: --</p>
+            </div>
+            
+            <div style="text-align:center;">
+            </div>
+        </div>
+
+        <!-- Reflect-style Glassmorphic Timeline -->
+        <div class="reflect-timeline" role="region" aria-label="Journey Delay Trend">
+            <h3 class="timeline-title">Historical Station Trend</h3>
+            <ul class="timeline-list" id="pax-historical-timeline">
+                <li class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <p class="timeline-station">Awaiting Data...</p>
+                        <p class="timeline-delay">--</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Hidden legacy IDs for other modules -->
+        <span id="passenger-conflict" style="display:none"></span>
+        <span id="passenger-train" style="display:none">TRAIN 20507</span>
+      </section>
+
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

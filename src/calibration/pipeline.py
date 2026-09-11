@@ -28,7 +28,11 @@ class CalibratedPredictionPipeline:
 
         adjustments: dict[str, float] = {}
         if self.graph is not None:
-            conflicts = detect_conflicts(self.graph, current_state)
+            if hasattr(self.graph, "detect_conflicts"):
+                conflicts = self.graph.detect_conflicts(current_state)
+            else:
+                conflicts = detect_conflicts(self.graph, current_state)
+                
             for conflict in conflicts:
                 train_id = conflict["affected_train"]
                 adjustments[train_id] = adjustments.get(train_id, 0.0) + float(

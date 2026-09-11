@@ -125,12 +125,31 @@ def _get(endpoint: str, params: Optional[dict] = None) -> dict:
         resp.raise_for_status()
     raise RuntimeError(f"Exhausted {MAX_RETRIES} retries for {url}")
 
+import sqlite3
+
 def _load_replay_fixture(filename: str) -> dict:
-    path = Path("data/replay") / filename
-    if not path.exists():
-        raise FileNotFoundError(f"Replay fixture {path} not found.")
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    # Example filename: "12301_live.json"
+    parts = filename.replace(".json", "").split("_")
+    if len(parts) < 2:
+        raise FileNotFoundError(f"Invalid replay filename: {filename}")
+        
+    train_number = parts[0]
+    table = "live_status" if parts[1] == "live" else "route"
+    
+    db_path = Path("data/replay/ntes_capture.db")
+    if not db_path.exists():
+        raise FileNotFoundError(f"Seeded database {db_path} not found. Run 'make seed' first.")
+        
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute(f"SELECT data FROM {table} WHERE train_number=?", (train_number,))
+    row = c.fetchone()
+    conn.close()
+    
+    if row is None:
+        raise FileNotFoundError(f"Replay data for {train_number} not found in DB.")
+        
+    return json.loads(row[0])
 
 # ---------------------------------------------------------------------------
 # Public API

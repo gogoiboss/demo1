@@ -763,7 +763,12 @@ class CachedPropagationEngine:
             self._build_non_conflict_cache()
 
         # Baseline pass (no conflict edges)
-        baseline_actual = self._scheduled.copy()
+        # `_inject` writes observed/pinned state into `self._actual`.  The
+        # no-conflict pass must start from that state too; starting from the
+        # bare timetable silently discarded every injected delay and inflated
+        # the reported edge contribution (e.g. +64 instead of +9 minutes in
+        # the sandbox's 15-minute scenario).
+        baseline_actual = self._actual.copy()
         self._run_pass_with_preds(
             baseline_actual, pinned_baseline,
             self._nc_pred_ptr, self._nc_pred_indices, self._nc_pred_weights,

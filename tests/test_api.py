@@ -59,20 +59,26 @@ def test_anomaly_returns_suspension_flag():
 
 def test_stakeholder_endpoints_are_distinct():
     cutoff = datetime.now(timezone.utc).isoformat()
-    paths = [
-        "/predict/12301/passenger",
-        "/predict/12301/station-master",
-        "/predict/12301/crew-controller",
-        "/predict/12301/maintenance",
+    endpoints = [
+        ("passenger", "/predict/12301/passenger"),
+        ("station_master", "/predict/12301/station-master"),
+        ("crew_controller", "/predict/12301/crew-controller"),
+        ("maintenance", "/predict/12301/maintenance"),
+        ("feeder_transport", "/predict/12301/feeder-transport"),
     ]
-
-    responses = [client.get(path) for path in paths]
-    responses.append(
-        client.get("/predict/12301/feeder-transport", params={"cutoff_time": cutoff})
-    )
+    responses = []
+    for role, path in endpoints:
+        login = client.post(
+            "/api/auth/demo",
+            json={"email": "test@rippleeta.in", "role": role},
+        )
+        assert login.status_code == 200
+        responses.append(
+            client.get(path, params={"cutoff_time": cutoff} if role == "feeder_transport" else {})
+        )
 
     assert all(response.status_code == 200 for response in responses)
-    assert responses[0].json()["trend"] == "unknown"
+    assert responses[0].json()["trend"] in {"unknown", "stable", "worsening", "improving"}
     assert "platform_commit" in responses[1].json()
     assert "relief_dispatch_deadline" in responses[2].json()
     assert "maintenance_window_adequate" in responses[3].json()

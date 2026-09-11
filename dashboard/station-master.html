@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Station Master | RippleETA</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="has-grain" data-view="station">
+  
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
+      <a class="brand" href="#" aria-label="RippleETA home">
+        <span class="brand-mark">R</span>
+        <span class="brand-logotype">RippleETA</span>
+      </a>
+      <div class="divider"></div>
+      <span class="view-title">STATION INTELLIGENCE</span>
+    </div>
+    <div class="topbar-right">
+      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
+      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
+      <div class="clock" id="clock">--:-- IST</div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <main class="main-content">
+      
+      <!-- Top controls -->
+      <header class="view-header">
+        <div class="header-left">
+          <h1 class="view-headline">Platform Triage</h1>
+          <p class="view-subhead">Commit platform decisions against the calibrated arrival interval.</p>
+        </div>
+        <div class="header-right">
+          <div class="train-input-group">
+            <label for="train-id">FOCAL TRAIN</label>
+            <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
+            <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="view-panel is-active" id="station-view" data-panel="station">
+        
+        <div class="triage-matrix">
+            <div class="decision-card" id="triage-card">
+                <span class="decision-kicker">PLATFORM ALLOCATION</span>
+                <h2 class="decision-status" id="triage-decision">--</h2>
+                <div class="decision-details" id="triage-details">
+                    Train: <span id="triage-train">--</span><br>
+                    P50 ETA: <span id="triage-p50">--</span> min<br>
+                    P10 / P90: <span id="triage-p10">--</span> / <span id="triage-p90">--</span> min<br>
+                    Deadline: <span id="triage-deadline">--</span> min<br>
+                    <br>
+                    <span id="triage-msg">Loading data...</span>
+                </div>
+            </div>
+            
+            <div class="decision-card" style="background:var(--primary); border:none;">
+                <span class="decision-kicker" style="color:rgba(243,237,227,0.5);">VHF SYNTHESIS</span>
+                <pre id="triage-vhf" style="font-family:var(--mono); font-size:1.1rem; color:var(--surface); line-height:1.6; margin:0;">
+AWAITING DATA...
+                </pre>
+            </div>
+        </div>
+
+        <p id="data-source" class="data-provenance">Source status: --</p>
+        <a class="back-link role-link" data-role="sandbox" href="sandbox.html">Open replay sandbox</a>
+
+        <h3 class="timeline-title" style="max-width:900px; margin: 0 auto -2rem auto; position:relative; z-index:10;">Incoming Sequence</h3>
+        <div class="incoming-strip" id="incoming-sequence">
+            <div class="incoming-train">
+                <p class="inc-train-id">AWAITING</p>
+            </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

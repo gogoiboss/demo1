@@ -1,37 +1,49 @@
-with open("src/api/app.py", "r", encoding="utf-8") as f:
-    text = f.read()
-
 import re
 
-# We will inject some dummy mapping logic in get_prediction or predict
-old_predict = """    @app.get("/predict/{train_id}", response_model=PredictionResponse, tags=["prediction"])
-    def predict(
-        train_id: str,
-        prediction_variance: float | None = Query(default=None, ge=0),
-    ) -> PredictionResponse:
-        prediction = get_prediction(train_id, prediction_variance)
-        prediction.pop("train_id", None)"""
+with open('src/api/app.py', 'r') as f:
+    app_code = f.read()
 
-new_predict = """    @app.get("/predict/{train_id}", response_model=PredictionResponse, tags=["prediction"])
-    def predict(
-        train_id: str,
-        prediction_variance: float | None = Query(default=None, ge=0),
-    ) -> PredictionResponse:
-        prediction = get_prediction(train_id, prediction_variance)
-        prediction.pop("train_id", None)
-        
-        # Populate explicit Problem Statement fields using deterministic proxies for the prototype
-        tid_hash = sum(ord(c) for c in train_id)
-        prediction["weather_risk_flag"] = "monsoon" if tid_hash % 7 == 0 else "fog" if tid_hash % 5 == 0 else "none"
-        prediction["tsr_active"] = bool(tid_hash % 8 == 0)
-        prediction["signal_aspect_restriction"] = bool(tid_hash % 11 == 0)
-        prediction["unscheduled_maintenance_block"] = bool(tid_hash % 13 == 0)
-        prediction["downstream_congestion_score"] = float(tid_hash % 100) / 100.0
+app_code = app_code.replace(
+    'from fastapi import FastAPI, Query', 
+    'from fastapi import FastAPI, Query, Response, Depends\nfrom pydantic import BaseModel\nfrom .auth import create_session_token, verify_google_token, get_current_user, role_required\n\nclass GoogleLoginRequest(BaseModel):\n    credential: str\n\nclass DemoLoginRequest(BaseModel):\n    role: str\n    email: str = "demo@example.com"\n'
+)
+
+auth_routes = """
+    @app.post("/api/auth/google", tags=["auth"])
+    def google_login(req: GoogleLoginRequest, response: Response):
+        try:
+            idinfo = verify_google_token(req.credential)
+            email = idinfo.get("email")
+            role = "passenger"
+            if "station" in email.lower(): role = "station_master"
+            if "crew" in email.lower(): role = "crew_controller"
+            if "feeder" in email.lower(): role = "feeder_transport"
+            if "maintenance" in email.lower(): role = "maintenance"
+            
+            token = create_session_token(email, role)
+            response.set_cookie(key="rippleeta_session", value=token, httponly=True)
+            return {"success": True, "role": role}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    @app.post("/api/auth/demo", tags=["auth"])
+    def demo_login(req: DemoLoginRequest, response: Response):
+        token = create_session_token(req.email, req.role)
+        response.set_cookie(key="rippleeta_session", value=token, httponly=True)
+        return {"success": True, "role": req.role}
+
+    @app.get("/api/me", tags=["auth"])
+    def get_me(user: dict = Depends(get_current_user)):
+        return {"email": user.get("sub"), "role": user.get("role")}
 """
 
-text = text.replace(old_predict, new_predict)
+app_code = app_code.replace('    @app.get("/predict/{train_id}/passenger"', auth_routes + '\n    @app.get("/predict/{train_id}/passenger"')
 
-with open("src/api/app.py", "w", encoding="utf-8") as f:
-    f.write(text)
+app_code = app_code.replace('def passenger(\n        train_id: str,', 'def passenger(\n        train_id: str,\n        user: dict = Depends(role_required("passenger")),')
+app_code = app_code.replace('def station_master(\n        train_id: str,', 'def station_master(\n        train_id: str,\n        user: dict = Depends(role_required("station_master")),')
+app_code = app_code.replace('def crew_controller(\n        train_id: str,', 'def crew_controller(\n        train_id: str,\n        user: dict = Depends(role_required("crew_controller")),')
+app_code = app_code.replace('def feeder_transport(\n        train_id: str,', 'def feeder_transport(\n        train_id: str,\n        user: dict = Depends(role_required("feeder_transport")),')
+app_code = app_code.replace('def maintenance(\n        train_id: str,', 'def maintenance(\n        train_id: str,\n        user: dict = Depends(role_required("maintenance")),')
 
-print("app.py patched with proxy fields.")
+with open('src/api/app.py', 'w') as f:
+    f.write(app_code)

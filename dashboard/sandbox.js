@@ -35,15 +35,18 @@ const sandboxEl = {
 
 // ── Color palette (matching RippleETA design system) ───────────────────
 const COLORS = {
-  teal:       '#61c5bd',
-  tealDeep:   '#1d686a',
-  amber:      '#f5b84b',
-  amberSoft:  '#6f4d1e',
-  coral:      '#f07868',
-  text:       '#edf4ef',
-  muted:      '#8da1a0',
-  ink:        '#091113',
-  panel:      '#101b1d',
+  // Keep the fallback-rendered sandbox in the same railway palette as its CSS.
+  // Green-grey is deliberately limited to the safe/no-conflict state; red is
+  // reserved for a real collision.
+  teal:       '#4D7A64',
+  tealDeep:   '#365543',
+  amber:      '#F5A623',
+  amberSoft:  '#7C5717',
+  coral:      '#C1272D',
+  text:       '#F3ECDD',
+  muted:      '#B08D57',
+  ink:        '#0B2447',
+  panel:      '#0B2447',
 };
 
 // ── Severity → visual mapping ──────────────────────────────────────────
@@ -58,6 +61,7 @@ const SEVERITY_MAP = {
 let sandboxState = {
   lastResult: null,
   debounceTimer: null,
+  collisionTimer: null,
   apiOnline: false,
   thresholdMin: 6,  // updated from API response
 };
@@ -141,23 +145,11 @@ function updateSandboxVisuals(result) {
   // ── Train 1 position & color (moves right as delay increases) ──
   const train1 = sandboxEl.train1();
   if (train1) {
+    train1.querySelector('.train-body').style.removeProperty('background');
     const progress = Math.min(delay / 30, 1);
     const train1Left = TRACK.train1Base + progress * (TRACK.train1Max - TRACK.train1Base);
     train1.style.left = `${train1Left}%`;
-    // Color transitions: teal (0-6 min) → amber (6-20) → coral (20+)
-    if (delay <= sandboxState.thresholdMin) {
-      train1.style.setProperty('--train-color', COLORS.teal);
-      train1.querySelector('.train-body').style.background =
-        `linear-gradient(135deg, ${COLORS.teal}, ${COLORS.tealDeep})`;
-    } else if (delay <= 20) {
-      train1.style.setProperty('--train-color', COLORS.amber);
-      train1.querySelector('.train-body').style.background =
-        `linear-gradient(135deg, ${COLORS.amber}, #c87f0a)`;
-    } else {
-      train1.style.setProperty('--train-color', COLORS.coral);
-      train1.querySelector('.train-body').style.background =
-        `linear-gradient(135deg, ${COLORS.coral}, #b84a3c)`;
-    }
+    train1.style.setProperty('--train-color', result.conflict_active ? COLORS.amber : COLORS.teal);
     // Update delay label
     const label = train1.querySelector('.train-delay');
     if (label) label.textContent = `+${delay.toFixed(0)}`;
@@ -166,17 +158,14 @@ function updateSandboxVisuals(result) {
   // ── Train 2 position & color (shifts when conflict pushes it) ──
   const train2 = sandboxEl.train2();
   if (train2) {
+    train2.querySelector('.train-body').style.removeProperty('background');
     const conflictProgress = Math.min(result.conflict_addition_min / 24, 1);
     const train2Left = TRACK.train2Base + conflictProgress * TRACK.train2ConflictShift;
     train2.style.left = `${train2Left}%`;
 
     if (result.conflict_active) {
-      train2.querySelector('.train-body').style.background =
-        `linear-gradient(135deg, ${severity.trainColor}, ${severity.glow})`;
       train2.classList.add('is-conflicted');
     } else {
-      train2.querySelector('.train-body').style.background =
-        `linear-gradient(135deg, ${COLORS.amber}, #c87f0a)`;
       train2.classList.remove('is-conflicted');
     }
     // Update delay label
@@ -189,8 +178,12 @@ function updateSandboxVisuals(result) {
   if (beam) {
     if (result.conflict_active) {
       beam.classList.add('is-active');
-      beam.style.setProperty('--beam-color', severity.color);
       beam.style.opacity = Math.min(0.3 + result.conflict_addition_min / 30, 1);
+      beam.classList.remove('is-collision');
+      void beam.offsetWidth;
+      beam.classList.add('is-collision');
+      window.clearTimeout(sandboxState.collisionTimer);
+      sandboxState.collisionTimer = window.setTimeout(() => beam.classList.remove('is-collision'), 900);
     } else {
       beam.classList.remove('is-active');
       beam.style.opacity = 0;
@@ -251,7 +244,7 @@ function updateSandboxVisuals(result) {
   const dot = sandboxEl.statusDot();
   const lbl = sandboxEl.statusLabel();
   if (dot) dot.className = `status-dot ${sandboxState.apiOnline ? 'is-online' : ''}`;
-  if (lbl) lbl.textContent = sandboxState.apiOnline ? 'LIVE GRAPH ENGINE' : 'LOCAL FALLBACK';
+  if (lbl) lbl.textContent = sandboxState.apiOnline ? 'REPLAY GRAPH ENGINE' : 'LOCAL CALCULATION FALLBACK';
 }
 
 // ── Slider handler (debounced) ─────────────────────────────────────────
@@ -266,7 +259,7 @@ function onSliderInput(e) {
   clearTimeout(sandboxState.debounceTimer);
   sandboxState.debounceTimer = setTimeout(async () => {
     const apiResult = await fetchSandboxResult(delay);
-    updateSandboxVisuals(apiResult);
+    if (sandboxEl.slider() && parseFloat(sandboxEl.slider().value) === delay) updateSandboxVisuals(apiResult);
   }, 150);
 }
 
@@ -282,7 +275,9 @@ function initSandbox() {
   updateSandboxVisuals(initialResult);
 
   // Try to reach API for initial accuracy
-  fetchSandboxResult(0).then(result => updateSandboxVisuals(result));
+  fetchSandboxResult(0).then(result => {
+    if (sandboxEl.slider() && parseFloat(sandboxEl.slider().value) === 0) updateSandboxVisuals(result);
+  });
 
   // Add ambient floating animation to trains
   addAmbientMotion();

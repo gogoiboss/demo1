@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sandbox | RippleETA</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="has-grain" data-view="sandbox">
+  
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
+      <a class="brand" href="#" aria-label="RippleETA home">
+        <span class="brand-mark">R</span>
+        <span class="brand-logotype">RippleETA</span>
+      </a>
+      <div class="divider"></div>
+      <span class="view-title">GHOST TRAIN SANDBOX</span>
+    </div>
+    <div class="topbar-right">
+      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
+      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
+      <div class="clock" id="clock">--:-- IST</div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <main class="main-content">
+      
+      <header class="view-header">
+        <div class="header-left">
+          <h1 class="view-headline">Scenario Injection</h1>
+          <p class="view-subhead">Test conflict propagation and threshold triggering.</p>
+        </div>
+      </header>
+
+      <section class="view-panel is-active" id="sandbox-view" data-panel="sandbox">
+        
+        <div class="sandbox-container">
+            <div class="sandbox-header">
+                <div>
+                    <h2 class="sandbox-title">Delay Injection Simulator</h2>
+                    <p style="font-family:var(--sans); color:var(--muted);">Inject hypothetical delay into EXPRESS 56789</p>
+                </div>
+                <div class="sandbox-badge">[ REPLAY SIMULATION ]</div>
+            </div>
+            
+            <div class="iso-grid" id="sandbox-scene">
+              <div class="iso-plane" style="position:relative; min-height:220px;">
+                <div class="iso-train" id="sandbox-train1" style="position:absolute; left:22%; top:35%;"><span class="train-body"></span><span class="train-delay">+0</span></div>
+                <div class="iso-train" id="sandbox-train2" style="position:absolute; left:30%; top:65%;"><span class="train-body"></span><span class="train-delay">+55</span></div>
+                <div id="sandbox-conflict-beam" style="position:absolute; left:25%; right:55%; top:49%; height:3px; opacity:0; background:var(--warning-500);"></div>
+                <span id="sandbox-conflict-label" style="position:absolute; left:40%; top:42%; font-family:var(--mono);"></span>
+                <span id="sandbox-threshold-line" style="position:absolute; left:20%; top:5%; bottom:5%; border-left:1px dashed var(--warning-500);"></span>
+                <span id="sandbox-threshold-label" style="position:absolute; left:20%; top:0; font-family:var(--mono);">HEADWAY THRESHOLD</span>
+                </div>
+            </div>
+
+            <p style="font-family:var(--mono); color:var(--muted);"><span id="sandbox-status-dot" class="status-dot"></span> <span id="sandbox-status-label">CONNECTING TO REPLAY GRAPH ENGINE</span></p>
+            
+            <!-- Delay injection slider -->
+            <div class="sandbox-control">
+              <div class="slider-header" style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
+                <span class="card-label" style="font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted);">INJECT DELAY ON EXPRESS 56789</span>
+                <strong id="sandbox-slider-value" class="slider-value" style="font-family:var(--mono); color:var(--primary); font-size: 1.2rem;">0 min</strong>
+              </div>
+              <div class="slider-track-container" style="position:relative; margin-bottom: 2rem;">
+                <input type="range" id="sandbox-delay-slider" min="0" max="30" step="1" value="0" class="sandbox-slider" style="width:100%; margin-bottom: 0.5rem;" />
+              </div>
+            </div>
+
+            <!-- Result readouts -->
+            <div class="sandbox-results" style="display:flex; gap: 2rem; justify-content:space-between;">
+              <div style="flex:1;">
+                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">CONFLICT PROPAGATION</span>
+                <strong id="sandbox-result-conflict" class="sandbox-big-number" style="font-family:var(--display); font-size:3rem; color:var(--primary);">0</strong>
+                <span class="sandbox-unit" style="font-family:var(--sans); color:var(--muted);">min added</span>
+              </div>
+              <div style="flex:1;">
+                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">RAJDHANI 12301 TOTAL DELAY</span>
+                <strong id="sandbox-result-total" class="sandbox-big-number" style="font-family:var(--display); font-size:3rem; color:var(--primary);">55.0</strong>
+                <span class="sandbox-unit" style="font-family:var(--sans); color:var(--muted);">min (base 55)</span>
+              </div>
+              <div style="flex:1;">
+                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">SEVERITY</span>
+                <strong id="sandbox-result-severity" class="sandbox-severity-badge" style="display:block; padding:8px 12px; background:rgba(61,122,92,0.2); color:var(--success); border-radius:4px; font-family:var(--sans); font-weight:bold;">NO CONFLICT</strong>
+              </div>
+            </div>
+            
+            <div style="background:#111; color:var(--text-inv); padding: 1.5rem; border-radius: 8px;">
+                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:rgba(255,255,255,0.5); margin-bottom:0.5rem;">MAX-PLUS PROPAGATION</span>
+                <code id="sandbox-math" class="sandbox-formula" style="font-family:var(--mono); color:var(--signal); display:block; margin-bottom: 0.5rem;">actual = max(1580, 1574) = 1580</code>
+                <p id="sandbox-explanation" class="sandbox-explain" style="font-family:var(--sans); color:rgba(255,255,255,0.7); margin:0;">max(1580, 1574) = 1580 ? conflict adds +0.0 min</p>
+            </div>
+            
+            <div style="text-align:center; margin-top: 1rem;">
+            </div>
+        </div>
+        
+      </section>
+
+    </main>
+  </div>
+  <script src="sandbox.js"></script>
+</body>
+</html>

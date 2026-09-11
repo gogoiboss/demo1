@@ -44,7 +44,31 @@ class GraphDemoResponse(BaseModel):
     conflict_addition_min: float
     final_delay_min: float
     message: str
+    source_type: str = "local_replay"
+    generated_at: datetime | None = None
 
+
+class SupportedTrain(BaseModel):
+    train_id: str
+
+
+class SystemStatusResponse(BaseModel):
+    mode: Literal["REPLAY", "LIVE"]
+    source: str
+    live_feed_configured: bool
+    refresh_interval_seconds: int | None = None
+    supported_train_count: int
+    model_loaded: bool
+
+
+
+class StationHistory(BaseModel):
+    station_code: str
+    station_name: str
+    scheduled_arrival: datetime
+    actual_arrival: datetime | None = None
+    delay_min: float
+    status: Literal["departed", "arrived", "en_route"]
 
 class PassengerResponse(BaseModel):
     train_id: str
@@ -54,6 +78,7 @@ class PassengerResponse(BaseModel):
     next_update_at: datetime
     message: str
     cost_asymmetry_applied: bool = True
+    historical_stations: list[StationHistory] = Field(default_factory=list)
 
 
 class StationMasterResponse(BaseModel):
@@ -67,6 +92,7 @@ class StationMasterResponse(BaseModel):
     radio_summary: str = ""
     urgency_rank: Literal["critical", "high", "normal", "low"] = "normal"
     cost_asymmetry_applied: bool = True
+    historical_stations: list[StationHistory] = Field(default_factory=list)
     
     # Prescriptive & Tier 1-3 Features
     ripple_score: int = 0

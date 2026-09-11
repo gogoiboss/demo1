@@ -10,8 +10,18 @@ services:
       - ./models:/app/models
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - RIPPLEETA_MODE=replay
     depends_on:
       - mlflow
+
+  dashboard:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./dashboard:/usr/share/nginx/html:ro
+    depends_on:
+      - api
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:v2.7.0

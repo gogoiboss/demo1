@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Maintenance | RippleETA</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="has-grain" data-view="maintenance">
+  
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
+      <a class="brand" href="#" aria-label="RippleETA home">
+        <span class="brand-mark">R</span>
+        <span class="brand-logotype">RippleETA</span>
+      </a>
+      <div class="divider"></div>
+      <span class="view-title">MAINTENANCE INTELLIGENCE</span>
+    </div>
+    <div class="topbar-right">
+      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
+      <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
+      <div class="clock" id="clock">--:-- IST</div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <main class="main-content">
+      
+      <header class="view-header">
+        <div class="header-left">
+          <h1 class="view-headline">Turnaround Budget</h1>
+          <p class="view-subhead">Available turnaround derived from the predicted arrival bound.</p>
+        </div>
+        <div class="header-right">
+          <div class="train-input-group">
+            <label for="train-id">FOCAL TRAIN</label>
+            <input type="text" id="train-id" class="train-input" value="20507">
+            <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="view-panel is-active" id="maintenance-view" data-panel="maintenance">
+        
+        <div class="measuring-tape-container">
+            <div class="tape-header">
+                <div>
+                    <p class="tradeoff-title">Available Turnaround Window</p>
+                    <p style="font-family:var(--sans); color:var(--text);" id="maint-train-lbl">Evaluating train...</p>
+                </div>
+                <div class="tape-val" id="maint-val">--<span>min</span></div>
+            </div>
+            
+            <!-- Measuring Tape -->
+            <div class="tape-ruler">
+                <div class="tape-ticks"></div>
+                <div class="tape-ticks-major"></div>
+                <div class="tape-fill" id="maint-fill" style="width: 100%;"></div>
+            </div>
+            
+            <div class="tape-status" id="maint-status">AWAITING DATA</div>
+            
+            <div style="text-align:center; margin-top: 2rem;">
+            </div>
+        </div>
+        
+      </section>
+
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

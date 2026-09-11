@@ -32,3 +32,10 @@ Rather than silently ignoring this gap, we made an explicit modeling choice to s
 - **SOFT Conflicts (`conflict_type="soft"`):** Shared-section headway. These are **probabilistic approximations**. We infer section congestion dynamically from the scheduled timetable's station-pairs rather than relying on absent signal-state telemetry.
 
 This distinction is baked directly into the graph data structure and surfaced through the API (`get_prediction`) so that downstream consumers (e.g. Station Masters) can assign different confidence levels to a deterministic hardware delay vs. a probabilistic congestion delay.
+
+## Phase 1 Audit Disclosures
+- **Cross-Train Attribution:** NOT IMPLEMENTED. The UI field is a stub based on train ID hashing.
+- **Downstream Congestion Score:** NOT IMPLEMENTED. The UI field is a stub.
+- **Ripple Score & Financial INR Impact:** NOT IMPLEMENTED. Currently computed via modulo arithmetic.
+- **Cost Asymmetry:** NOT IMPLEMENTED. Hardcoded to True in the API.
+- **Nightly Recalibration:** PARTIALLY IMPLEMENTED. The script exists and trains a model, but explicitly prevents auto-deployment.

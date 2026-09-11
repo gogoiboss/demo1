@@ -1,579 +1,388 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RippleETA | Network Control</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>RippleETA | One Network, Seven Realities</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --hero-image: url('https://upload.wikimedia.org/wikipedia/commons/6/66/Mumbai_CST_interior.jpg');
+    }
+    body, html {
+        margin: 0; padding: 0;
+        scroll-behavior: smooth;
+        background: var(--surface);
+        color: var(--text);
+    }
+    
+    /* ChainGPT-style vertical nav */
+    .vertical-nav {
+        position: fixed;
+        right: 2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        z-index: 1000;
+    }
+    .nav-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: var(--border-300);
+        cursor: pointer;
+        position: relative;
+        transition: background 0.3s ease;
+    }
+    .nav-dot.active {
+        background: var(--primary);
+        box-shadow: 0 0 8px rgba(27,42,74,0.4);
+    }
+    .nav-dot::after {
+        content: attr(data-label);
+        position: absolute;
+        right: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        white-space: nowrap;
+        font-family: var(--sans);
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        color: var(--primary);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease, right 0.3s ease;
+    }
+    .nav-dot:hover::after, .nav-dot.active::after {
+        opacity: 1;
+        right: 20px;
+    }
+
+    /* Scroll Sections */
+    section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 4rem 10vw;
+        position: relative;
+    }
+
+    /* Hero Section with Heritage Photo */
+    .hero-section {
+        overflow: hidden;
+    }
+    .hero-bg {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: var(--hero-image);
+        background-size: cover;
+        background-position: center;
+        opacity: 0.15; /* Subtle */
+        filter: grayscale(100%) contrast(1.2);
+        z-index: 0;
+    }
+    .hero-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(243,237,227,0.95) 0%, rgba(243,237,227,0.7) 100%);
+        z-index: 1;
+    }
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+    }
+    .hero-insight {
+        font-family: var(--display);
+        font-size: clamp(3rem, 8vw, 6rem);
+        color: var(--primary);
+        line-height: 1.1;
+        margin: 0 0 1.5rem;
+        letter-spacing: -0.02em;
+    }
+    .hero-sub {
+        font-family: var(--sans);
+        font-size: clamp(1.25rem, 2vw, 1.75rem);
+        color: var(--text);
+        max-width: 600px;
+    }
+
+    /* Numbered Sections */
+    .section-number {
+        font-family: var(--mono);
+        font-size: 1rem;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-family: var(--display);
+        font-size: 4rem;
+        color: var(--primary);
+        margin: 0 0 2rem;
+    }
+    .section-text {
+        font-family: var(--sans);
+        font-size: 1.25rem;
+        color: var(--text);
+        max-width: 600px;
+        line-height: 1.6;
+    }
+    
+    /* Roles Grid */
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border-300);
+      padding: 2.5rem;
+      cursor: pointer;
+      transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .role-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 4px; height: 100%;
+        background: var(--primary);
+        transform: scaleY(0);
+        transition: transform 400ms ease;
+        transform-origin: bottom;
+    }
+    .role-card:hover {
+      background: #EBE4D5;
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(27,42,74,0.08);
+    }
+    .role-card:hover::before {
+        transform: scaleY(1);
+    }
+    .role-title {
+      font-family: var(--display);
+      font-size: 1.75rem;
+      color: var(--primary);
+      margin: 0 0 1rem;
+    }
+    .role-desc {
+      font-family: var(--sans);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 0;
+    }
+    
+    .lottie-accent {
+        position: absolute;
+        bottom: 2rem;
+        right: 4rem;
+        opacity: 0.8;
+    }
+  </style>
 </head>
-<body>
-  <div class="app-shell">
-    <header class="topbar">
-      <a class="brand" href="#passenger" aria-label="RippleETA home">
-        <span class="brand-mark">R</span>
-        <span><strong>RippleETA</strong></span>
-<span id="mode-badge" style="margin-left: 1rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: var(--warning); color: #000; display: none;"></span>
-      </a>
-      <div class="topbar-status">
-        <span id="connection-dot" class="status-dot"></span>
-        <span id="connection-label">API CONNECTING</span>
-        <span class="separator"></span>
-        <span id="clock">--:--:-- IST</span>
+<body class="has-grain">
+  
+  <nav class="vertical-nav">
+      <a href="#hero" class="nav-dot active" data-label="HOME"></a>
+      <a href="#propagation" class="nav-dot" data-label="01. PROPAGATION"></a>
+      <a href="#certainty" class="nav-dot" data-label="02. CERTAINTY"></a>
+      <a href="#roles" class="nav-dot" data-label="03. ROLES"></a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero" class="hero-section">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay has-grain"></div>
+      <div class="hero-content">
+          <h1 class="hero-insight">One network.<br>Seven realities.</h1>
+          <p class="hero-sub">Predictive intelligence for every stakeholder on the Indian Railways.</p>
       </div>
-    </header>
+  </section>
 
-    <!-- RIGHT-EDGE STATION NAV: persistent vertical strip of 7 station-stop markers
-         connected by a double-rail track segment. Active one pulses signal-lamp amber.
-         Hover shows view name via data-label. -->
-    <nav class="signal-nav" aria-label="Section quick nav">
-      <button class="signal-dot is-active" data-nav="station" data-label="STATION MASTER" title="Station Master"><span></span></button>
-      <button class="signal-dot" data-nav="passenger" data-label="PASSENGER" title="Passenger"><span></span></button>
-      <button class="signal-dot" data-nav="crew" data-label="CREW CONTROLLER" title="Crew Controller"><span></span></button>
-      <button class="signal-dot" data-nav="feeder" data-label="FEEDER TRANSPORT" title="Feeder Transport"><span></span></button>
-      <button class="signal-dot" data-nav="maintenance" data-label="MAINTENANCE YARD" title="Maintenance Yard"><span></span></button>
-      <button class="signal-dot" data-nav="network" data-label="CONTROL ROOM" title="Network Control Room"><span></span></button>
-      <button class="signal-dot" data-nav="sandbox" data-label="GHOST TRAIN" title="Ghost Train Sandbox"><span></span></button>
-    </nav>
+  <!-- 01. Propagation -->
+  <section id="propagation" class="scroll-section">
+      <div class="section-number">
+          <span class="live-pulse" id="api-health-1"></span> 01
+      </div>
+      <h2 class="section-title">Propagation</h2>
+      <p class="section-text">
+          A delay doesn't exist in isolation. It cascades through junctions, overlapping platform claims, and rippling into crew schedules. We track the knock-on effects before they happen using Conformal Prediction bounds.
+      </p>
+      <div class="lottie-accent">
+      </div>
+  </section>
 
-    <!-- LIVE STATUS TICKER: bottom-left, shows data mode + last updated with
-         departure-board flip animation on digit changes -->
-    <div class="live-ticker" aria-live="polite">
-      <span id="ticker-mode" class="ticker-mode is-replay">REPLAY</span>
-      <span class="ticker-sep"></span>
-      <span class="ticker-update">
-        UPDATED <span id="ticker-value" class="ticker-digit">0</span>s AGO
-      </span>
-    </div>
+  <!-- 02. Certainty -->
+  <section id="certainty" class="scroll-section">
+      <div class="section-number">
+          <span class="live-pulse" id="api-health-2"></span> 02
+      </div>
+      <h2 class="section-title">Certainty</h2>
+      <p class="section-text">
+          Instead of offering a single misleading ETA, we compute a calibrated window of uncertainty (P10 to P90). As a train approaches, the window tightens. Decisions are made only when statistical confidence allows.
+      </p>
+  </section>
 
-    <!-- ACCESSIBILITY TOGGLE: high-contrast button, stays in railway palette -->
-    <button class="a11y-toggle" id="a11y-toggle" title="Toggle high contrast" aria-label="Toggle high contrast mode">A</button>
-
-    <main>
-      <section class="command-bar" aria-label="Dashboard controls">
-        <div><h1>RippleETA</h1></div>
-        <div class="controls">
-          <label class="train-picker">TRAIN <input id="train-id" value="20507" inputmode="numeric" aria-label="Train number"></label>
-          <button id="refresh-button" class="icon-button" type="button" title="Refresh prediction" aria-label="Refresh prediction">↻</button>
-        </div>
-      </section>
-
+  <!-- 03. Roles -->
+  <section id="roles" class="scroll-section">
+      <div class="section-number">
+          <span class="live-pulse" id="api-health-3"></span> 03
+      </div>
+      <h2 class="section-title">Access</h2>
+      <p class="section-text">
+          Different operational roles require completely distinct interfaces into the same underlying reality. Choose your perspective.
+      </p>
       
+      <div class="train-input-group" style="max-width: 32rem; margin: 2rem 0 1rem;">
+        <label for="landing-train">SEARCH SUPPORTED TRAIN</label>
+        <input id="landing-train" class="train-input" list="supported-trains" value="20507" placeholder="e.g. 12301">
+        <datalist id="supported-trains"></datalist>
+        <button id="landing-search" class="btn-refresh" type="button" aria-label="Search train">SEARCH</button>
+        <p id="landing-status" style="font-family:var(--mono); color:var(--muted); margin: .75rem 0 0;">Loading supported snapshot IDs...</p>
+      </div>
+      <div class="role-grid">
+        <a href="passenger.html" class="role-card" data-role="passenger">
+          <h3 class="role-title">Passenger</h3>
+          <p class="role-desc">Honest ticket timeline and platform advisory.</p>
+        </a>
+        <a href="station-master.html" class="role-card" data-role="station_master">
+          <h3 class="role-title">Station Master</h3>
+          <p class="role-desc">Platform triage matrix and VHF synthesis.</p>
+        </a>
+        <a href="crew.html" class="role-card" data-role="crew_controller">
+          <h3 class="role-title">Crew Controller</h3>
+          <p class="role-desc">HOER limit bounds vs. arrival windows.</p>
+        </a>
+        <a href="feeder.html" class="role-card" data-role="feeder_transport">
+          <h3 class="role-title">Feeder Transport</h3>
+          <p class="role-desc">Hold vs. depart probability thresholds.</p>
+        </a>
+        <a href="maintenance.html" class="role-card" data-role="maintenance">
+          <h3 class="role-title">Maintenance</h3>
+          <p class="role-desc">Rapid turnaround budget ticking down.</p>
+        </a>
+        <a href="control.html" class="role-card" data-role="control_room">
+          <h3 class="role-title">Control Room</h3>
+          <p class="role-desc">Network-wide anomaly propagation radar.</p>
+        </a>
+        <a href="sandbox.html" class="role-card" data-role="sandbox">
+          <h3 class="role-title">Ghost Sandbox</h3>
+          <p class="role-desc">Scenario injection simulator for delay testing.</p>
+        </a>
+      </div>
+  </section>
 
-      <div id="notice" class="notice" role="status"></div>
+  <script>
+    // Intersection Observer for Vertical Nav Highlighting
+    const sections = document.querySelectorAll('section');
+    const navDots = document.querySelectorAll('.nav-dot');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navDots.forEach(dot => {
+                    dot.classList.toggle('active', dot.getAttribute('href') === `#${entry.target.id}`);
+                });
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    sections.forEach(section => observer.observe(section));
 
-      <section class="pipeline-strip" aria-label="Pipeline status">
-        <div class="pipeline-cell"><span class="pipeline-label">DATA PATH</span><strong id="pipeline-mode">CHECKING</strong></div>
-        <div class="pipeline-cell"><span class="pipeline-label">API HEALTH</span><strong id="pipeline-health">CHECKING</strong></div>
-        <div class="pipeline-cell"><span class="pipeline-label">MODEL STATE</span><strong id="pipeline-model">CHECKING</strong></div>
-        <div class="pipeline-cell pipeline-explanation"><span class="pipeline-label">SYSTEM</span><span id="pipeline-explanation">Loading...</span></div>
-      </section>
+    const LANDING_API = window.location.port === '8000' ? '' : 'http://127.0.0.1:8000';
+    const trainInput = document.getElementById('landing-train');
+    const landingStatus = document.getElementById('landing-status');
+    const trainList = document.getElementById('supported-trains');
+    let supportedTrainIds = [];
+    async function loadSupportedTrains() {
+      try {
+        const response = await fetch(`${LANDING_API}/trains`);
+        const trains = await response.json();
+        supportedTrainIds = trains.map(({ train_id }) => train_id);
+        trainList.innerHTML = trains.map(({ train_id }) => `<option value="${train_id}"></option>`).join('');
+        landingStatus.textContent = `${trains.length} supported trains · historical snapshot`; 
+      } catch (error) {
+        landingStatus.textContent = 'Snapshot unavailable · connect to the API to search trains';
+      }
+    }
+    const selectedTrain = new URLSearchParams(window.location.search).get('train') || localStorage.getItem('rippleeta_train_id') || '20507';
+    trainInput.value = selectedTrain;
+    document.getElementById('landing-search').addEventListener('click', () => {
+      const value = trainInput.value.trim();
+      if (!value) return;
+      if (supportedTrainIds.length && !supportedTrainIds.includes(value)) {
+        landingStatus.textContent = `Train ${value} is not in the supported snapshot. Choose a listed ID.`;
+        return;
+      }
+      localStorage.setItem('rippleeta_train_id', value);
+      landingStatus.textContent = `Selected train ${value}`;
+    });
+    loadSupportedTrains();
 
-      <div class="km-rule" aria-hidden="true"></div>
-
-      <section id="passenger-view" class="view-panel is-hidden" data-panel="passenger">
-
-        <!-- ── Language Toggle ──────────────────────────────────────────── -->
-        <div class="pax-lang-strip" aria-label="Language selector">
-          <span class="pax-lang-label" aria-hidden="true">PASSENGER DISPLAY · भाषा</span>
-          <div class="pax-lang-toggle" role="group" aria-label="Select display language" id="lang-toggle">
-            <button class="lang-btn is-active" data-lang="en" type="button" aria-pressed="true">ENGLISH</button>
-            <button class="lang-btn" data-lang="hi" type="button" aria-pressed="false">हिंदी</button>
-          </div>
-        </div>
-
-        <!-- ── Departure Board ─────────────────────────────────────────── -->
-        <div class="pax-board dotmatrix-bg" role="region" aria-label="Arrival window board" aria-live="polite">
-
-          <div class="pax-board-header">
-            <span class="pax-board-kicker" data-en="YOUR ARRIVAL WINDOW" data-hi="आपके आगमन का समय">YOUR ARRIVAL WINDOW</span>
-            <span class="pax-board-train" id="pax-board-train">TRAIN ·····</span>
-          </div>
-
-          <div class="pax-board-cells" aria-label="P10 to P90 delay window">
-
-            <div class="pax-board-col">
-              <div class="pax-flap-label" data-en="EARLIEST" data-hi="जल्द से जल्द">EARLIEST</div>
-              <div class="pax-flap-group" id="pax-flap-p10" aria-label="P10 delay">
-                <div class="flap-cell" data-value="--">
-                  <div class="flap-top"><span>--</span></div>
-                  <div class="flap-bottom"><span>--</span></div>
-                  <div class="flap-fold"></div>
-                </div>
-              </div>
-              <div class="pax-flap-unit" data-en="MINUTES LATE" data-hi="मिनट देर">MINUTES LATE</div>
-            </div>
-
-            <div class="pax-board-divider" aria-hidden="true">·</div>
-
-            <div class="pax-board-col pax-board-col--primary">
-              <div class="pax-flap-label" data-en="MOST LIKELY" data-hi="सबसे संभावित">MOST LIKELY</div>
-              <div class="pax-flap-group" id="pax-flap-p50" aria-label="P50 delay">
-                <div class="flap-cell" data-value="--">
-                  <div class="flap-top"><span>--</span></div>
-                  <div class="flap-bottom"><span>--</span></div>
-                  <div class="flap-fold"></div>
-                </div>
-              </div>
-              <div class="pax-flap-unit" data-en="MINUTES LATE" data-hi="मिनट देर">MINUTES LATE</div>
-            </div>
-
-            <div class="pax-board-divider" aria-hidden="true">·</div>
-
-            <div class="pax-board-col">
-              <div class="pax-flap-label" data-en="LATEST" data-hi="अधिकतम">LATEST</div>
-              <div class="pax-flap-group" id="pax-flap-p90" aria-label="P90 delay">
-                <div class="flap-cell" data-value="--">
-                  <div class="flap-top"><span>--</span></div>
-                  <div class="flap-bottom"><span>--</span></div>
-                  <div class="flap-fold"></div>
-                </div>
-              </div>
-              <div class="pax-flap-unit" data-en="MINUTES LATE" data-hi="मिनट देर">MINUTES LATE</div>
-            </div>
-
-          </div><!-- /pax-board-cells -->
-
-          <div class="pax-board-footer">
-            <span class="pax-board-status"><span class="live-pulse" id="pax-pulse"></span> <span id="passenger-updated" data-en="UPDATED --" data-hi="अपडेट --" data-mr="अपडेट --">UPDATED --</span></span>
-            <span class="pax-board-next"><span data-en="Next:" data-hi="अगला:" data-mr="पुढील:">Next:</span> <strong id="passenger-next-update">--</strong></span>
-          </div>
-
-        </div><!-- /pax-board -->
-
-        <!-- ── Two-column module row ────────────────────────────────────── -->
-        <div class="pax-modules-row">
-
-          <!-- ── Departure Advisory ──────────────────────────────────────── -->
-          <div class="pax-advisory" role="region" aria-label="Departure advisory">
-
-            <span class="card-label" data-en="DEPARTURE ADVISORY" data-hi="प्रस्थान सलाह" data-mr="निघण्याचा सल्ला">DEPARTURE ADVISORY</span>
-
-            <!-- Connection cutoff time input -->
-            <label class="pax-cutoff-label" for="passenger-deadline-input">
-              <span data-en="I need to be at the station by" data-hi="मुझे स्टेशन पहुँचना है">I need to be at the station by</span>
-              <input type="time" id="passenger-deadline-input" class="pax-time-input" value="03:00" aria-label="Connection cutoff time">
-            </label>
-
-            <!-- Platform signal indicator -->
-            <div class="pax-signal-wrap">
-              <div class="signal-lamp" id="pax-signal-lamp" aria-live="polite" aria-label="Departure signal">
-                <div class="signal-lamp-inner"></div>
-              </div>
-              <div class="pax-advisory-badge" id="pax-advisory-badge" aria-live="polite">--</div>
-            </div>
-
-            <p class="pax-advisory-sub" id="passenger-message"></p>
-
-          </div><!-- /pax-advisory -->
-
-          <!-- ── Delay Trend Panel ───────────────────────────────────────── -->
-          <div class="pax-trend" role="region" aria-label="Delay trend over recent updates">
-
-            <span class="card-label" data-en="THE LAST EIGHT UPDATES" data-hi="पिछले आठ अपडेट">THE LAST EIGHT UPDATES</span>
-
-            <div class="pax-trend-header">
-              <span class="trend-chip" id="passenger-trend">STABLE</span>
-              <span class="pax-trend-sub" data-en="newest at right" data-hi="नवीनतम दाईं ओर">newest at right</span>
-            </div>
-
-            <!-- Sparkline SVG — drawn by JS -->
-            <svg class="pax-sparkline"
-                 id="pax-sparkline"
-                 viewBox="0 0 220 52"
-                 aria-hidden="true"
-                 preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="spark-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="var(--ir-marigold)" stop-opacity="0.22"/>
-                  <stop offset="100%" stop-color="var(--ir-marigold)" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <!-- Area fill -->
-              <path id="pax-spark-area" fill="url(#spark-grad)" d=""/>
-              <!-- Line -->
-              <polyline id="pax-spark-line"
-                        fill="none"
-                        stroke="var(--ir-marigold)"
-                        stroke-width="1.8"
-                        stroke-linejoin="round"
-                        stroke-linecap="round"
-                        points=""/>
-              <!-- Endpoint dot -->
-              <circle id="pax-spark-dot" r="3" fill="var(--ir-marigold)" cx="0" cy="0"/>
-            </svg>
-
-            <div class="pax-trend-scale">
-              <span id="pax-spark-min" class="pax-spark-label">·</span>
-              <span id="pax-spark-max" class="pax-spark-label">·</span>
-            </div>
-
-            <ol class="pax-chronicle" id="pax-chronicle" aria-label="Eight most recent arrival updates"></ol>
-
-          </div><!-- /pax-trend -->
-
-        </div><!-- /pax-modules-row -->
-
-        <!-- Hidden legacy ID kept so existing renderNetwork() reference to
-             #passenger-conflict still works without a JS change there -->
-        <span id="passenger-conflict" style="display:none"></span>
-        <span id="passenger-train" style="display:none">TRAIN 20507</span>
-
-      </section>
-
-      <section id="station-view" class="view-panel" data-panel="station">
-
-        <!-- ── Header ──────────────────────────────────────────────────── -->
-        <div class="view-heading"><h2>Station Master</h2></div>
+    // Handle role assignment and routing
+    document.querySelectorAll('.role-card').forEach(card => {
+      card.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const role = card.dataset.role;
+        const selected = trainInput.value.trim() || '20507';
+        if (supportedTrainIds.length && !supportedTrainIds.includes(selected)) {
+          landingStatus.textContent = `Train ${selected} is not in the supported snapshot. Choose a listed ID.`;
+          return;
+        }
+        const target = `${card.getAttribute('href')}?train=${encodeURIComponent(selected)}`;
+        localStorage.setItem('rippleeta_train_id', selected);
+        
+        try {
+          const res = await fetch(`${LANDING_API}/api/auth/demo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: role, email: 'user@rippleeta.in' })
+          });
           
-        </div>
-        <div class="station-live-note"><span class="live-pulse"></span><strong>LIVE</strong><span>TRAIN <b id="station-train-label">20507</b></span></div>
+          if(res.ok) {
+            window.location.href = target;
+          } else {
+            console.error("Failed to authenticate role");
+          }
+        } catch(err) {
+          console.error(err);
+        }
+      });
+    });
 
-        <!-- ── Top row: Lever + VHF + Gauges ───────────────────────────── -->
-        <div class="sm-top-row">
-
-          <!-- Signal-box lever card -->
-          <article class="sm-lever-card" id="station-decision-card">
-            <span class="card-label">PLATFORM COMMITMENT</span>
-
-            <!-- Lever visual -->
-            <div class="sm-lever-wrap">
-              <div class="sm-lever-track">
-                <div class="sm-lever-labels">
-                  <span class="sm-lever-label-commit">COMMIT</span>
-                  <span class="sm-lever-label-defer">DEFER</span>
-                </div>
-                <div class="sm-lever-arm" id="sm-lever-arm">
-                  <div class="sm-lever-knob"></div>
-                </div>
-                <div class="sm-lever-pivot"></div>
-              </div>
-            </div>
-
-            <strong id="station-decision" class="sm-decision-text">DEFER</strong>
-            <p id="station-message" class="sm-decision-msg">Waiting for interval confidence.</p>
-
-            <!-- Conflict forecast (shown when conflict > 0) -->
-            <div id="station-conflict-forecast" class="sm-conflict-forecast" style="display:none">
-              <span class="sm-conflict-kicker">ACTIVE SECTION CONFLICT</span>
-              <span id="station-conflict-detail" class="sm-conflict-detail">Train -- on -- (+--m)</span>
-            </div>
-
-            <div class="sm-lever-rule">
-              <span>DECISION NEEDED IN</span>
-              <strong id="station-deadline">-- min</strong>
-            </div>
-          </article>
-
-          <!-- VHF Radio Readout -->
-          <article class="sm-vhf-card">
-            <span class="card-label" style="color:var(--ir-brass)">VHF RADIO SYNTHESIS</span>
-            <div class="sm-vhf-screen">
-              <div class="sm-vhf-header">
-                <span class="sm-vhf-dot" aria-label="Transmitting"></span>
-                <span class="sm-vhf-freq">156.800 MHz</span>
-              </div>
-              <pre class="sm-vhf-text" id="sm-vhf-text">AWAITING DATA...</pre>
-            </div>
-            <span class="sm-vhf-caption"></span>
-          </article>
-
-          <!-- Gauge pair -->
-          <div class="sm-gauge-pair">
-            <!-- Criticality gauge -->
-            <article class="sm-gauge-card">
-              <span class="card-label">CRITICALITY SCORE</span>
-              <div class="sm-gauge" id="sm-gauge-crit">
-                <svg class="sm-gauge-svg" viewBox="0 0 120 70" aria-hidden="true">
-                  <!-- Background arc -->
-                  <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(176,141,87,.2)" stroke-width="6" stroke-linecap="round"/>
-                  <!-- Colored arc segments: green → amber → red -->
-                  <path d="M 10 65 A 50 50 0 0 1 43 18" fill="none" stroke="rgba(42,122,80,.35)" stroke-width="6" stroke-linecap="round"/>
-                  <path d="M 43 18 A 50 50 0 0 1 77 18" fill="none" stroke="rgba(245,166,35,.35)" stroke-width="6" stroke-linecap="round"/>
-                  <path d="M 77 18 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(193,39,45,.35)" stroke-width="6" stroke-linecap="round"/>
-                  <!-- Needle -->
-                  <line class="sm-gauge-needle" id="sm-needle-crit" x1="60" y1="65" x2="60" y2="18" stroke="var(--ir-navy)" stroke-width="2" stroke-linecap="round"/>
-                  <!-- Center pivot -->
-                  <circle cx="60" cy="65" r="4" fill="var(--ir-navy)"/>
-                </svg>
-                <strong class="sm-gauge-value" id="sm-gauge-crit-val">--</strong>
-                <span class="sm-gauge-unit">/100</span>
-              </div>
-            </article>
-
-            <!-- INR cost gauge -->
-            <article class="sm-gauge-card">
-              <span class="card-label">DELAY COST (EST.)</span>
-              <div class="sm-gauge" id="sm-gauge-cost">
-                <svg class="sm-gauge-svg" viewBox="0 0 120 70" aria-hidden="true">
-                  <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(176,141,87,.2)" stroke-width="6" stroke-linecap="round"/>
-                  <path d="M 10 65 A 50 50 0 0 1 43 18" fill="none" stroke="rgba(42,122,80,.35)" stroke-width="6" stroke-linecap="round"/>
-                  <path d="M 43 18 A 50 50 0 0 1 77 18" fill="none" stroke="rgba(245,166,35,.35)" stroke-width="6" stroke-linecap="round"/>
-                  <path d="M 77 18 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(193,39,45,.35)" stroke-width="6" stroke-linecap="round"/>
-                  <line class="sm-gauge-needle" id="sm-needle-cost" x1="60" y1="65" x2="60" y2="18" stroke="var(--ir-navy)" stroke-width="2" stroke-linecap="round"/>
-                  <circle cx="60" cy="65" r="4" fill="var(--ir-navy)"/>
-                </svg>
-                <strong class="sm-gauge-value" id="sm-gauge-cost-val">--</strong>
-                <span class="sm-gauge-unit">INR</span>
-              </div>
-            </article>
-          </div>
-
-        </div><!-- /sm-top-row -->
-
-        <!-- ── Signals strip ───────────────────────────────────────────── -->
-        <div class="sm-signals-strip">
-          <div class="sm-signal-tile"><span class="card-label">P10 LOWER</span><strong id="station-p10">--</strong><span>min</span></div>
-          <div class="sm-signal-tile"><span class="card-label">P50 EXPECTED</span><strong id="station-p50">--</strong><span>min</span></div>
-          <div class="sm-signal-tile"><span class="card-label">P90 UPPER</span><strong id="station-p90">--</strong><span>min</span></div>
-          <div class="sm-signal-tile"><span class="card-label">INTERVAL WIDTH</span><strong id="station-width">--</strong><span></span></div>
-          <div class="sm-signal-tile"><span class="card-label">CONFLICT ADJ.</span><strong id="station-conflict">--</strong><span></span></div>
-          <div class="sm-signal-tile"><span class="card-label">PREDICTION</span><strong id="station-state">--</strong><span></span></div>
-        </div>
-
-        <!-- ── Junction Operations Table ───────────────────────────────── -->
-        <div class="sm-junction" role="region" aria-label="Junction train overview">
-          <div class="sm-junction-header">
-            <span class="card-label">JUNCTION OPERATIONS — MULTI-TRAIN</span>
-            <span class="sm-junction-count" id="sm-junction-count">5 TRAINS</span>
-          </div>
-          <table class="sm-junction-table">
-            <thead>
-              <tr>
-                <th>TRAIN</th>
-                <th>P50 DELAY</th>
-                <th>INTERVAL</th>
-                <th>COMMIT</th>
-                <th>DEADLINE</th>
-                <th>LOAD</th>
-              </tr>
-            </thead>
-            <tbody id="junction-body">
-              <tr><td colspan="6" class="junction-loading">Loading junction data…</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-      </section>
-
-      <!-- ═══ CREW CONTROLLER VIEW ═══════════════════════════════════════════ -->
-      <section id="crew-view" class="view-panel is-hidden" data-panel="crew">
-        <div class="view-heading"><h2>Crew Controller</h2></div>
-          
-        </div>
-        <div class="crew-summary" aria-label="Crew duty summary">
-          <article class="crew-summary-cell"><span class="card-label">CREW SET IN VIEW</span><strong id="crew-count">--</strong><span>upcoming handovers</span></article>
-          <article class="crew-summary-cell crew-summary-risk"><span class="card-label">HOER BREACH RISK</span><strong id="crew-risk-count">--</strong><span>rows crossing P90</span></article>
-          <article class="crew-summary-cell"><span class="card-label">NEXT DUTY LIMIT</span><strong id="crew-next-limit">--:--</strong><span id="crew-next-limit-sub">IST · remaining</span></article>
-          <article class="crew-summary-note"><span class="card-label">PRIORITY</span><p>EARLIEST LIMIT FIRST</p></article>
-        </div>
-        <div class="crew-register-head">
-          <div><span class="eyebrow">RELIEF REGISTER</span><strong>UPCOMING HANDOVERS · URGENCY ORDER</strong></div>
-          <span class="crew-register-legend"><i class="crew-legend-watch"></i> P50 / P90 window <i class="crew-legend-risk"></i> HOER at risk</span>
-        </div>
-        <div id="crew-register" class="crew-register" role="table" aria-label="Upcoming crew relief points">
-          <div class="crew-register-loading">Loading crew duty register...</div>
-        </div>
-      </section>
-
-      <!-- ═══ FEEDER TRANSPORT VIEW ════════════════════════════════════════ -->
-      <section id="feeder-view" class="view-panel is-hidden" data-panel="feeder">
-        <div class="view-heading"><h2>Feeder Transport</h2></div>
-          
-        </div>
-        <div class="feeder-control-strip">
-          <label class="feeder-time-label"><span class="card-label">INCOMING TRAIN CUTOFF / LOCAL TIME</span><input type="time" id="feeder-cutoff-input" class="feeder-time-input" value="14:40"></label>
-          <label class="feeder-threshold-label"><span class="card-label">HOLD THRESHOLD</span><span class="feeder-threshold-input"><input type="number" id="feeder-threshold" min="1" max="99" value="80" aria-label="Hold probability threshold"><b>%</b></span></label>
-          <div class="feeder-helper">THRESHOLD GOVERNS HOLD</div>
-        </div>
-        <article class="feeder-hero-board">
-          <div class="feeder-board-top"><span class="card-label">CONNECTING SERVICE INDICATOR / SELECTED ROUTE</span><span class="feeder-board-live" id="feeder-board-status">DEMO SNAPSHOT</span></div>
-          <div class="feeder-board-main"><div><strong id="feeder-probability" class="probability-hero">--%</strong><p id="feeder-hero-copy">likely to arrive before the connecting service departure.</p></div><div id="feeder-recommendation" class="recommendation-badge rec-hold">CALCULATING</div></div>
-          <div class="feeder-board-route"><strong id="feeder-hero-route">AIRPORT LINK / 14A</strong><span>FEEDER DEPARTURE <b id="feeder-hero-cutoff">14:40</b></span><span>INCOMING TRAIN <b id="feeder-hero-train">20507</b></span></div>
-        </article>
-        <div class="feeder-register-head"><div><span class="eyebrow">DISPATCH REGISTER / DOWNSTREAM CONNECTIONS</span><strong>FEEDERS DEPENDENT ON TRAIN <span id="feeder-register-train">20507</span></strong></div><span class="feeder-register-note">PREDICTION WINDOW / P10–P90</span></div>
-        <div id="feeder-register" class="feeder-register" role="table" aria-label="Downstream feeder connections"><div class="feeder-register-loading">Loading connection register...</div></div>
-      </section>
-
-      <!-- ═══ MAINTENANCE YARD VIEW ════════════════════════════════════════ -->
-      <section id="maintenance-view" class="view-panel is-hidden" data-panel="maintenance">
-        <div class="view-heading"><h2>Maintenance Yard</h2></div>
-          
-        </div>
-        <div class="maintenance-hero-grid">
-          <article class="maintenance-budget-card">
-            <div class="maintenance-budget-kicker"><span class="card-label">SELECTED RAKE / TRAIN <b id="maintenance-train">20507</b></span><span class="maintenance-live-pin">LIVE BUDGET</span></div>
-            <div class="turnaround-hero" id="maintenance-minutes">--</div>
-            <div class="turnaround-unit">minutes remaining · 360 minute maximum window</div>
-            <div class="turnaround-tape" aria-label="Turnaround budget countdown">
-              <div class="turnaround-tape-track"><div class="turnaround-tape-fill" id="maintenance-bar"></div><div class="turnaround-tape-notch" style="left:25%"></div><div class="turnaround-tape-notch" style="left:50%"></div><div class="turnaround-tape-notch" style="left:75%"></div></div>
-              <div class="turnaround-scale"><span>0</span><span>90</span><span>180</span><span>270</span><span>360</span></div>
-            </div>
-            <div id="maintenance-adequacy" class="adequacy-badge adequacy-ok">CALCULATING</div>
-          </article>
-          <aside class="maintenance-signal">
-            <div class="maintenance-signal-line"><span class="card-label">P90 DELAY / ARRIVAL BOUND</span><strong id="maintenance-p90">--</strong><span>MIN LATE</span></div>
-            <div class="maintenance-signal-line"><span class="card-label">YARD PROTOCOL</span><strong id="maintenance-crew-mode">--</strong></div>
-            <div class="maintenance-action" id="maintenance-action-card"><span class="card-label">YARD INSTRUCTION</span><strong id="maintenance-message">Loading...</strong></div>
-          </aside>
-        </div>
-        <div class="yard-register-head"><div><span class="eyebrow">YARD CLIPBOARD / NEXT MOVEMENTS</span><strong>RAKES DUE FOR TURNAROUND</strong></div><span class="yard-register-note">BUDGETS SORTED BY ARRIVAL</span></div>
-        <div id="maintenance-queue" class="yard-register" role="table" aria-label="Trains due for turnaround"><div class="yard-register-loading">Loading yard clipboard...</div></div>
-      </section>
-
-      <section id="network-view" class="view-panel is-hidden" data-panel="network">
-        <div class="view-heading"><h2>Network Control</h2></div><button id="trace-conflict" class="amber-button" type="button">▶ SCENARIO REPLAY — station-pair conflict example</button></div>
-        <!-- Live prediction counter (Alpha Wave translation: running counter rebuilt as
-             departure-board style ticking number in Plex Mono) -->
-        <div class="prediction-counter">
-          <span class="card-label">PREDICTIONS PROCESSED TODAY · SIMULATED REPLAY</span>
-          <strong id="prediction-count" class="counter-value">0</strong>
-        </div>
-        <div class="network-summary"><div><span class="card-label">FIXED CORRIDOR (NOT LIVE)</span><strong>KANPUR → ALLAHABAD</strong></div><div><span class="card-label">REPLAY STATE</span><strong id="network-state">READY</strong></div><div><span class="card-label">TRAINS IN SCENARIO</span><strong>12301 / 56789</strong></div></div>
-        <div class="network-canvas" id="network-canvas" aria-label="Schematic max-plus propagation replay">
-          <div class="network-axis-label axis-left">UPSTREAM</div><div class="network-axis-label axis-right">DOWNSTREAM</div>
-          <div class="track-line track-top"></div><div class="track-line track-bottom"></div>
-          <div class="route-edge edge-kanpur-allahabad"><span>KANPUR → ALLAHABAD · SHARED SECTION</span></div>
-          <div class="route-edge edge-allahabad-mughal"><span>ALLAHABAD → MUGHALSARAI · HANDOVER</span></div>
-          <div class="propagation-pulse pulse-upstream"></div><div class="propagation-pulse pulse-downstream"></div>
-          <div class="station-node node-kanpur"><span></span><strong>KANPUR</strong><small>22:25</small></div>
-          <div class="station-node node-allahabad"><span></span><strong>ALLAHABAD</strong><small>02:04</small></div>
-          <div class="station-node node-mughal"><span></span><strong>MUGHALSARAI</strong><small>04:10</small></div>
-          <div class="train-token token-56789"><i></i><strong>56789</strong><small>EXPRESS · +15</small></div>
-          <div class="train-token token-12301"><i></i><strong>12301</strong><small>RAJDHANI · +55</small></div>
-          <div class="conflict-point" id="conflict-point"><span>HEADWAY CONFLICT</span></div>
-          <div id="conflict-path" class="conflict-path"><span>+9 MIN PROPAGATED</span></div>
-        </div>
-        <div class="network-detail"><div><span class="card-label">BEFORE TRACE</span><strong id="network-before">12301 · +55.0 min base delay</strong></div><div class="trace-arrow">→</div><div class="amber-detail"><span class="card-label">AFTER HEADWAY CHECK</span><strong id="network-after">12301 · awaiting trace</strong><small>56789 clears section + minimum headway</small></div></div>
-        <p class="demo-caption"></p>
-      </section>
-
-      <section id="sandbox-view" class="view-panel is-hidden" data-panel="sandbox">
-        <div class="view-heading">
-          <div>
-            <p class="eyebrow">INTERACTIVE PROOF / MAX-PLUS DELAY PROPAGATION</p>
-            <h2>Ghost Train Sandbox</h2>
-          </div>
-          <div class="sandbox-api-status">
-            <span id="sandbox-status-dot" class="status-dot"></span>
-            <span id="sandbox-status-label" class="sandbox-status-text">CONNECTING</span>
-          </div>
-        </div>
-
-        <!-- 3D isometric scene -->
-        <div class="sandbox-scene" id="sandbox-scene">
-          <div class="scene-label">MAX-PLUS PLAYGROUND · KANPUR → ALLAHABAD → MUGHALSARAI</div>
-
-          <!-- Track bed with sleeper ties -->
-          <div class="iso-track">
-            <div class="track-rail track-rail-1"></div>
-            <div class="track-rail track-rail-2"></div>
-            <div class="track-sleepers"></div>
-          </div>
-
-          <!-- Station platforms -->
-          <div class="iso-station iso-station-kanpur">
-            <div class="station-platform"><div class="station-roof"></div></div>
-            <strong>KANPUR</strong>
-            <small>22:25 / 22:30</small>
-          </div>
-          <div class="iso-station iso-station-allahabad">
-            <div class="station-platform"><div class="station-roof"></div></div>
-            <strong>ALLAHABAD</strong>
-            <small>02:04 / 01:25</small>
-          </div>
-          <div class="iso-station iso-station-mughal">
-            <div class="station-platform"><div class="station-roof"></div></div>
-            <strong>MUGHALSARAI</strong>
-            <small>04:10</small>
-          </div>
-
-          <!-- Train 1: Express 56789 (user-controlled delay) -->
-          <div class="iso-train livery-lhb" id="sandbox-train1" style="left: 22%; top: 38%;">
-            <div class="train-body">
-              <div class="train-cream-band"></div>
-              <div class="train-chimney"></div>
-              <div class="train-window"></div>
-            </div>
-            <div class="train-info">
-              <strong>56789</strong>
-              <small>EXPRESS</small>
-              <span class="train-delay">+0</span>
-            </div>
-            <div class="train-glow"></div>
-          </div>
-
-          <!-- Train 2: Rajdhani 12301 (receives propagated delay) -->
-          <div class="iso-train iso-train-rajdhani livery-rajdhani" id="sandbox-train2" style="left: 30%; top: 56%;">
-            <div class="train-body">
-              <div class="train-cream-band"></div>
-              <div class="train-chimney"></div>
-              <div class="train-window"></div>
-            </div>
-            <div class="train-info">
-              <strong>12301</strong>
-              <small>RAJDHANI</small>
-              <span class="train-delay">+55</span>
-            </div>
-            <div class="train-glow"></div>
-          </div>
-
-          <!-- Conflict propagation beam -->
-          <div class="conflict-beam" id="sandbox-conflict-beam">
-            <span class="conflict-beam-label" id="sandbox-conflict-label"></span>
-          </div>
-        </div>
-
-        <!-- Delay injection slider -->
-        <div class="sandbox-control">
-          <div class="slider-header">
-            <span class="card-label">INJECT DELAY ON EXPRESS 56789</span>
-            <strong id="sandbox-slider-value" class="slider-value">0 min</strong>
-          </div>
-          <div class="slider-track-container">
-            <input type="range" id="sandbox-delay-slider" min="0" max="30" step="1" value="0" class="sandbox-slider" />
-            <div class="slider-marks">
-              <span>0</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span>
-            </div>
-            <!-- Threshold annotation -->
-            <div class="threshold-line" id="sandbox-threshold-line" style="left: 20%;">
-              <span id="sandbox-threshold-label">CONFLICT<br/>THRESHOLD</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Result readouts -->
-        <div class="sandbox-results">
-          <article class="sandbox-card">
-            <span class="card-label">CONFLICT PROPAGATION</span>
-            <strong id="sandbox-result-conflict" class="sandbox-big-number">0</strong>
-            <span class="sandbox-unit">minutes added</span>
-          </article>
-          <article class="sandbox-card">
-            <span class="card-label">RAJDHANI 12301 TOTAL DELAY</span>
-            <strong id="sandbox-result-total" class="sandbox-big-number">55.0</strong>
-            <span class="sandbox-unit">minutes (base 55 + conflict)</span>
-          </article>
-          <article class="sandbox-card sandbox-card-severity">
-            <span class="card-label">SEVERITY</span>
-            <strong id="sandbox-result-severity" class="sandbox-severity-badge">NO CONFLICT</strong>
-          </article>
-          <article class="sandbox-card sandbox-card-wide">
-            <span class="card-label">MAX-PLUS PROPAGATION</span>
-            <code id="sandbox-math" class="sandbox-formula">actual = max(<span class="val-scheduled">1580</span>, <span class="val-upstream">1574</span>) = <span class="val-scheduled">1580</span> · no conflict</code>
-            <p id="sandbox-explanation" class="sandbox-explain">max(1580, 1574) = 1580 → conflict adds +0.0 min</p>
-          </article>
-        </div>
-
-        <p class="demo-caption"></p>
-      </section>
-    </main>
-
-    <footer class="footer"><span>RIPPLEETA</span><span id="footer-state">LIVE NETWORK ETA</span></footer>
-  </div>
-  <script src="app.js"></script>
-  <script src="sandbox.js"></script>
+    // Real API Health Check for blinking dots
+    async function checkHealth() {
+        try {
+            const res = await fetch('/health');
+            const data = await res.json();
+            const color = data.status === 'ok' ? 'var(--signal)' : 'var(--warning-500)';
+            document.querySelectorAll('.live-pulse').forEach(dot => {
+                dot.style.background = color;
+                dot.style.opacity = '1';
+                dot.style.boxShadow = `0 0 8px ${color}`;
+            });
+        } catch(e) {
+            document.querySelectorAll('.live-pulse').forEach(dot => {
+                dot.style.background = '#ccc';
+                dot.style.opacity = '0.2';
+                dot.style.boxShadow = 'none';
+            });
+        }
+    }
+    setInterval(checkHealth, 5000);
+    checkHealth();
+  </script>
 </body>
 </html>
