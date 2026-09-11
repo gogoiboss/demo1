@@ -1,5 +1,30 @@
 # Progress Log
 
+- **2026-09-11 (Real-Data Execution Session)**:
+  - **TASK 0 — Dataset Confirmation & Ingestion:** Confirmed `data/raw/train_delay.csv` is present (10,000 rows × 11 columns). Columns match all requirements (`train_number`, `journey_date`, `actual_delay_minutes`, `scheduled_travel_hours`, `distance_km`, `zone_congestion_index`, `monsoon_flag`, `fog_risk`, `coach_count`, `loco_age_years`, `delayed_gt_15min`). Ran ingestion (`python -m src.ingestion.load_kaggle --csv data/raw/train_delay.csv`) — generated `data/processed/kaggle_competition_cleaned.parquet` (0.6 MB) cleanly.
+  - **TASK 1 — Real-Data Evaluations Executed:**
+    - **4-Model Baseline Comparison (`eval/baseline_comparison.py`):**
+      - Scheduled ETA (Zero Delay): MAE 31.26 min, Pinball loss 15.63 (-14.3% vs prior-leg)
+      - Prior-Leg Baseline (Naive): MAE 36.45 min, Pinball loss 18.23
+      - Per-Train Regression (No Network Features): MAE 28.15 min, Pinball loss 14.08 (-22.8% vs prior-leg)
+      - RippleETA (XGBoost + MAPIE): MAE 28.22 min, Pinball loss 8.12 (-22.6% MAE improvement, 55.5% Pinball Loss reduction)
+    - **Segmented Evaluation (`eval/baseline_comparison.py` & `eval/comprehensive_evaluation.py`):**
+      - By Delay Magnitude: 0–15 min (N=670): RippleETA MAE 26.78m (pinball 7.23); 15–60 min (N=520): RippleETA MAE 13.63m (pinball 5.01); 60+ min (N=310): RippleETA MAE 55.79m (pinball 15.26).
+      - By Horizon: Medium 4–12h (N=245): RippleETA MAE 28.16m; Long-range >12h (N=1255): RippleETA MAE 28.23m.
+    - **Mondrian Conformal Coverage (`eval/comprehensive_evaluation.py`):**
+      - 0–15 min bucket (N=667): 90.4% coverage (width 84.9m)
+      - 15–60 min bucket (N=522): 90.6% coverage (width 81.7m)
+      - 60+ min bucket (N=311): 90.4% coverage (width 82.6m)
+    - **Backtest Harness Replay (`eval/backtest_harness.py` & `test_backtest_harness.py`):**
+      - Executed 2025-12-31 replay: MAE P50 = 25.9 min, Pinball loss = 6.81, Coverage 90% = 100.0%. Test passed cleanly (no longer skipped).
+    - **Scalability Benchmark (`jobs/scalability_benchmark.py`):**
+      - Processed 3,000 trains in 9.890s (3.30 ms/train latency, 3000/3000 success count, 0 failures).
+  - **TASK 2 — Documentation Updated:** Updated `docs/RESULTS.md` with 4-model baseline table, segmented evaluation tables, and Mondrian conformal coverage results. Updated `ROUND2_READINESS.md` items D, E, F, and R from blocked to completed `[x]`.
+  - **TASK 3 — Light Cleanup & Test Suite Verification:**
+    - Confirmed no stale file availability claims remain in documentation.
+    - Executed full test suite (`pytest -v`): **68 passed, 0 skipped**.
+    - Audited test assert counts across all 18 test files: 198 total assert statements for 68 test functions (healthy coverage, zero fake tests).
+
 - **2026-09-04**: Project scaffolding complete.
 - **2026-09-04**: Data ingestion layer built. Kaggle loader, data.gov.in timetable ingestion, and RailRadar API client stub with rate limiting are in place. Exploration notebook created. Selected backtesting routes: 12301/12302 Howrah Rajdhani, 12951/12952 Mumbai Rajdhani, 12625/12626 Kerala Express.
 

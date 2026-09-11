@@ -14,3 +14,6 @@ httpx>=0.25.0          # FastAPI TestClient transport layer
 mlflow>=2.7.0          # Tier 3 Model Registry
 PyJWT>=2.8.0
 google-auth>=2.23.0
+shap>=0.44.0           # per-prediction SHAP explanations (src/calibration/conformal.py)
+matplotlib>=3.7.0      # coverage plot generation (eval/comprehensive_evaluation.py)
+tabulate>=0.9.0         # DataFrame.to_markdown() (eval/comprehensive_evaluation.py)
