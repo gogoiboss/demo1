@@ -801,6 +801,13 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             StaticFiles(directory=str(frontend_path), html=True),
             name="frontend_alias",
         )
+
+    # Make /eta (3D Network Overview landing page) the primary root page at http://127.0.0.1:8000/
+    if eta_path.exists():
+        app.mount(
+            "/", StaticFiles(directory=str(eta_path), html=True), name="root"
+        )
+    elif frontend_path.exists():
         app.mount(
             "/", StaticFiles(directory=str(frontend_path), html=True), name="frontend"
         )
