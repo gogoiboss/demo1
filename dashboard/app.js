@@ -511,6 +511,10 @@ async function loadStation() {
   }
 
   // Ripple Score Gauge
+  // STATUS: HARDCODED. The API always sends ripple_score: 0 (see
+  // src/api/app.py), which is falsy in JS, so this ALWAYS falls through to
+  // the flat `55` fallback below — every train, every request, no variation
+  // and no on-screen disclaimer. Not a proxy computation of any kind.
   const ripple = station.ripple_score || 55;
   setText('triage-ripple', ripple);
   setText('sm-ripple-rating', `${ripple > 60 ? 'HIGH' : (ripple > 30 ? 'MODERATE' : 'LOW')} RISK (${ripple}/100)`);
@@ -521,6 +525,11 @@ async function loadStation() {
   }
 
   // Projected Financial Impact
+  // STATUS: PARTIAL/proxy (docs/LIMITATIONS.md section 3). The API always
+  // sends financial_impact_inr: 0, so this always falls through to the
+  // client-side formula below — genuinely reactive to the real predicted
+  // delay, but the Rs 1200/min rate is an undisclosed constant, not a real
+  // cost model (crew overtime, penalty tariffs, etc.).
   const cost = station.financial_impact_inr || (Math.round((prediction.p50_delay_min || 20) * 1200));
   setText('triage-impact', `₹${cost.toLocaleString('en-IN')}`);
 

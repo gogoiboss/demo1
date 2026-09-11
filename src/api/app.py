@@ -584,8 +584,20 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             radio_summary=radio,
             urgency_rank=urgency,
             cost_asymmetry_applied=True,
+            # STATUS: NOT IMPLEMENTED (docs/LIMITATIONS.md "Phase 1 Audit
+            # Disclosures"). A true network-criticality ranking needs
+            # counterfactual simulation across the full schedule; this
+            # always sends 0, which the frontend replaces with its own
+            # hardcoded fallback display value — see dashboard/app.js.
             ripple_score=0,
+            # STATUS: NOT IMPLEMENTED — stub string, no station-pair
+            # occupancy data available from the current snapshot.
             cross_train_attribution="Not available from the current station-event snapshot.",
+            # STATUS: NOT IMPLEMENTED here — always 0. dashboard/app.js
+            # falls back to its own client-side proxy formula
+            # (p50_delay_min * a hardcoded Rs/min constant) whenever this
+            # is falsy, which is every request; see docs/LIMITATIONS.md
+            # section 3 ("Prescriptive Tier: proxy constants").
             financial_impact_inr=0,
         )
 
@@ -711,6 +723,14 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         # degraded or stale response doesn't come back looking like a
         # normal, fully-confident prediction.
         original_message = prediction.pop("message", None)
+        # STATUS: HARDCODED, not PARTIAL/proxy. docs/LIMITATIONS.md section 2
+        # describes these as "injected via deterministic proxy logic (hashing
+        # the Train ID)" — that hash-based logic does not exist in this
+        # handler (see the removed fix_tid_hash.py in git history for where
+        # it apparently once lived). Every response gets the same static
+        # off/zero values below regardless of train_id; the doc description
+        # is stale relative to this code. Schemas/UI wiring are real; the
+        # values themselves are not computed at all.
         prediction["weather_risk_flag"] = "none"
         prediction["tsr_active"] = False
         prediction["signal_aspect_restriction"] = False
