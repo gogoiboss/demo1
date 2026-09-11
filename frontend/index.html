@@ -1,0 +1,1689 @@
+```html
+<!DOCTYPE html>
+<html lang="en" data-state="station">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="description" content="OUTLIERS — Dynamic ETA Intelligence for Indian Railways">
+
+  <title>OUTLIERS — Dynamic ETA Intelligence</title>
+
+  <!-- Main application stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!--
+    Typography:
+    Space Grotesk = primary interface typography
+    JetBrains Mono = telemetry / technical data
+    Caveat = used very sparingly for human editorial notes
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!--
+    Three.js
+    The actual 3D world is controlled from js/scene.js.
+    This canvas is intentionally kept completely separate from the UI.
+  -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <!-- GSAP: cinematic transitions and choreography -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+
+
+<body data-state="station">
+
+  <!-- ================================================================
+       3D CINEMATIC WORLD
+       ---------------------------------------------------------------
+       This is the actual WebGL scene.
+       No UI elements are placed inside this canvas.
+       scene.js owns:
+       - train
+       - railway
+       - environment
+       - lighting
+       - camera
+       - atmosphere
+       - movement
+       ================================================================ -->
+
+  <main id="app">
+
+    <canvas id="hero-canvas" class="hero-canvas" aria-label="Interactive 3D railway environment"></canvas>
+
+
+    <!-- ================================================================
+         CINEMATIC GRAIN / ATMOSPHERE LAYERS
+         ---------------------------------------------------------------
+         These are intentionally empty.
+         CSS and JS can use them for subtle film-like depth.
+         No fake particle-heavy effects.
+         ================================================================ -->
+
+    <div id="cinematic-vignette" class="cinematic-vignette"></div>
+    <div id="cinematic-grain" class="cinematic-grain"></div>
+
+
+    <!-- ================================================================
+         LANDING NAVIGATION
+         ================================================================ -->
+
+    <header id="landing-navbar" class="landing-navbar" aria-label="Primary navigation">
+
+      <a href="#home" class="nav-brand" aria-label="OUTLIERS Home">
+        <span class="nav-brand-mark" aria-hidden="true">
+          <span class="brand-line"></span>
+          <span class="brand-line"></span>
+        </span>
+
+        <span class="nav-brand-text">
+          OUTLIERS
+        </span>
+      </a>
+
+
+      <nav class="nav-links" aria-label="Main navigation">
+
+        <a href="#home" class="nav-link active" data-nav="home">
+          Home
+        </a>
+
+        <a href="#track" class="nav-link" id="nav-link-track" data-nav="track">
+          Track
+        </a>
+
+        <a href="#insights" class="nav-link" id="nav-link-insights" data-nav="insights">
+          Insights
+        </a>
+
+        <a href="#about" class="nav-link" id="nav-link-about" data-nav="about">
+          About
+        </a>
+
+      </nav>
+
+
+      <div class="nav-actions">
+
+        <span class="nav-system-status">
+          <span class="status-indicator"></span>
+          SYSTEM READY
+        </span>
+
+        <button type="button" id="btn-nav-signin" class="btn-nav-signin">
+          Sign In
+        </button>
+
+      </div>
+
+    </header>
+
+
+
+    <!-- ================================================================
+         SCENE 01 — HERO / RAILWAY STATION
+         ================================================================ -->
+
+    <section id="station-hero" class="station-hero" aria-label="OUTLIERS introduction">
+
+      <!-- Left editorial content -->
+
+      <div class="hero-text-block">
+
+        <div class="hero-eyebrow">
+
+          <span class="eyebrow-rule"></span>
+
+          <span>
+            DYNAMIC RAILWAY INTELLIGENCE
+          </span>
+
+          <span class="eyebrow-code">
+            SIH / 26028
+          </span>
+
+        </div>
+
+
+        <div class="hero-title-group">
+
+          <h1 class="hero-title">
+            OUTLIERS
+          </h1>
+
+          <p class="hero-title-caption">
+            Predicting the journey before it arrives.
+          </p>
+
+        </div>
+
+
+        <h2 class="hero-headline">
+          Dynamic ETA intelligence<br>
+          for a moving railway.
+        </h2>
+
+
+        <p class="hero-subtext">
+          Real-time operational signals, predictive modelling
+          and journey intelligence built around the way trains
+          actually move.
+        </p>
+
+
+        <!-- Train number search -->
+
+        <div class="hero-search-wrapper">
+
+          <label class="hero-search-label" for="train-number-input">
+            SELECT A JOURNEY
+          </label>
+
+          <div class="hero-search-pill">
+
+            <span class="search-prefix">
+              TRAIN
+            </span>
+
+            <input id="train-number-input" type="text" class="hero-search-input" placeholder="Enter train number"
+              value="12301" maxlength="12" autocomplete="off" spellcheck="false">
+
+            <button id="btn-start-journey" class="btn-journey-circle" type="button" title="Begin journey"
+              aria-label="Begin journey">
+              <span class="journey-arrow" aria-hidden="true">
+                →
+              </span>
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- Small technical footer -->
+
+        <div class="hero-meta-row">
+
+          <span>
+            LIVE PREDICTION ENGINE
+          </span>
+
+          <span class="meta-separator"></span>
+
+          <span>
+            PAST + PRESENT SIGNALS
+          </span>
+
+          <span class="meta-separator"></span>
+
+          <span>
+            DYNAMIC ETA
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ============================================================
+           TRAIN INTERACTION HINT
+           ============================================================ -->
+
+      <div id="train-click-prompt" class="train-click-prompt" aria-hidden="true">
+
+        <div class="prompt-line"></div>
+
+        <div class="prompt-content">
+
+          <span class="prompt-kicker">
+            INTERACTIVE SCENE
+          </span>
+
+          <span class="prompt-script">
+            Select the train<br>
+            to begin.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ============================================================
+           STATION LOCATION / SCENE INFORMATION
+           ============================================================ -->
+
+      <div class="station-scene-info">
+
+        <div class="scene-info-label">
+          CURRENT SCENE
+        </div>
+
+        <div class="scene-info-value">
+          RAILWAY PLATFORM
+        </div>
+
+        <div class="scene-info-coordinates">
+          28.6139° N &nbsp; 77.2090° E
+        </div>
+
+      </div>
+
+
+      <!-- Bottom cinematic cue -->
+
+      <div class="station-amber-sign">
+
+        <span class="sign-index">
+          01
+        </span>
+
+        <span class="sign-text">
+          A smarter journey starts with knowing what comes next.
+        </span>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ================================================================
+         SCENE 02 / 03 — VIADUCT JOURNEY
+         ================================================================ -->
+
+    <section id="viaduct-journey-overlay" class="viaduct-journey-overlay" style="display:none; opacity:0;"
+      aria-hidden="true">
+
+      <!-- Top editorial information -->
+
+      <div class="viaduct-editorial-title">
+
+        <span class="scene-number">
+          02 / JOURNEY
+        </span>
+
+        <h2 class="editorial-main">
+          The railway<br>
+          keeps moving.
+        </h2>
+
+        <p class="editorial-sub">
+          Our prediction engine moves with it.
+        </p>
+
+      </div>
+
+
+      <!-- Left narrative -->
+
+      <div class="viaduct-script-messages">
+
+        <div class="script-step" id="script-step-1">
+          <span class="script-index">01</span>
+          <span>Analysing route conditions</span>
+        </div>
+
+        <div class="script-step" id="script-step-2">
+          <span class="script-index">02</span>
+          <span>Predicting delay propagation</span>
+        </div>
+
+        <div class="script-step" id="script-step-3">
+          <span class="script-index">03</span>
+          <span>Updating expected arrival</span>
+        </div>
+
+      </div>
+
+
+      <!-- Right-side intelligence cards -->
+
+      <div class="viaduct-feature-cards">
+
+        <article class="feature-card">
+
+          <div class="feature-card-index">
+            01
+          </div>
+
+          <div class="feature-card-content">
+
+            <span class="feature-card-title">
+              LIVE SIGNALS
+            </span>
+
+            <span class="feature-card-meta">
+              Operational movement data
+            </span>
+
+            <div class="mini-chart" aria-hidden="true">
+
+              <span class="bar" style="height:35%"></span>
+              <span class="bar" style="height:52%"></span>
+              <span class="bar" style="height:44%"></span>
+              <span class="bar active" style="height:82%"></span>
+              <span class="bar" style="height:61%"></span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <article class="feature-card">
+
+          <div class="feature-card-index">
+            02
+          </div>
+
+          <div class="feature-card-content">
+
+            <span class="feature-card-title">
+              PREDICTION
+            </span>
+
+            <span class="feature-card-meta">
+              Dynamic ML inference
+            </span>
+
+          </div>
+
+        </article>
+
+
+        <article class="feature-card">
+
+          <div class="feature-card-index">
+            03
+          </div>
+
+          <div class="feature-card-content">
+
+            <span class="feature-card-title">
+              CONFIDENCE
+            </span>
+
+            <span class="feature-card-meta">
+              Prediction uncertainty tracked
+            </span>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ================================================================
+         SCENE 04 — TUNNEL APPROACH
+         ================================================================ -->
+
+    <div id="tunnel-approach-card" class="tunnel-approach-card" style="display:none; opacity:0;" aria-hidden="true">
+
+      <div class="approach-inner">
+
+        <span class="approach-index">
+          03 / TRANSITION
+        </span>
+
+        <h3 class="approach-title">
+          One more step.
+        </h3>
+
+        <p class="approach-sub">
+          Sign in to continue the journey
+          and access live prediction tools.
+        </p>
+
+        <span class="approach-arrow" aria-hidden="true">
+          →
+        </span>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================================================
+         SCENE 05 — AUTHENTICATION
+         ================================================================ -->
+
+    <div id="auth-modal-wrapper" class="auth-modal-wrapper" style="display:none; opacity:0;" aria-hidden="true">
+
+      <div id="auth-modal" class="auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-card-title">
+
+        <button type="button" id="auth-close-btn" class="auth-close-btn" title="Close"
+          aria-label="Close authentication">
+          ×
+        </button>
+
+
+        <div class="auth-card-header">
+
+          <span class="auth-kicker">
+            OUTLIERS ACCESS
+          </span>
+
+          <h2 id="auth-card-title" class="auth-card-title">
+            Welcome aboard.
+          </h2>
+
+          <p class="auth-card-subtitle">
+            Sign in to continue to your operational dashboard.
+          </p>
+
+        </div>
+
+
+        <!-- Google authentication -->
+
+        <div id="google-auth-container" class="google-auth-container">
+
+          <div id="google-signin-btn"></div>
+
+          <button id="btn-google-fallback" class="btn-google-signin" type="button">
+
+            <span class="google-mark" aria-hidden="true">
+              G
+            </span>
+
+            <span>
+              Continue with Google
+            </span>
+
+          </button>
+
+        </div>
+
+
+        <!-- Trust indicators -->
+
+        <div class="auth-trust-row">
+
+          <div class="trust-item">
+            <span class="trust-indicator"></span>
+            <span class="trust-label">Secure</span>
+          </div>
+
+          <div class="trust-item">
+            <span class="trust-indicator"></span>
+            <span class="trust-label">Private</span>
+          </div>
+
+          <div class="trust-item">
+            <span class="trust-indicator"></span>
+            <span class="trust-label">Personalised</span>
+          </div>
+
+        </div>
+
+
+        <!-- Demo mode -->
+
+        <div class="auth-demo-section">
+
+          <div id="auth-unconfigured-note" class="auth-unconfigured-note">
+            Google OAuth can be configured through
+            <code>GOOGLE_CLIENT_ID</code>.
+          </div>
+
+          <button id="btn-demo-mode" class="btn-demo-action" type="button">
+            <span>
+              Continue in Demo Mode
+            </span>
+
+            <span aria-hidden="true">
+              →
+            </span>
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================================================
+         SCENE 06 — TUNNEL EXIT / YOU'RE IN
+         ================================================================ -->
+
+    <div id="youre-in-overlay" class="youre-in-overlay" style="display:none; opacity:0;" aria-hidden="true">
+
+      <div class="youre-in-content">
+
+        <span class="youre-in-kicker">
+          JOURNEY CONTINUES
+        </span>
+
+        <h1 class="youre-in-script">
+          You're in.
+        </h1>
+
+        <h2 class="youre-in-sub">
+          Let's track a smarter tomorrow.
+        </h2>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ================================================================
+         SCENE 07 — OPERATIONAL DASHBOARD
+         ================================================================ -->
+
+    <div id="main-dashboard" class="dashboard-shell" style="display:none; opacity:0;">
+
+      <!-- ============================================================
+           SIDEBAR
+           ============================================================ -->
+
+      <aside class="dashboard-sidebar" aria-label="Dashboard navigation">
+
+        <div class="sidebar-brand">
+
+          <span class="sidebar-brand-mark">
+            <span></span>
+            <span></span>
+          </span>
+
+          <span class="brand-name">
+            OUTLIERS
+          </span>
+
+        </div>
+
+
+        <div class="sidebar-section-label">
+          WORKSPACE
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+          <a href="#dashboard" class="sidebar-item active">
+            <span class="item-index">01</span>
+            <span>Dashboard</span>
+          </a>
+
+          <a href="#track" class="sidebar-item" id="side-track">
+            <span class="item-index">02</span>
+            <span>Track Train</span>
+          </a>
+
+          <a href="#live-map" class="sidebar-item" id="side-map">
+            <span class="item-index">03</span>
+            <span>Live Map</span>
+          </a>
+
+          <a href="#analytics" class="sidebar-item" id="side-analytics">
+            <span class="item-index">04</span>
+            <span>Analytics</span>
+          </a>
+
+          <a href="#alerts" class="sidebar-item" id="side-alerts">
+            <span class="item-index">05</span>
+            <span>Alerts</span>
+          </a>
+
+          <a href="#profile" class="sidebar-item" id="side-profile">
+            <span class="item-index">06</span>
+            <span>Profile</span>
+          </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+          <span class="sidebar-footer-label">
+            SYSTEM
+          </span>
+
+          <span class="sidebar-badge">
+            SIH 2026 / 26028
+          </span>
+
+        </div>
+
+      </aside>
+
+
+
+      <!-- ============================================================
+           DASHBOARD MAIN
+           ============================================================ -->
+
+      <div class="dashboard-main">
+
+        <!-- Top operational bar -->
+
+        <header class="dashboard-topbar">
+
+          <div class="topbar-welcome">
+
+            <span class="topbar-kicker">
+              OPERATIONAL OVERVIEW
+            </span>
+
+            <h2 class="welcome-heading">
+              Welcome, Yogesh.
+            </h2>
+
+            <p class="welcome-tagline">
+              Track. Predict. Travel smarter.
+            </p>
+
+          </div>
+
+
+          <div class="topbar-search">
+
+            <span class="search-lens">
+              /
+            </span>
+
+            <input type="text" class="topbar-search-input" placeholder="Search train number / name..."
+              value="12951 Mumbai Rajdhani" aria-label="Search train">
+
+          </div>
+
+
+          <div class="topbar-controls">
+
+            <div class="mode-switch-container">
+
+              <div class="mode-switch" id="mode-switch">
+
+                <button type="button" class="mode-btn" id="btn-mode-live">
+                  LIVE FORECAST
+                </button>
+
+                <button type="button" class="mode-btn active demo-active" id="btn-mode-demo">
+                  DEMO REPLAY
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <span id="health-badge" class="badge status-badge live">
+              SYSTEM LIVE
+            </span>
+
+
+            <button type="button" class="notification-icon" title="Alerts" aria-label="Alerts">
+              03
+            </button>
+
+
+            <div class="user-avatar-pill" title="Yogesh" aria-label="User Yogesh">
+              Y
+            </div>
+
+          </div>
+
+        </header>
+
+
+
+        <!-- ============================================================
+             SECURITY / TELEMETRY BANNERS
+             ============================================================ -->
+
+        <div id="live-blocked-banner" class="live-blocked-banner hidden">
+
+          <div class="banner-left">
+
+            <span class="banner-index">
+              !
+            </span>
+
+            <div>
+
+              <strong>
+                LIVE TELEMETRY UNAVAILABLE
+              </strong>
+
+              <div class="banner-subtext">
+                Real provider authorization is required.
+                Configure NTES_BASE_URL and the appropriate API key
+                to activate live feeds.
+              </div>
+
+            </div>
+
+          </div>
+
+          <button type="button" id="switch-to-demo-btn" class="btn-outline-amber">
+            Switch to Demo Mode
+          </button>
+
+        </div>
+
+
+        <div id="demo-banner" class="demo-banner">
+
+          <span class="banner-index">
+            DEMO
+          </span>
+
+          <span class="banner-text">
+            Deterministic synthetic telemetry is currently active.
+            Real-data admission remains fail-closed.
+          </span>
+
+        </div>
+
+
+        <div id="error-banner" class="error-banner hidden">
+
+          <span id="error-banner-text"></span>
+
+          <button type="button" id="error-close-btn" aria-label="Close error">
+            ×
+          </button>
+
+        </div>
+
+
+
+        <!-- ============================================================
+             EXECUTIVE STATUS CARDS
+             ============================================================ -->
+
+        <section class="exec-cards-row">
+
+          <!-- Live train -->
+
+          <article class="exec-card status-card">
+
+            <span class="exec-card-label">
+              LIVE TRAIN STATUS
+            </span>
+
+            <div class="exec-status-badge on-time">
+
+              <span class="status-dot"></span>
+
+              <span>
+                On Time
+              </span>
+
+            </div>
+
+            <div class="exec-train-id" id="exec-train-name">
+              12951 Mumbai Rajdhani
+            </div>
+
+            <div class="exec-train-sub">
+              Current Delay:
+              <strong id="exec-delay-val">
+                0 min
+              </strong>
+            </div>
+
+          </article>
+
+
+          <!-- Next station -->
+
+          <article class="exec-card next-station-card">
+
+            <span class="exec-card-label">
+              NEXT STATION
+            </span>
+
+            <div class="exec-station-code" id="exec-next-station">
+              Vadodara (BRC)
+            </div>
+
+            <div class="exec-eta-line">
+
+              <span>
+                ETA:
+                <strong id="exec-eta-time">
+                  02:17 PM
+                </strong>
+              </span>
+
+              <span>
+                Distance:
+                <strong id="exec-distance">
+                  124 km
+                </strong>
+              </span>
+
+            </div>
+
+          </article>
+
+
+          <!-- Prediction -->
+
+          <article class="exec-card prediction-card">
+
+            <span class="exec-card-label">
+              AI PREDICTION
+            </span>
+
+            <div class="exec-pred-status">
+
+              <span class="pred-label on-time">
+                ON TIME
+              </span>
+
+              <span class="pred-conf" id="exec-confidence">
+                High Confidence · 82%
+              </span>
+
+            </div>
+
+
+            <svg class="sparkline-svg" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true">
+
+              <path d="M 0 28
+                   Q 25 30 42 25
+                   T 80 18
+                   T 118 16
+                   T 160 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+
+              <circle cx="160" cy="10" r="3" fill="currentColor" />
+
+            </svg>
+
+          </article>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             LIVE ROUTE
+             ============================================================ -->
+
+        <section class="exec-route-card">
+
+          <div class="route-card-header">
+
+            <span class="route-label">
+              LIVE ROUTE
+            </span>
+
+            <span class="route-train-tag" id="route-train-tag">
+              12301 · NDLS → HWH
+            </span>
+
+          </div>
+
+
+          <div class="live-route-track">
+
+            <span class="route-origin" id="route-origin-label">
+              New Delhi
+            </span>
+
+
+            <div class="route-bar-line">
+
+              <div class="route-station-dot passed" title="NDLS Passed"></div>
+
+              <div class="route-station-dot passed" title="CNB Passed"></div>
+
+              <div class="route-station-dot active" title="DDU Current">
+                <span class="train-pin">
+                  12301
+                </span>
+              </div>
+
+              <div class="route-station-dot" title="PRYJ Upcoming"></div>
+
+              <div class="route-station-dot" title="GAYA Upcoming"></div>
+
+              <div class="route-station-dot" title="HWH Destination"></div>
+
+            </div>
+
+
+            <span class="route-destination" id="route-dest-label">
+              Howrah
+            </span>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             DYNAMIC ETA CONTROLLER
+             ============================================================ -->
+
+        <section class="card control-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <span class="section-kicker">
+                PREDICTION ENGINE
+              </span>
+
+              <h2>
+                Dynamic ETA Prediction Controller
+              </h2>
+
+            </div>
+
+            <span id="mode-indicator-tag" class="card-tag badge-tag-demo">
+              Demo Mode
+            </span>
+
+          </div>
+
+
+          <!-- Live telemetry -->
+
+          <div id="telemetry-strip" class="telemetry-strip hidden">
+
+            <div class="telemetry-item">
+              <span class="telemetry-label">Provider</span>
+              <span id="telemetry-provider" class="telemetry-val">
+                CRIS_NTES
+              </span>
+            </div>
+
+            <div class="telemetry-item">
+              <span class="telemetry-label">Freshness</span>
+              <span id="telemetry-freshness" class="telemetry-badge fresh">
+                FRESH
+              </span>
+            </div>
+
+            <div class="telemetry-item">
+              <span class="telemetry-label">Data Age</span>
+              <span id="telemetry-age" class="telemetry-val">
+                --
+              </span>
+            </div>
+
+            <div class="telemetry-item">
+              <span class="telemetry-label">Poll Latency</span>
+              <span id="telemetry-latency" class="telemetry-val">
+                -- ms
+              </span>
+            </div>
+
+            <div class="telemetry-item">
+              <span class="telemetry-label">Next Poll</span>
+              <span id="telemetry-countdown" class="telemetry-val">
+                30s
+              </span>
+            </div>
+
+            <div class="telemetry-item">
+
+              <button type="button" id="btn-refresh-live" class="btn-outline-amber">
+                Poll Telemetry
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Prediction form -->
+
+          <form id="prediction-form" class="controls-grid">
+
+            <div class="form-group">
+
+              <label for="train-select">
+                TRAIN RUN
+              </label>
+
+              <select id="train-select" class="form-control">
+                <option value="12301">
+                  12301 — New Delhi to Howrah Rajdhani Express
+                </option>
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="current-station-select">
+                CURRENT STATION
+              </label>
+
+              <select id="current-station-select" class="form-control"></select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="target-station-select">
+                TARGET DESTINATION
+              </label>
+
+              <select id="target-station-select" class="form-control"></select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="delay-slider">
+                OBSERVED DELAY:
+                <strong id="delay-value">
+                  15
+                </strong>
+                min
+              </label>
+
+              <div class="slider-wrapper">
+
+                <input type="range" id="delay-slider" min="0" max="120" value="15" step="1" class="slider">
+
+              </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+              <button type="submit" id="submit-btn" class="btn btn-primary">
+                <span>
+                  Forecast Dynamic ETA
+                </span>
+
+                <span aria-hidden="true">
+                  →
+                </span>
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             CORRIDOR TIMELINE
+             ============================================================ -->
+
+        <section class="card timeline-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <span class="section-kicker">
+                ROUTE INTELLIGENCE
+              </span>
+
+              <h2>
+                Corridor Station Progression
+              </h2>
+
+            </div>
+
+            <span id="route-summary" class="card-tag">
+              NDLS → HWH
+            </span>
+
+          </div>
+
+          <div id="corridor-timeline" class="corridor-timeline"></div>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             PREDICTION RESULTS
+             ============================================================ -->
+
+        <section class="results-grid">
+
+          <!-- ML -->
+
+          <article class="card result-card ml-card">
+
+            <div class="card-header">
+
+              <div class="model-badge">
+
+                <span class="model-type">
+                  ML MODEL
+                </span>
+
+                <span id="ml-model-version" class="model-version">
+                  Ridge / GBDT Predictor
+                </span>
+
+              </div>
+
+              <span class="badge badge-accent">
+                LEARNED DYNAMIC
+              </span>
+
+            </div>
+
+
+            <div class="prediction-main">
+
+              <div class="time-block">
+
+                <span class="label">
+                  PREDICTED ARRIVAL
+                </span>
+
+                <div id="ml-predicted-arrival" class="time-display">
+                  --:--:-- UTC
+                </div>
+
+              </div>
+
+
+              <div class="delay-pill-wrapper">
+
+                <span id="ml-delay-pill" class="pill pill-delay">
+                  +0.0 min delay
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="metrics-row">
+
+              <div class="metric-item">
+
+                <span class="metric-label">
+                  CONFIDENCE
+                </span>
+
+                <div class="metric-value-wrap">
+
+                  <span id="ml-confidence-val" class="metric-value">
+                    --%
+                  </span>
+
+                  <div class="progress-bar">
+
+                    <div id="ml-confidence-bar" class="progress-fill" style="width:0%"></div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="metric-item">
+
+                <span class="metric-label">
+                  UNCERTAINTY RANGE
+                </span>
+
+                <span id="ml-interval" class="metric-value mono">
+                  --:-- to --:-- UTC
+                </span>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+
+          <!-- Baseline -->
+
+          <article class="card result-card baseline-card">
+
+            <div class="card-header">
+
+              <div class="model-badge">
+
+                <span class="model-type">
+                  BASELINE
+                </span>
+
+                <span class="model-version">
+                  Schedule Delay Propagator
+                </span>
+
+              </div>
+
+              <span class="badge badge-neutral">
+                DETERMINISTIC
+              </span>
+
+            </div>
+
+
+            <div class="prediction-main">
+
+              <div class="time-block">
+
+                <span class="label">
+                  PREDICTED ARRIVAL
+                </span>
+
+                <div id="base-predicted-arrival" class="time-display">
+                  --:--:-- UTC
+                </div>
+
+              </div>
+
+
+              <div class="delay-pill-wrapper">
+
+                <span id="base-delay-pill" class="pill pill-delay-neutral">
+                  +0.0 min delay
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="metrics-row">
+
+              <div class="metric-item">
+
+                <span class="metric-label">
+                  CONFIDENCE
+                </span>
+
+                <div class="metric-value-wrap">
+
+                  <span id="base-confidence-val" class="metric-value">
+                    --%
+                  </span>
+
+                  <div class="progress-bar">
+
+                    <div id="base-confidence-bar" class="progress-fill fill-neutral" style="width:0%"></div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="metric-item">
+
+                <span class="metric-label">
+                  SCHEDULED ARRIVAL
+                </span>
+
+                <span id="scheduled-arrival-val" class="metric-value mono">
+                  --:--:-- UTC
+                </span>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             EVALUATION + PROVENANCE
+             ============================================================ -->
+
+        <section class="info-grid">
+
+          <article class="card gate-card">
+
+            <div class="card-header">
+
+              <div>
+
+                <span class="section-kicker">
+                  MODEL EVALUATION
+                </span>
+
+                <h2>
+                  Evaluation Gate
+                </h2>
+
+              </div>
+
+              <span id="gate-badge" class="badge badge-success">
+                ACCEPTED
+              </span>
+
+            </div>
+
+
+            <div class="gate-metrics">
+
+              <div class="gate-metric-box">
+                <span class="gate-metric-label">
+                  EVALUATED CASES
+                </span>
+                <span id="gate-count" class="gate-metric-num">
+                  32
+                </span>
+              </div>
+
+              <div class="gate-metric-box">
+                <span class="gate-metric-label">
+                  BATCH MAE
+                </span>
+                <span id="gate-mae" class="gate-metric-num">
+                  3.75 min
+                </span>
+              </div>
+
+              <div class="gate-metric-box">
+                <span class="gate-metric-label">
+                  BATCH RMSE
+                </span>
+                <span id="gate-rmse" class="gate-metric-num">
+                  4.48 min
+                </span>
+              </div>
+
+              <div class="gate-metric-box">
+                <span class="gate-metric-label">
+                  MEDIAN ERROR
+                </span>
+                <span id="gate-medae" class="gate-metric-num">
+                  2.88 min
+                </span>
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <article class="card provenance-card">
+
+            <div class="card-header">
+
+              <div>
+
+                <span class="section-kicker">
+                  DATA GOVERNANCE
+                </span>
+
+                <h2>
+                  Provenance &amp; Safety
+                </h2>
+
+              </div>
+
+              <span class="card-tag">
+                STRICT BOUNDARY
+              </span>
+
+            </div>
+
+
+            <ul class="audit-list">
+
+              <li>
+                <span class="audit-check">✓</span>
+                <span>
+                  <strong>Classification:</strong>
+                  <code>simulated_demo</code>
+                </span>
+              </li>
+
+              <li>
+                <span class="audit-check">✓</span>
+                <span>
+                  <strong>Temporal Leakage:</strong>
+                  Zero future information in features
+                </span>
+              </li>
+
+              <li>
+                <span class="audit-check">✓</span>
+                <span>
+                  <strong>Label Isolation:</strong>
+                  Arrival and departure labels isolated
+                </span>
+              </li>
+
+              <li>
+                <span class="audit-check">✓</span>
+                <span>
+                  <strong>Real Data Gate:</strong>
+                  Fail-closed provider validation
+                </span>
+              </li>
+
+            </ul>
+
+          </article>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             OPERATIONAL TABS
+             ============================================================ -->
+
+        <section class="card table-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <span class="section-kicker">
+                OPERATIONS
+              </span>
+
+              <h2 id="table-card-title">
+                Corridor Operations &amp; Intelligence
+              </h2>
+
+            </div>
+
+
+            <div class="tab-controls">
+
+              <button id="tab-timetable" class="tab-btn active">
+                Planned Schedule
+              </button>
+
+              <button id="tab-benchmark" class="tab-btn">
+                ML vs Baseline
+              </button>
+
+              <button id="tab-monitoring" class="tab-btn">
+                Error Slicing
+              </button>
+
+              <button id="tab-telemetry" class="tab-btn">
+                Live Telemetry
+              </button>
+
+              <button id="tab-model" class="tab-btn">
+                Model Architecture
+              </button>
+
+              <button id="tab-provenance" class="tab-btn">
+                Provenance &amp; Safety
+              </button>
+
+              <button id="tab-audit" class="tab-btn">
+                Audit Logs
+              </button>
+
+              <button id="tab-provider" class="tab-btn">
+                Provider Gateway
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div id="table-container" class="table-container"></div>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             MISSION / BRAND END
+             ============================================================ -->
+
+        <section class="brand-mission-section">
+
+          <div class="mission-inner">
+
+            <span class="mission-kicker">
+              OUTLIERS / 2026
+            </span>
+
+            <h3 class="mission-title">
+              Know the journey<br>
+              before it arrives.
+            </h3>
+
+            <p class="mission-sub">
+              A dynamic ETA intelligence layer for a railway
+              that never stops moving.
+            </p>
+
+
+            <div class="mission-pillars">
+
+              <div class="pillar">
+
+                <span class="pillar-index">
+                  01
+                </span>
+
+                <span class="pillar-name">
+                  Smarter Travel
+                </span>
+
+              </div>
+
+
+              <div class="pillar">
+
+                <span class="pillar-index">
+                  02
+                </span>
+
+                <span class="pillar-name">
+                  Better Predictions
+                </span>
+
+              </div>
+
+
+              <div class="pillar">
+
+                <span class="pillar-index">
+                  03
+                </span>
+
+                <span class="pillar-name">
+                  Better Journeys
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="mission-tagline">
+              BUILT FOR A MOVING INDIA
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- ============================================================
+             FOOTER
+             ============================================================ -->
+
+        <footer class="app-footer">
+
+          <p>
+            SIH 2026 · Problem Statement SIH26028 ·
+            Dynamic Forecast of ETA for Coaching Trains
+          </p>
+
+          <span class="footer-status">
+            OUTLIERS SYSTEM / READY
+          </span>
+
+        </footer>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+
+  <!-- ================================================================
+       APPLICATION ORCHESTRATOR
+       ---------------------------------------------------------------
+       Keep this as the final script.
+       app.js coordinates:
+       - scene.js
+       - tunnel.js
+       - auth.js
+       - dashboard.js
+       - API
+       ================================================================ -->
+
+  <script type="module" src="app.js"></script>
+
+</body>
+
+</html>
+```

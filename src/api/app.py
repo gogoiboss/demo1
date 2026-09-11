@@ -514,7 +514,9 @@ except ImportError:
 from pathlib import Path
 
 # Mount the static frontends
-frontend_path = Path(__file__).resolve().parent.parent.parent.parent / "outliers-frontend"
+internal_frontend = Path(__file__).resolve().parent.parent.parent / "frontend"
+external_frontend = Path(__file__).resolve().parent.parent.parent.parent / "outliers-frontend"
+frontend_path = internal_frontend if internal_frontend.exists() else external_frontend
 dashboard_path = Path(__file__).resolve().parent.parent.parent / "dashboard"
 
 if dashboard_path.exists():
