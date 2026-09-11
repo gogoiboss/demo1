@@ -19,9 +19,9 @@
 ## Engineering items — status (A-W)
 
 ### Data layer
-- [x] A. Midnight rollover — `tests/test_midnight_crossing.py` exists; VERIFY it passes in this session
-- [x] B. GPS dedup + watermark — `tests/test_dedup_watermark.py` exists; VERIFY it passes in this session
-- [x] C. Ingest validation — `tests/test_schema_validation.py`, `tests/test_validation.py`, `src/validation.py` exist; VERIFY
+- [x] A. Midnight rollover — VERIFIED: `pytest tests/test_midnight_crossing.py -v` → 1 passed
+- [x] B. GPS dedup + watermark — VERIFIED: `pytest tests/test_dedup_watermark.py -v` → 1 passed
+- [x] C. Ingest validation — VERIFIED: `pytest tests/test_schema_validation.py tests/test_validation.py -v` → 3 passed
 
 ### ML correctness
 - [ ] D. Baseline table (4-model) — 4th model (per-train regression, no network features) added to `eval/baseline_comparison.py`, but NO REAL NUMBERS yet — blocked on missing dataset in this environment
@@ -33,9 +33,9 @@
 - [ ] H. Point-in-time backfill correctness — NOT yet explicitly audited this session
 
 ### Performance
-- [x] I. Static graph caching — CONFIRMED EXISTS: `CachedPropagationEngine` in `src/graph/timed_event_graph.py`
-- [x] J. Vectorized topological traversal — CONFIRMED EXISTS: NumPy-vectorized pass in `CachedPropagationEngine`
-- [x] K. Incremental propagation — CONFIRMED EXISTS: `CachedPropagationEngine` supports incremental updates; VERIFY with a direct test this session, not just code presence
+- [x] I. Static graph caching — VERIFIED: `CachedPropagationEngine` in `src/graph/timed_event_graph.py`; exercised by `eval/bench_propagation.py` at 50/200/500-train scale, numerical equivalence PASS at all three
+- [x] J. Vectorized topological traversal — VERIFIED: same benchmark run confirms the NumPy-vectorized pass matches the reference NetworkX implementation exactly at all three scales
+- [x] K. Incremental propagation — FIXED THIS SESSION (was broken, not just unverified): `propagate_incremental()` derived its recompute boundary from `changed_nodes` alone, which is unsafe — a two-independent-train reproduction showed it silently returning 0.0 for a delay's own downstream cascade when an unrelated node sorted later in topo order. Fixed to derive the boundary from the full `delays` set instead (always safe — see commit `07bb3ea`). New regression test `test_incremental_propagation_matches_full_pass_when_changed_node_sorts_later` in `tests/test_graph_boundaries.py` fails against the pre-fix code and passes against the fix. Not used in the live serving path (only `eval/bench_propagation.py`'s benchmark), so no prediction was ever affected — but the benchmark's own "incremental" timing number was previously computed from a function that silently gave wrong answers whenever it was actually exercising the intended single-train-update case.
 
 ### Automation
 - [~] L. Offline seed — `Makefile` has `make seed` / `make demo` targets and `scripts/seed_db.py` exists; VERIFY it actually loads a real recorded capture, not just a stub
@@ -43,10 +43,10 @@
 - [ ] N. Git history secret scan — NOT yet done, do it this session (see Task 4 below)
 
 ### Testing
-- [x] O. Propagation boundary tests — CONFIRMED EXISTS: covered within `tests/test_graph.py` / `tests/test_graph_boundaries.py`; VERIFY passing
-- [x] P. Property tests — CONFIRMED EXISTS: `tests/test_invariants.py`; VERIFY passing
-- [x] Q. Golden scenarios — CONFIRMED EXISTS: `tests/test_golden_scenarios.py`; VERIFY passing
-- [x] R. Backtest harness — CONFIRMED EXISTS: `eval/backtest_harness.py`, `tests/test_backtest_harness.py`; VERIFY passing
+- [x] O. Propagation boundary tests — VERIFIED: `pytest tests/test_graph.py tests/test_graph_boundaries.py -v` → 12 passed (8 + 4, including the new incremental-propagation regression test)
+- [x] P. Property tests — VERIFIED: `pytest tests/test_invariants.py -v` → 3 passed
+- [x] Q. Golden scenarios — VERIFIED: `pytest tests/test_golden_scenarios.py -v` → 3 passed
+- [~] R. Backtest harness — `eval/backtest_harness.py` and `tests/test_backtest_harness.py` exist and are wired correctly, but the test SKIPS in this environment ("checked-in historical artifact is optional locally") because `data/` does not exist here — genuinely blocked on the missing dataset, not failing. Cannot mark `[x]` without having seen it actually pass.
 
 ### Serving
 - [ ] S. Graceful degradation — NOT yet confirmed implemented (persistence fallback when ML down, interval widening when feed stale) — do this session
