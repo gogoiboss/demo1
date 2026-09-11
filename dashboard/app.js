@@ -2281,6 +2281,16 @@ function applyGlobalLanguage(lang) {
     });
   }
 
+  const cookieVal = (lang === 'en' || !lang) ? '' : `/en/${lang}`;
+  document.cookie = `googtrans=${cookieVal}; path=/;`;
+  document.cookie = `googtrans=${cookieVal}; path=/; domain=${window.location.hostname};`;
+
+  const googCombo = document.querySelector('.goog-te-combo');
+  if (googCombo) {
+    googCombo.value = lang;
+    googCombo.dispatchEvent(new Event('change'));
+  }
+
   window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
 }
 

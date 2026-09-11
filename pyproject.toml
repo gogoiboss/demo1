@@ -1,3 +1,6 @@
+[tool.pyright]
+extraPaths = ["."]
+
 [tool.ruff]
 line-length = 100
 
@@ -11,3 +14,4 @@ line-length = 100
 # ruff` picking up whatever is newest: E4/E7/E9 (pycodestyle error subset)
 # plus F (pyflakes — unused imports/names, undefined names, etc).
 select = ["E4", "E7", "E9", "F"]
+

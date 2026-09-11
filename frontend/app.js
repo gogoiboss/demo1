@@ -458,7 +458,7 @@ async function _startETATransitionSequence(user) {
   if (overlay && frame) {
     overlay.style.display = 'block';
     const returnTarget = _getResolvedReturnUrl();
-    frame.src = '/eta/index.html?mode=transition&returnTo=' + encodeURIComponent(returnTarget);
+    frame.src = '/?mode=transition&returnTo=' + encodeURIComponent(returnTarget);
 
     if (window.gsap) {
       window.gsap.to(overlay, { opacity: 1, duration: 0.6, ease: 'power2.out' });

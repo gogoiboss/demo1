@@ -87,6 +87,23 @@
     background:var(--rail-blue-soft); color:var(--rail-blue); border:1px solid rgba(18,59,93,0.12);
     font-size:11.5px; font-weight:700; padding:8px 14px; border-radius:20px; letter-spacing:0.02em;
   }
+  .nav-pill-btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    height:34px; padding:0 16px; background:#FFFFFF;
+    border:1px solid var(--line-strong); border-radius:20px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600;
+    color:var(--text-primary); text-decoration:none;
+    transition:all .2s var(--ease); box-shadow:var(--shadow-sm); cursor:pointer;
+    line-height:1; white-space:nowrap; outline:none;
+  }
+  .nav-pill-btn:hover{
+    background:var(--bg-subtle); border-color:var(--rail-blue); color:var(--rail-blue-dark); text-decoration:none;
+  }
+  select.nav-pill-btn{
+    appearance:none; -webkit-appearance:none; padding-right:26px;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%2317202B" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>');
+    background-repeat:no-repeat; background-position:right 10px center;
+  }
   .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green); animation:pulse-dot 1.8s infinite;}
   @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.3;}}
   .nav-hide-mobile{display:flex;}
@@ -170,11 +187,13 @@
   @media (max-width:700px){ .step-label{font-size:11px;} }
 
   .scroll-cue{
-    position:absolute; bottom:16px; left:50%; transform:translateX(-50%); z-index:6;
+    position:absolute; bottom:18px; left:50%; transform:translateX(-50%); z-index:6;
     display:flex; align-items:center; gap:10px; font-size:10.5px; letter-spacing:0.14em; color:var(--text-secondary);
-    opacity:0; transition:opacity 1s .8s; font-weight:600;
+    opacity:0; transition:opacity .4s var(--ease), visibility .4s var(--ease); font-weight:600;
+    pointer-events:none;
   }
-  .scroll-cue.in{opacity:1;}
+  .scroll-cue.in{opacity:1; visibility:visible;}
+  .scroll-cue.out{opacity:0 !important; visibility:hidden !important;}
   .scroll-cue .chevbob{animation:bob 1.8s infinite ease-in-out;}
   @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
 
@@ -186,6 +205,7 @@
   }
   .intro.hidden{opacity:0; visibility:hidden; pointer-events:none;}
   .skip-btn{
+    position:relative; z-index:10; cursor:pointer; pointer-events:auto;
     margin:0 28px 28px 0; font-size:12px; color:var(--text-primary); font-weight:600;
     background:#FFFFFF; border:1px solid var(--line-strong); padding:10px 20px; border-radius:20px;
     display:flex; align-items:center; gap:8px; transition:border-color .2s, background .2s; box-shadow:var(--shadow-sm);
@@ -224,12 +244,26 @@
   .station-glow{opacity:0; transition:opacity .25s;}
   .station-node:hover .station-glow, .station-node.hot .station-glow{opacity:1;}
   .station-node:hover .station-core, .station-node.hot .station-core{filter:brightness(1.15);}
-  .station-label{font-family:'Inter',sans-serif; font-size:11px; font-weight:700; fill:var(--rail-blue); opacity:0; transition:opacity .2s; pointer-events:none;}
-  .station-node:hover .station-label, .station-node.hot .station-label{opacity:1;}
-  .station-label-always{font-family:'Inter',sans-serif; font-size:10.5px; font-weight:700; fill:var(--text-primary);}
+  
+  .station-badge-group{
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+    transform: translateY(2px);
+  }
+  .station-node:hover .station-badge-group,
+  .station-node.hot .station-badge-group,
+  .station-node.active-badge .station-badge-group,
+  .station-node.tier1 .station-badge-group,
+  .stations-layer-on .station-badge-group{
+    opacity: 1; pointer-events: auto; transform: translateY(0);
+  }
+  .station-badge-bg{
+    filter: drop-shadow(0 2px 6px rgba(18,59,93,0.18));
+  }
 
-  .route-line{fill:none; stroke:#9AAEC1; stroke-width:1.6; opacity:0.65;}
-  .route-line.affected{stroke:var(--red); stroke-width:2.8; opacity:1;}
+  .route-line{fill:none; stroke:#9AAEC1; stroke-width:1.6; opacity:0.65; transition: stroke .3s var(--ease), stroke-width .3s var(--ease), opacity .3s var(--ease);}
+  .route-line.affected{stroke:var(--red) !important; stroke-width:3.6 !important; opacity:1 !important; filter: drop-shadow(0 0 6px rgba(201,75,67,0.55));}
+  .route-line.dimmed{opacity:0.12 !important; stroke:#C2D1E0 !important;}
 
   .ripple-pulse{fill:none; stroke:var(--red); stroke-width:3; opacity:0;}
 
@@ -281,6 +315,7 @@
   }
   .train-row:last-child{border-bottom:none;}
   .train-row:hover, .train-row.hot{background:#F7F9FB;}
+  .train-row.selected{background:#EEF4F9; border-left:4px solid var(--rail-blue);}
   .tr-left{display:flex; align-items:center; gap:14px;}
   .tr-code{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--rail-blue); font-weight:700; width:54px;}
   .tr-name{font-size:14px; font-weight:600; color:var(--text-primary);}
@@ -297,12 +332,57 @@
   footer .f-right{display:flex; gap:24px;}
   footer a:hover{color:var(--rail-blue);}
 
+  /* Footer Modals */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(13, 38, 61, 0.45); backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99999; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: #FFFFFF; border-radius: var(--radius-m);
+    box-shadow: 0 20px 50px rgba(18,59,93,0.25);
+    max-width: 520px; width: 92%; padding: 28px 32px;
+    border: 1px solid var(--line-strong);
+    transform: translateY(12px); transition: transform 0.25s ease;
+    max-height: 85vh; overflow-y: auto; position: relative;
+  }
+  .modal-overlay.active .modal-box { transform: translateY(0); }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 18px;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--rail-blue-dark); }
+  .modal-close {
+    background: rgba(23,32,43,0.06); border: none; font-size: 20px; font-weight: 600;
+    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all 0.15s;
+  }
+  .modal-close:hover { background: rgba(201,75,67,0.1); color: var(--red); }
+  .modal-body { font-size: 13.5px; line-height: 1.6; color: var(--text-primary); }
+  .modal-body p { margin-bottom: 12px; }
+  .modal-body h4 { font-size: 14px; color: var(--rail-blue); margin: 14px 0 6px 0; font-weight:700; }
+  .modal-form-group { margin-bottom: 14px; }
+  .modal-form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; }
+  .modal-form-group input, .modal-form-group textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-s);
+    font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s;
+  }
+  .modal-form-group input:focus, .modal-form-group textarea:focus { border-color: var(--rail-blue); }
+  .modal-btn {
+    background: var(--rail-blue); color: #FFF; padding: 10px 20px; border-radius: var(--radius-s);
+    font-weight: 600; font-size: 13px; cursor: pointer; border: none; transition: background 0.15s;
+  }
+  .modal-btn:hover { background: var(--rail-blue-dark); }
+
   .fade-up{opacity:0; transform:translateY(26px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
   .fade-up.in{opacity:1; transform:translateY(0);}
 
   /* ---------- WAP-7 HERO HUD & CAM CONTROLS ---------- */
   .wap7-hud{
-    position:absolute; top:104px; left:clamp(20px,4.5vw,64px); z-index:8; width:296px;
+    position:absolute; top:104px; right:clamp(20px,4.5vw,64px); z-index:12; width:296px;
     background:#FFFFFF;
     border:1px solid var(--line-strong); border-left:4px solid var(--yellow);
     border-radius:var(--radius-m); padding:16px 18px;
@@ -333,12 +413,12 @@
   .hud-val.warn{color:var(--yellow-dim);}
   .hud-val.delay{color:var(--red);}
   .hud-hint{
-    font-size:9.5px; letter-spacing:0.12em; color:var(--text-muted); margin-top:12px;
-    padding-top:8px; border-top:1px dashed var(--line); display:flex; align-items:center; gap:6px; font-weight:600;
+    font-size:9.5px; color:var(--text-muted); margin-top:12px; padding-top:8px;
+    border-top:1px dashed var(--line); letter-spacing:0.04em; font-family:'JetBrains Mono',monospace;
   }
 
   .cam-controls{
-    position:absolute; bottom:24px; right:clamp(16px,4vw,56px); z-index:8;
+    position:absolute; bottom:12px; right:clamp(12px, 2.5vw, 24px); z-index:8;
     display:flex; gap:6px; background:#FFFFFF;
     padding:5px; border-radius:24px; border:1px solid var(--line-strong);
     box-shadow:var(--shadow-card);
@@ -351,7 +431,7 @@
   .cam-btn.active{background:var(--rail-blue); color:#FFFFFF;}
 
   @media (max-width:760px){
-    .wap7-hud{width:250px; top:76px; padding:12px 14px;}
+    .wap7-hud{width:calc(100vw - 32px); right:16px; top:80px; padding:12px 14px;}
     .cam-controls{display:none;}
   }
 </style>
@@ -362,7 +442,7 @@
 <div class="intro" id="intro">
   <canvas id="intro-canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
   <div class="intro-caption mono" id="intro-caption">DEPARTING NEW DELHI</div>
-  <button class="skip-btn" id="skip-intro">Skip intro <span aria-hidden="true">→</span></button>
+  <button class="skip-btn" id="skip-intro" onclick="window.endIntro && window.endIntro()">Skip intro <span aria-hidden="true">→</span></button>
 </div>
 
 <!-- ============ NAV ============ -->
@@ -371,24 +451,23 @@
     <div class="brand-word">RIPPLE<span>ETA</span></div>
     <div class="brand-sub">INDIAN RAILWAY INTELLIGENCE</div>
   </div>
-  <div class="nav-links">
-    <a href="#top" class="active">Home</a>
-    <a href="#network">Network</a>
-    <a href="/dashboard/index.html" style="font-weight:600; color:var(--rail-blue);">Dashboard ↗</a>
-    <a href="/dashboard/index.html" style="opacity:.85">Portals</a>
-    <a href="#top" onclick="document.getElementById('replay-intro')?.click(); return false;">Replay 3D</a>
-  </div>
-  <div class="nav-right nav-hide-mobile">
-    <div class="search">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-      Search train, station...
+  <div class="nav-right nav-hide-mobile" style="display:flex; align-items:center; gap:10px;">
+    <div class="search" style="position:relative; width:210px; padding:0 12px; height:34px; background:#FFFFFF; border:1px solid var(--line-strong); border-radius:20px; display:flex; align-items:center; gap:8px; box-shadow:var(--shadow-sm);">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-secondary); flex-shrink:0;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" id="nav-search-input" placeholder="Search train, station..." autocomplete="off" style="width:100%; border:none; background:transparent; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text-primary); outline:none;" />
+      <div id="search-dropdown" class="search-dropdown" style="display:none; position:absolute; top:40px; left:0; right:0; background:#FFFFFF; border:1px solid var(--line-strong); border-radius:12px; box-shadow:0 8px 24px rgba(18,59,93,0.12); z-index:100; max-height:260px; overflow-y:auto; padding:6px 0;"></div>
     </div>
-    <select id="lang-select" class="lang-select" aria-label="Select Language" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; border-radius:4px; padding:0.2rem 0.4rem; font-size:0.75rem; font-family:'JetBrains Mono', monospace; cursor:pointer;">
+    <a href="/dashboard/index.html" class="nav-pill-btn">
+      <span class="live-dot"></span> Open Dashboard ↗
+    </a>
+    <button type="button" class="nav-pill-btn" onclick="if(window.triggerReplay3D) window.triggerReplay3D();">
+      Replay 3D
+    </button>
+    <select id="lang-select" class="lang-select nav-pill-btn" aria-label="Select Language">
       <option value="en">EN</option>
       <option value="hi">HI (हिंदी)</option>
       <option value="mr">MR (मराठी)</option>
     </select>
-    <a href="/dashboard/index.html" class="live-pill" style="text-decoration:none; cursor:pointer; background:var(--yellow-soft); color:var(--rail-blue-dark); border-color:var(--yellow); font-weight:700;"><span class="live-dot"></span> Open Dashboard ↗</a>
   </div>
 </nav>
 
@@ -428,12 +507,6 @@
     <div class="hero-actions">
       <a class="btn-primary" href="/dashboard/index.html">Proceed to Dashboard <span aria-hidden="true">→</span></a>
       <a class="btn-secondary" href="#network">Explore 3D Network</a>
-    </div>
-    <div class="watch-row">
-      <div class="play-circle" id="replay-intro" title="Replay intro">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      </div>
-      <span>Watch the network in motion · 0:24</span>
     </div>
   </div>
 
@@ -490,21 +563,21 @@
       <div class="eta-corridor">
         <div class="corridor-row"><span>UNCERTAINTY CORRIDOR (P10 – P90)</span><span id="dp-eta" class="mono">ETA 18:42</span></div>
         <div class="corridor-bar">
-          <div class="corridor-fill"></div>
-          <div class="corridor-marker" style="left:50%;"></div>
+          <div class="corridor-fill" id="dp-corridor-fill"></div>
+          <div class="corridor-marker" id="dp-corridor-marker" style="left:50%;"></div>
         </div>
         <div class="corridor-labels">
-          <div><div style="color:var(--grey)">EARLIEST</div><div class="mono">18:35</div></div>
-          <div style="text-align:center"><div style="color:var(--grey)">MOST LIKELY</div><div class="mono" style="color:var(--yellow)">18:42</div></div>
-          <div style="text-align:right"><div style="color:var(--grey)">LATEST</div><div class="mono">18:51</div></div>
+          <div><div style="color:var(--grey)">EARLIEST</div><div class="mono" id="dp-earliest">18:35</div></div>
+          <div style="text-align:center"><div style="color:var(--grey)">MOST LIKELY</div><div class="mono" id="dp-mostlikely" style="color:var(--yellow)">18:42</div></div>
+          <div style="text-align:right"><div style="color:var(--grey)">LATEST</div><div class="mono" id="dp-latest">18:51</div></div>
         </div>
       </div>
 
       <div style="margin-top:22px;">
-        <div class="panel-title mono" style="margin-bottom:10px;">NETWORK IMPACT · <b id="dp-impact-stations">3 STATIONS</b></div>
-        <div class="impact-row"><span style="width:80px;color:var(--grey);font-size:11.5px;">CRITICALITY</span><div class="impact-bar-wrap"><div class="impact-bar" style="width:64%;background:var(--yellow);"></div></div><span class="mono" style="font-size:11.5px;">MEDIUM</span></div>
-        <div class="impact-row"><span style="width:80px;color:var(--grey);font-size:11.5px;">CONFLICTS</span><div class="impact-bar-wrap"><div class="impact-bar" style="width:38%;background:var(--blue);"></div></div><span class="mono" style="font-size:11.5px;">2 TRAINS</span></div>
-        <div class="impact-row"><span style="width:80px;color:var(--grey);font-size:11.5px;">DELAY TREND</span><div class="impact-bar-wrap"><div class="impact-bar" style="width:80%;background:var(--red);"></div></div><span class="mono" style="font-size:11.5px;">WORSENING</span></div>
+        <div class="panel-title mono" style="margin-bottom:10px;">NETWORK IMPACT · <b id="dp-impact-stations">1 STATION</b></div>
+        <div class="impact-row"><span style="width:80px;color:var(--grey);font-size:11.5px;">CRITICALITY</span><div class="impact-bar-wrap"><div class="impact-bar" id="dp-crit-bar" style="width:25%;background:var(--green);"></div></div><span class="mono" id="dp-crit-val" style="font-size:11.5px;">LOW</span></div>
+        <div class="impact-row"><span style="width:80px;color:var(--grey);font-size:11.5px;">CONFLICTS</span><div class="impact-bar-wrap"><div class="impact-bar" id="dp-conf-bar" style="width:10%;background:var(--blue);"></div></div><span class="mono" id="dp-conf-val" style="font-size:11.5px;">0 TRAINS</span></div>
+        <div class="impact-row"><span style="width:80px;color:var(--grey);font-size:11.5px;">DELAY TREND</span><div class="impact-bar-wrap"><div class="impact-bar" id="dp-trend-bar" style="width:20%;background:var(--green);"></div></div><span class="mono" id="dp-trend-val" style="font-size:11.5px;">STABLE</span></div>
       </div>
     </div>
 
@@ -521,12 +594,21 @@
     <span>Built for a smarter, more reliable Indian Railways</span>
   </div>
   <div class="f-right">
-    <a href="#" onclick="return false;">Privacy</a>
-    <a href="#" onclick="return false;">Terms</a>
-    <a href="#" onclick="return false;">Contact</a>
-    <span>Data inspired by Indian Railways</span>
+    <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a>
+    <a href="javascript:void(0)" onclick="openFooterModal('terms')">Terms</a>
+    <a href="javascript:void(0)" onclick="openFooterModal('contact')">Contact</a>
   </div>
 </footer>
+
+<div class="modal-overlay" id="footerModal" onclick="if(event.target===this) closeFooterModal();">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">Privacy Policy</h3>
+      <button class="modal-close" onclick="closeFooterModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
 
 <script src="three.min.js"></script>
 <script>
@@ -546,11 +628,11 @@ if(typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined'){
    DATA
 ====================================================================== */
 const TRAINS = [
-  {code:'12301', name:'Rajdhani Express', route:'NDLS → BCT', status:'On Time', statusColor:'#4CAF7D', x:640, y:250, delay:0},
-  {code:'22887', name:'Vande Bharat', route:'NDLS → VNS', status:'+12 MIN', statusColor:'#E8B23D', x:760, y:330, delay:12},
-  {code:'12951', name:'Mumbai Rajdhani', route:'BCT → NDLS', status:'+47 MIN', statusColor:'#D6534A', x:520, y:430, delay:47},
-  {code:'12009', name:'Shatabdi Express', route:'NDLS → BPL', status:'On Time', statusColor:'#4CAF7D', x:610, y:320, delay:0},
-  {code:'12621', name:'Tamil Nadu Exp.', route:'NDLS → MAS', status:'+6 MIN', statusColor:'#E8B23D', x:720, y:560, delay:6},
+  {code:'12301', name:'Rajdhani Express', route:'NDLS → BCT', status:'On Time', statusColor:'#4CAF7D', x:640, y:250, delay:0, eta:'18:42', earliest:'18:35', mostlikely:'18:42', latest:'18:51', corridorLeft:'50%', impactStations:'1 STATION', criticality:'LOW', critWidth:'25%', critColor:'#4CAF7D', conflicts:'0 TRAINS', confWidth:'10%', confColor:'#1C4E73', trend:'STABLE', trendWidth:'20%', trendColor:'#4CAF7D'},
+  {code:'22887', name:'Vande Bharat', route:'NDLS → VNS', status:'+12 MIN', statusColor:'#E8B23D', x:760, y:330, delay:12, eta:'14:22', earliest:'14:15', mostlikely:'14:22', latest:'14:38', corridorLeft:'45%', impactStations:'2 STATIONS', criticality:'MEDIUM', critWidth:'55%', critColor:'#E8B23D', conflicts:'1 TRAIN', confWidth:'35%', confColor:'#1C4E73', trend:'MODERATE', trendWidth:'50%', trendColor:'#E8B23D'},
+  {code:'12951', name:'Mumbai Rajdhani', route:'BCT → NDLS', status:'+47 MIN', statusColor:'#D6534A', x:520, y:430, delay:47, eta:'09:17', earliest:'08:58', mostlikely:'09:17', latest:'09:45', corridorLeft:'65%', impactStations:'3 STATIONS', criticality:'HIGH', critWidth:'85%', critColor:'#D6534A', conflicts:'3 TRAINS', confWidth:'75%', confColor:'#D6534A', trend:'WORSENING', trendWidth:'85%', trendColor:'#D6534A'},
+  {code:'12009', name:'Shatabdi Express', route:'NDLS → BPL', status:'On Time', statusColor:'#4CAF7D', x:610, y:320, delay:0, eta:'11:30', earliest:'11:26', mostlikely:'11:30', latest:'11:38', corridorLeft:'50%', impactStations:'0 STATIONS', criticality:'MINIMAL', critWidth:'15%', critColor:'#4CAF7D', conflicts:'0 TRAINS', confWidth:'5%', confColor:'#1C4E73', trend:'STABLE', trendWidth:'15%', trendColor:'#4CAF7D'},
+  {code:'12621', name:'Tamil Nadu Exp.', route:'NDLS → MAS', status:'+6 MIN', statusColor:'#E8B23D', x:720, y:560, delay:6, eta:'07:11', earliest:'07:06', mostlikely:'07:11', latest:'07:22', corridorLeft:'40%', impactStations:'1 STATION', criticality:'LOW', critWidth:'35%', critColor:'#E8B23D', conflicts:'1 TRAIN', confWidth:'25%', confColor:'#1C4E73', trend:'IMPROVING', trendWidth:'30%', trendColor:'#4CAF7D'}
 ];
 
 // stylised station layout (relative composition inspired by reference image)
@@ -581,8 +663,12 @@ const DELAY_ROUTE = ['BCT','HYB','NGP','CNB']; // the ripple path for train 1295
    NAV SCROLL STATE
 ====================================================================== */
 const navEl = document.getElementById('nav');
+const scrollCueEl = document.getElementById('scroll-cue');
+
 window.addEventListener('scroll', () => {
-  navEl.classList.toggle('scrolled', window.scrollY > 40);
+  const isScrolled = window.scrollY > 30;
+  if (navEl) navEl.classList.toggle('scrolled', isScrolled);
+  if (scrollCueEl) scrollCueEl.classList.toggle('out', isScrolled);
 }, {passive:true});
 
 /* ======================================================================
@@ -620,10 +706,61 @@ TRAINS.forEach((t, i) => {
 
 function selectTrain(i){
   const t = TRAINS[i];
-  document.getElementById('dp-code').textContent = t.code;
-  document.getElementById('dp-name').textContent = t.name.toUpperCase();
-  document.getElementById('dp-route').textContent = t.route;
+  if (!t) return;
+
+  const dpCode = document.getElementById('dp-code');
+  const dpName = document.getElementById('dp-name');
+  const dpRoute = document.getElementById('dp-route');
+  if (dpCode) dpCode.textContent = t.code;
+  if (dpName) dpName.textContent = t.name.toUpperCase();
+  if (dpRoute) dpRoute.textContent = t.route;
+
+  const dpEta = document.getElementById('dp-eta');
+  const dpEarliest = document.getElementById('dp-earliest');
+  const dpMostlikely = document.getElementById('dp-mostlikely');
+  const dpLatest = document.getElementById('dp-latest');
+  const dpMarker = document.getElementById('dp-corridor-marker');
+
+  if (dpEta) dpEta.textContent = 'ETA ' + t.eta;
+  if (dpEarliest) dpEarliest.textContent = t.earliest;
+  if (dpMostlikely) dpMostlikely.textContent = t.mostlikely;
+  if (dpLatest) dpLatest.textContent = t.latest;
+  if (dpMarker) dpMarker.style.left = t.corridorLeft || '50%';
+
+  const dpImpact = document.getElementById('dp-impact-stations');
+  if (dpImpact) dpImpact.textContent = t.impactStations;
+
+  const dpCritBar = document.getElementById('dp-crit-bar');
+  const dpCritVal = document.getElementById('dp-crit-val');
+  if (dpCritBar) {
+    dpCritBar.style.width = t.critWidth;
+    dpCritBar.style.background = t.critColor;
+  }
+  if (dpCritVal) dpCritVal.textContent = t.criticality;
+
+  const dpConfBar = document.getElementById('dp-conf-bar');
+  const dpConfVal = document.getElementById('dp-conf-val');
+  if (dpConfBar) {
+    dpConfBar.style.width = t.confWidth;
+    dpConfBar.style.background = t.confColor;
+  }
+  if (dpConfVal) dpConfVal.textContent = t.conflicts;
+
+  const dpTrendBar = document.getElementById('dp-trend-bar');
+  const dpTrendVal = document.getElementById('dp-trend-val');
+  if (dpTrendBar) {
+    dpTrendBar.style.width = t.trendWidth;
+    dpTrendBar.style.background = t.trendColor;
+  }
+  if (dpTrendVal) dpTrendVal.textContent = t.trend;
+
+  document.querySelectorAll('.train-row').forEach((r, idx) => {
+    r.classList.toggle('selected', idx === i);
+  });
 }
+
+// Initial selection
+selectTrain(0);
 
 /* ======================================================================
    SVG NETWORK MAP
@@ -683,28 +820,85 @@ const tierColor = {1:'#123B5D', 2:'#1C4E73', 3:'#65717D'};
 const tierRadius = {1:7, 2:5.5, 3:4};
 STATIONS.forEach(s => {
   stationByCode[s.code] = s;
-  const g = makeEl('g', {class:'station-node', 'data-code':s.code, tabindex:'0', role:'button', 'aria-label':s.name});
-  g.appendChild(makeEl('circle', {class:'station-glow', cx:s.x, cy:s.y, r:tierRadius[s.tier]+9, fill:tierColor[s.tier], opacity:'0.12'}));
-  g.appendChild(makeEl('circle', {class:'station-core', cx:s.x, cy:s.y, r:tierRadius[s.tier], fill:tierColor[s.tier], stroke:'#FFFFFF', 'stroke-width':'2'}));
-  if(s.tier===1){
-    g.appendChild(makeEl('text', {class:'station-label-always', x:s.x+12, y:s.y+4}, )).textContent = s.name.toUpperCase();
-  }
-  const hoverLabel = makeEl('text', {class:'station-label', x:s.x+12, y:s.y-10});
-  hoverLabel.textContent = `${s.name.toUpperCase()} · ${s.code}`;
-  g.appendChild(hoverLabel);
+  const isTier1 = s.tier === 1;
+  const g = makeEl('g', {
+    class: `station-node ${isTier1 ? 'tier1' : ''}`,
+    'data-code': s.code,
+    tabindex: '0',
+    role: 'button',
+    'aria-label': s.name
+  });
+
+  g.appendChild(makeEl('circle', {
+    class: 'station-glow',
+    cx: s.x, cy: s.y,
+    r: tierRadius[s.tier]+9,
+    fill: tierColor[s.tier],
+    opacity: '0.12'
+  }));
+
+  g.appendChild(makeEl('circle', {
+    class: 'station-core',
+    cx: s.x, cy: s.y,
+    r: tierRadius[s.tier],
+    fill: tierColor[s.tier],
+    stroke: '#FFFFFF',
+    'stroke-width': '2'
+  }));
+
+  // Station Badge Pill (White background + dark blue border + crisp typography)
+  const labelGroup = makeEl('g', { class: 'station-badge-group' });
+  const labelStr = `${s.name.toUpperCase()} · ${s.code}`;
+  const textLen = labelStr.length;
+  const rectW = Math.max(90, textLen * 6.8 + 16);
+  const rectH = 22;
+  const rectX = s.x + 10;
+  const rectY = s.y - 11;
+
+  const bgRect = makeEl('rect', {
+    class: 'station-badge-bg',
+    x: rectX, y: rectY,
+    width: rectW, height: rectH,
+    rx: 4, ry: 4,
+    fill: '#FFFFFF',
+    stroke: '#123B5D',
+    'stroke-width': '1.5'
+  });
+
+  const badgeText = makeEl('text', {
+    class: 'station-badge-text',
+    x: rectX + 8,
+    y: rectY + 15,
+    'font-family': "'JetBrains Mono', 'Inter', monospace",
+    'font-size': '11',
+    'font-weight': '700',
+    fill: '#123B5D'
+  });
+  badgeText.textContent = labelStr;
+
+  labelGroup.appendChild(bgRect);
+  labelGroup.appendChild(badgeText);
+  g.appendChild(labelGroup);
+
   g.addEventListener('mouseenter', () => g.classList.add('hot'));
-  g.addEventListener('mouseleave', () => g.classList.remove('hot'));
-  g.addEventListener('click', () => inspectStation(s));
+  g.addEventListener('mouseleave', () => {
+    if (!g.classList.contains('active-badge')) g.classList.remove('hot');
+  });
+  g.addEventListener('click', (e) => {
+    e.stopPropagation();
+    inspectStation(s);
+  });
+
   stationGroup.appendChild(g);
 });
 svg.appendChild(stationGroup);
 
 function inspectStation(s){
-  document.getElementById('net-head').scrollIntoView({behavior:'smooth', block:'start'});
-  const alert = document.getElementById('train-alert');
-  // quick pulse feedback
-  stationGroup.querySelectorAll('.station-node').forEach(n => n.classList.remove('hot'));
-  document.querySelector(`.station-node[data-code="${s.code}"]`).classList.add('hot');
+  const node = document.querySelector(`.station-node[data-code="${s.code}"]`);
+  if (node) {
+    node.classList.toggle('active-badge');
+    node.classList.add('hot');
+  }
 }
 
 // train icons (moving)
@@ -815,8 +1009,30 @@ function setLayer(name, on){
   const opacity = on ? 1 : 0;
   if(name==='trains') trainGroup.style.opacity = opacity;
   if(name==='signals') signalGroup.style.opacity = opacity;
-  if(name==='stations') stationGroup.style.opacity = on ? 1 : 0.35;
-  if(name==='delay') routeGroup.querySelectorAll('.route-line').forEach(p=>p.style.strokeWidth = on ? '2.2' : '1.4');
+  if(name==='stations') {
+    stationGroup.style.opacity = on ? 1 : 0.35;
+    stationGroup.classList.toggle('stations-layer-on', on);
+  }
+  if(name==='delay') {
+    if(on){
+      for(let i=0; i<DELAY_ROUTE.length-1; i++){
+        const key = DELAY_ROUTE[i]+'-'+DELAY_ROUTE[i+1];
+        const path = routeEls[key];
+        if(path) path.classList.add('affected');
+      }
+      Object.values(routeEls).forEach(path => {
+        if(!path.classList.contains('affected')){
+          path.classList.add('dimmed');
+        }
+      });
+      runRipple();
+    } else {
+      Object.values(routeEls).forEach(path => {
+        path.classList.remove('affected');
+        path.classList.remove('dimmed');
+      });
+    }
+  }
   if(name==='heat') heatGroup.style.opacity = opacity;
 }
 document.querySelectorAll('[data-layer]').forEach(btn => {
@@ -1380,12 +1596,16 @@ setLayer('stations', true);
   function endIntro(){
     if(introDone) return;
     introDone = true;
-    if(introEl) introEl.classList.add('hidden');
+    if(introEl) {
+      introEl.classList.add('hidden');
+      introEl.style.display = 'none';
+    }
     if(heroContentEl) heroContentEl.classList.add('in');
     if(stepRailEl) stepRailEl.classList.add('in');
     if(scrollCueEl) scrollCueEl.classList.add('in');
     notifyETAComplete();
   }
+  window.endIntro = endIntro;
 
   if(skipBtn) skipBtn.addEventListener('click', endIntro);
   setTimeout(cycleCaption, 100);
@@ -1395,19 +1615,23 @@ setLayer('stations', true);
   }, 1600);
   setTimeout(endIntro, INTRO_DUR);
 
+  window.triggerReplay3D = function() {
+    introDone = false;
+    introStart = performance.now();
+    capIdx = 0;
+    if(introEl) {
+      introEl.classList.remove('hidden');
+      introEl.style.display = 'flex';
+    }
+    if(heroContentEl) heroContentEl.classList.remove('in');
+    if(stepRailEl) stepRailEl.classList.remove('in');
+    if(scrollCueEl) scrollCueEl.classList.remove('in');
+    cycleCaption();
+    setTimeout(endIntro, INTRO_DUR);
+  };
   const replayBtn = document.getElementById('replay-intro');
   if(replayBtn){
-    replayBtn.addEventListener('click', () => {
-      introDone = false;
-      introStart = performance.now();
-      capIdx = 0;
-      if(introEl) introEl.classList.remove('hidden');
-      if(heroContentEl) heroContentEl.classList.remove('in');
-      if(stepRailEl) stepRailEl.classList.remove('in');
-      if(scrollCueEl) scrollCueEl.classList.remove('in');
-      cycleCaption();
-      setTimeout(endIntro, INTRO_DUR);
-    });
+    replayBtn.addEventListener('click', window.triggerReplay3D);
   }
 
   /* ---------------- ANIMATION LOOP ---------------- */
@@ -1576,6 +1800,290 @@ setLayer('stations', true);
 
   requestAnimationFrame(animate);
 })();
+
+function openFooterModal(type) {
+  const modal = document.getElementById('footerModal');
+  const title = document.getElementById('modalTitle');
+  const body = document.getElementById('modalBody');
+  if(!modal || !title || !body) return;
+
+  if (type === 'privacy') {
+    title.innerText = 'Privacy Policy';
+    body.innerHTML = `
+      <h4>1. Data Collection & Telemetry</h4>
+      <p>RippleETA monitors real-time train movement telemetry, schedule deviations, and corridor signal states to calculate accurate arrival confidence intervals (P10–P90).</p>
+      <h4>2. User Privacy</h4>
+      <p>No personal location data or identity tracking is stored. Anonymous query sessions are processed solely for network optimization and live delay predictions.</p>
+      <h4>3. Data Protection Compliance</h4>
+      <p>All data transit between official Indian Railways API endpoints and RippleETA intelligence engines is encrypted using TLS 1.3 protocol standards.</p>
+    `;
+  } else if (type === 'terms') {
+    title.innerText = 'Terms of Service';
+    body.innerHTML = `
+      <h4>1. Service Purpose</h4>
+      <p>RippleETA provides probabilistic ETA forecasting and corridor conflict propagation analysis for Indian Railways operational overview.</p>
+      <h4>2. ETA Accuracy Disclaimer</h4>
+      <p>ETA confidence bands (P10 Earliest, P50 Most Likely, P90 Latest) represent dynamic statistical models based on current signal flow and historical delay trends.</p>
+      <h4>3. Usage Terms</h4>
+      <p>Operational personnel and passengers may utilize RippleETA visualizations for schedule tracking and corridor dispatch monitoring.</p>
+    `;
+  } else if (type === 'contact') {
+    title.innerText = 'Contact Us';
+    body.innerHTML = `
+      <p style="margin-bottom:16px;">Have feedback, operational queries, or system integration inquiries? Get in touch with the RippleETA team.</p>
+      <form onsubmit="handleContactSubmit(event)">
+        <div class="modal-form-group">
+          <label>Your Name</label>
+          <input type="text" id="c_name" placeholder="e.g. Rahul Sharma" required />
+        </div>
+        <div class="modal-form-group">
+          <label>Email Address</label>
+          <input type="email" id="c_email" placeholder="name@domain.com" required />
+        </div>
+        <div class="modal-form-group">
+          <label>Message</label>
+          <textarea id="c_msg" rows="3" placeholder="Enter your inquiry or feedback..." required></textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end;">
+          <button type="submit" class="modal-btn">Send Message</button>
+        </div>
+      </form>
+    `;
+  }
+  modal.classList.add('active');
+}
+
+function closeFooterModal() {
+  const modal = document.getElementById('footerModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function handleContactSubmit(e) {
+  e.preventDefault();
+  const body = document.getElementById('modalBody');
+  if(body) {
+    body.innerHTML = `
+      <div style="text-align:center; padding: 24px 10px;">
+        <div style="width:48px; height:48px; border-radius:50%; background:var(--green-soft); color:var(--green); display:flex; align-items:center; justify-content:center; margin: 0 auto 16px auto; font-size:24px;">✓</div>
+        <h4 style="font-size:16px; margin-bottom:8px;">Message Sent Successfully!</h4>
+        <p style="color:var(--text-secondary); font-size:13px;">Thank you for contacting RippleETA support. Our team will review your inquiry shortly.</p>
+        <button class="modal-btn" style="margin-top:20px;" onclick="closeFooterModal()">Close Window</button>
+      </div>
+    `;
+  }
+}
+
+// ── Multi-Language Translation Engine (EN, HI, MR) ─────────────────────────
+const RIPPLEETA_I18N = {
+  hi: {
+    "Network Overview": "नेटवर्क अवलोकन",
+    "A MORE PREDICTABLE INDIAN RAILWAYS": "एक अधिक अनुमानित भारतीय रेल",
+    "NETWORK OVERVIEW": "नेटवर्क अवलोकन",
+    "Open Dashboard ↗": "डैशबोर्ड खोलें ↗",
+    "Home": "मुख्य पृष्ठ",
+    "Network": "नेटवर्क",
+    "Dashboard": "डैशबोर्ड",
+    "Portals": "पोर्टल्स",
+    "Replay 3D": "रीप्ले 3D",
+    "Search train, station...": "ट्रेन, स्टेशन खोजें...",
+    "Built for a smarter, more reliable Indian Railways": "स्मार्ट और अधिक विश्वसनीय भारतीय रेल के लिए निर्मित",
+    "Privacy": "गोपनीयता",
+    "Terms": "शर्तें",
+    "Contact": "संपर्क",
+    "Privacy Policy": "गोपनीयता नीति",
+    "User Privacy": "उपयोगकर्ता गोपनीयता",
+    "Data Protection Compliance": "डेटा सुरक्षा अनुपालन",
+    "Data Collection & Telemetry": "डेटा संग्रह और टेलीमेट्री",
+    "One network. Seven decisions. One calibrated signal.": "एक नेटवर्क। सात निर्णय। एक कैलिब्रेटेड सिग्नल।"
+  },
+  mr: {
+    "Network Overview": "नेटवर्क विहंगावलोकन",
+    "A MORE PREDICTABLE INDIAN RAILWAYS": "अधिक अंदाजण्यायोग्य भारतीय रेल्वे",
+    "NETWORK OVERVIEW": "नेटवर्क विहंगावलोकन",
+    "Open Dashboard ↗": "डॅशबोर्ड उघडा ↗",
+    "Home": "मुख्यपृष्ठ",
+    "Network": "नेटवर्क",
+    "Dashboard": "डॅशबोर्ड",
+    "Portals": "पोर्टल्स",
+    "Replay 3D": "रिप्ले 3D",
+    "Search train, station...": "ट्रेन, स्टेशन शोधा...",
+    "Built for a smarter, more reliable Indian Railways": "स्मार्ट आणि अधिक विश्वासार्ह भारतीय रेल्वेसाठी निर्मित",
+    "Privacy": "गोपनीयता",
+    "Terms": "अटी",
+    "Contact": "संपर्क",
+    "Privacy Policy": "गोपनीयता धोरण",
+    "User Privacy": "वापरकर्ता गोपनीयता",
+    "Data Protection Compliance": "डेटा संरक्षण पालन",
+    "Data Collection & Telemetry": "डेटा संकलन आणि टेलिमेट्री",
+    "One network. Seven decisions. One calibrated signal.": "एक नेटवर्क. सात निर्णय. एक कॅलिब्रेटेड सिग्नल."
+  }
+};
+
+function setTranslateCookie(lang) {
+  const cookieVal = (lang === 'en' || !lang) ? '' : `/en/${lang}`;
+  document.cookie = `googtrans=${cookieVal}; path=/;`;
+  document.cookie = `googtrans=${cookieVal}; path=/; domain=${window.location.hostname};`;
+}
+
+function applyPageLanguage(lang) {
+  const currentLang = localStorage.getItem('rippleeta_language');
+  localStorage.setItem('rippleeta_language', lang);
+  setTranslateCookie(lang);
+
+  // Apply quick inline translation
+  const dict = RIPPLEETA_I18N[lang];
+  if (dict) {
+    const walkNodes = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const txt = node.nodeValue.trim();
+        if (txt && dict[txt]) {
+          node.nodeValue = node.nodeValue.replace(txt, dict[txt]);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE && !['SCRIPT', 'STYLE', 'SELECT', 'OPTION'].includes(node.tagName)) {
+        node.childNodes.forEach(walkNodes);
+      }
+    };
+    walkNodes(document.body);
+  }
+
+  // Trigger Google Translate engine
+  const googCombo = document.querySelector('.goog-te-combo');
+  if (googCombo) {
+    googCombo.value = lang;
+    googCombo.dispatchEvent(new Event('change'));
+  } else if (currentLang && currentLang !== lang) {
+    location.reload();
+  }
+}
+
+function initTranslateWidget() {
+  const savedLang = localStorage.getItem('rippleeta_language') || 'en';
+  const langSelect = document.getElementById('lang-select');
+  if (langSelect) {
+    langSelect.value = savedLang;
+    langSelect.addEventListener('change', (e) => {
+      applyPageLanguage(e.target.value);
+    });
+  }
+  if (savedLang !== 'en') {
+    applyPageLanguage(savedLang);
+  }
+}
+
+window.googleTranslateElementInit = function() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'en,hi,mr',
+    autoDisplay: false
+  }, 'google_translate_element');
+};
+
+// ── Interactive Train & Station Search Engine ──────────────────────────────
+const SEARCHABLE_TRAINS = [
+  { code: '12301', name: 'Rajdhani Express', route: 'NDLS → BCT', delay: 'On Time' },
+  { code: '20507', name: 'Patna Rajdhani', route: 'NDLS → PNBE', delay: '+22.4 min' },
+  { code: '12951', name: 'Mumbai Rajdhani', route: 'MMCT → NDLS', delay: '+47 min' },
+  { code: '12004', name: 'Lucknow Shatabdi', route: 'NDLS → LKO', delay: 'On Time' },
+  { code: '22436', name: 'Vande Bharat Express', route: 'NDLS → VNS', delay: '+12 min' },
+  { code: '12002', name: 'Bhopal Shatabdi', route: 'NDLS → RKMP', delay: 'On Time' },
+  { code: '56789', name: 'Replay Express', route: 'CNB → PRYJ', delay: '+15 min' }
+];
+
+function initSearchEngine() {
+  const searchInput = document.getElementById('nav-search-input');
+  const searchDropdown = document.getElementById('search-dropdown');
+  if (!searchInput || !searchDropdown) return;
+
+  function renderResults(matches) {
+    if (!matches.length) {
+      searchDropdown.innerHTML = '<div style="padding:10px 14px; font-size:11px; color:var(--text-muted); font-family:monospace;">No matching train or station found</div>';
+      searchDropdown.style.display = 'block';
+      return;
+    }
+
+    searchDropdown.innerHTML = matches.map(t => `
+      <div class="search-item" data-code="${t.code}" style="padding:8px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); transition:background 0.15s;" onmouseover="this.style.background='var(--bg-subtle)'" onmouseout="this.style.background='transparent'">
+        <div>
+          <div style="font-family:'Archivo',sans-serif; font-weight:700; font-size:12px; color:var(--text-primary);">${t.code} &bull; ${t.name}</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-secondary); margin-top:2px;">${t.route}</div>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:${t.delay.includes('+') ? 'var(--red)' : 'var(--green)'};">${t.delay}</span>
+      </div>
+    `).join('');
+    searchDropdown.style.display = 'block';
+
+    searchDropdown.querySelectorAll('.search-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const trainCode = item.getAttribute('data-code');
+        selectSearchedTrain(trainCode);
+      });
+    });
+  }
+
+  function selectSearchedTrain(code) {
+    const idx = TRAINS.findIndex(t => t.code === code);
+    if (idx !== -1) {
+      selectTrain(idx);
+      const found = TRAINS[idx];
+      searchInput.value = `${found.code} - ${found.name}`;
+      searchDropdown.style.display = 'none';
+      const locoSvc = document.querySelector('.hud-svc');
+      if (locoSvc) locoSvc.textContent = `TRAIN ${found.code} · ${found.name.toUpperCase()}`;
+      document.getElementById('net-head')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      const found = SEARCHABLE_TRAINS.find(t => t.code === code);
+      if (found) {
+        searchInput.value = `${found.code} - ${found.name}`;
+        searchDropdown.style.display = 'none';
+
+        const locoSvc = document.querySelector('.hud-svc');
+        const dpCode = document.getElementById('dp-code');
+        const dpName = document.getElementById('dp-name');
+
+        if (locoSvc) locoSvc.textContent = `TRAIN ${found.code} · ${found.name.toUpperCase()}`;
+        if (dpCode) dpCode.textContent = found.code;
+        if (dpName) dpName.textContent = found.name.toUpperCase();
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('train', found.code);
+        window.history.replaceState({}, '', url.toString());
+      }
+    }
+  }
+
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) {
+      searchDropdown.style.display = 'none';
+      return;
+    }
+    const matches = SEARCHABLE_TRAINS.filter(t => 
+      t.code.toLowerCase().includes(q) || 
+      t.name.toLowerCase().includes(q) || 
+      t.route.toLowerCase().includes(q)
+    );
+    renderResults(matches);
+  });
+
+  searchInput.addEventListener('focus', () => {
+    if (searchInput.value.trim()) {
+      searchInput.dispatchEvent(new Event('input'));
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+      searchDropdown.style.display = 'none';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTranslateWidget();
+  initSearchEngine();
+});
 </script>
+<div id="google_translate_element" style="display:none;"></div>
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

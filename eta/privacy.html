@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Privacy Policy & Telemetry Governance — RippleETA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F3EE;
+    --bg-card: #FFFFFF;
+    --bg-subtle: #FAF9F6;
+    --text-primary: #17202B;
+    --text-secondary: #65717D;
+    --text-muted: #8A949D;
+    --rail-blue: #123B5D;
+    --rail-blue-dark: #0D263D;
+    --rail-blue-light: #1C4E73;
+    --rail-blue-soft: rgba(18, 59, 93, 0.07);
+    --yellow: #E5B83F;
+    --yellow-dim: #C99D2E;
+    --yellow-soft: rgba(229, 184, 63, 0.16);
+    --red: #C94B43;
+    --green: #24824F;
+    --green-soft: rgba(36, 130, 79, 0.10);
+    --line: rgba(23, 32, 43, 0.08);
+    --line-strong: rgba(23, 32, 43, 0.16);
+    --radius-s: 6px;
+    --radius-m: 10px;
+    --radius-l: 16px;
+    --shadow-card: 0 8px 24px rgba(18, 59, 93, 0.06), 0 1px 3px rgba(0,0,0,0.03);
+    --ease: cubic-bezier(.22,.7,.2,1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--rail-blue); text-decoration: none; font-weight: 500; }
+  a:hover { text-decoration: underline; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .display { font-family: 'Archivo', sans-serif; font-weight: 900; letter-spacing: -0.02em; }
+
+  /* Navigation Header */
+  .header {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px clamp(20px, 4vw, 56px);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 2px 6px rgba(18, 59, 93, 0.04);
+  }
+  .brand { display: flex; flex-direction: column; line-height: 1; }
+  .brand-title { font-size: 1.25rem; font-weight: 900; color: var(--rail-blue-dark); letter-spacing: -0.02em; }
+  .brand-sub { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+  
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: var(--radius-s);
+    background: var(--rail-blue-dark); color: #FFF;
+    font-size: 0.85rem; font-weight: 600; transition: background .2s var(--ease);
+  }
+  .nav-btn:hover { background: var(--rail-blue-light); text-decoration: none; }
+
+  /* Container */
+  .main-container {
+    max-width: 920px;
+    margin: 40px auto 80px;
+    padding: 0 24px;
+  }
+
+  /* Hero Banner */
+  .hero-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-l);
+    padding: 40px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 32px;
+  }
+  .badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 20px;
+    background: var(--green-soft); color: var(--green);
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .date-badge { font-size: 0.8rem; color: var(--text-muted); }
+  
+  .hero-title { font-size: 2.2rem; color: var(--rail-blue-dark); margin-bottom: 12px; }
+  .hero-subtitle { font-size: 1.05rem; color: var(--text-secondary); max-width: 760px; line-height: 1.6; }
+
+  /* Key Highlights Grid */
+  .highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .highlight-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(18, 59, 93, 0.03);
+  }
+  .highlight-icon {
+    width: 36px; height: 36px; border-radius: var(--radius-s);
+    background: var(--rail-blue-soft); color: var(--rail-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.1rem; margin-bottom: 12px;
+  }
+  .highlight-title { font-size: 0.95rem; font-weight: 700; color: var(--rail-blue-dark); margin-bottom: 6px; }
+  .highlight-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+  /* Policy Document Body */
+  .policy-body {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 44px;
+    box-shadow: var(--shadow-card);
+  }
+  .policy-section { margin-bottom: 36px; }
+  .policy-section:last-child { margin-bottom: 0; }
+  .section-num { font-size: 0.8rem; font-weight: 700; color: var(--yellow-dim); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 6px; }
+  .section-heading { font-size: 1.4rem; color: var(--rail-blue-dark); margin-bottom: 14px; border-bottom: 2px solid var(--rail-blue-soft); padding-bottom: 8px; }
+  .policy-text { font-size: 0.95rem; color: var(--text-primary); margin-bottom: 14px; line-height: 1.7; }
+  .policy-list { margin: 12px 0 16px 24px; color: var(--text-primary); font-size: 0.95rem; }
+  .policy-list li { margin-bottom: 8px; line-height: 1.6; }
+
+  .callout-box {
+    background: var(--rail-blue-soft);
+    border-left: 4px solid var(--rail-blue);
+    padding: 16px 20px;
+    border-radius: 0 var(--radius-s) var(--radius-s) 0;
+    margin: 20px 0;
+    font-size: 0.9rem;
+    color: var(--rail-blue-dark);
+  }
+  .callout-box strong { color: var(--rail-blue-dark); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--line);
+  }
+  .footer-links { display: flex; justify-content: center; gap: 20px; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="header">
+    <div class="brand">
+      <span class="brand-title display">RIPPLE<span style="color:var(--yellow-dim);">ETA</span></span>
+      <span class="brand-sub mono">Indian Railways Calibration Engine</span>
+    </div>
+    <div>
+      <a href="/dashboard/index.html" class="nav-btn">&larr; Return to Dashboard</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- Hero Banner -->
+    <div class="hero-card">
+      <div class="badge-row">
+        <span class="status-badge"><span class="status-dot"></span> Official Policy</span>
+        <span class="date-badge mono">Effective Date: September 12, 2026 &bull; Version 1.0</span>
+      </div>
+      <h1 class="hero-title display">Privacy Policy & Telemetry Governance</h1>
+      <p class="hero-subtitle">
+        RippleETA processes calibrated train ETA predictions, corridor signaling events, and network delay propagation. This document details how data is handled, stored, and protected across our operational stakeholder gateways.
+      </p>
+    </div>
+
+    <!-- Key Highlights Grid -->
+    <div class="highlights-grid">
+      <div class="highlight-card">
+        <div class="highlight-icon">&check;</div>
+        <div class="highlight-title">Zero Personal Tracking</div>
+        <div class="highlight-desc">We do not track passenger GPS location or personal movement history. All telemetry is centered strictly on train numbers and station milestones.</div>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">&lock;</div>
+        <div class="highlight-title">Conformal Data Privacy</div>
+        <div class="highlight-desc">Prediction intervals (P10–P90) are derived using conformalized historical distributions with cryptographic SHA-256 provenance logging.</div>
+      </div>
+      <div class="highlight-card">
+        <div class="highlight-icon">&#128737;</div>
+        <div class="highlight-title">Encrypted Transmission</div>
+        <div class="highlight-desc">All API payload exchanges utilize TLS 1.3 protocol standards with role-based JWT session authorization.</div>
+      </div>
+    </div>
+
+    <!-- Policy Document Body -->
+    <div class="policy-body">
+
+      <!-- Section 1 -->
+      <section class="policy-section">
+        <span class="section-num mono">SECTION 01</span>
+        <h2 class="section-heading display">Data Collection & Information Governance</h2>
+        <p class="policy-text">
+          RippleETA collects telemetry necessary to execute calibrated delay prediction algorithms across Indian Railways corridors. Data sources fall into two primary categories:
+        </p>
+        <ul class="policy-list">
+          <li><strong>Train Movement Telemetry:</strong> Station arrival/departure timestamps, actual vs. scheduled delay minutes, temporary speed restriction (TSR) flags, and track section occupancy states obtained from official railway data channels (e.g. RailRadar).</li>
+          <li><strong>Operator Session Data:</strong> Authenticated role tokens (Station Master, Crew Controller, Feeder Operator, Control Room) and associated email identifiers passed via Google OAuth 2.0 or local demo sessions.</li>
+        </ul>
+        <div class="callout-box">
+          <strong>Important:</strong> Passengers using public ETA views do not require account creation, and no biometric or location tracking cookies are used.
+        </div>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="policy-section">
+        <span class="section-num mono">SECTION 02</span>
+        <h2 class="section-heading display">Telemetry Processing & Conformal Predictions</h2>
+        <p class="policy-text">
+          Telemetry data is passed through our multi-stage calibration pipeline:
+        </p>
+        <ul class="policy-list">
+          <li><strong>Stage 1 (Feature Engineering):</strong> Calculates delay momentum, headway margins, and weather risk scores.</li>
+          <li><strong>Stage 2 (Conformal Calibration):</strong> Computes distribution bounds (P10 lower bound, P50 median, P90 upper bound) to deliver empirical coverage without compromising individual train operational confidentiality.</li>
+          <li><strong>Stage 3 (Audit Logging):</strong> Persists model execution state into <code class="mono">prediction_audit_log</code> with dataset SHA-256 hashes and git commit revisions for auditability.</li>
+        </ul>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="policy-section">
+        <span class="section-num mono">SECTION 03</span>
+        <h2 class="section-heading display">Session Security & Credentials</h2>
+        <p class="policy-text">
+          Session security is maintained through HTTP-only authorization headers and encrypted JWT tokens signed with HMAC-SHA256. Demo accounts operate within isolated session scopes and expire automatically.
+        </p>
+        <p class="policy-text">
+          We strictly enforce role-based access control (RBAC). Privileged actions (such as platform assignment triage by Station Masters or relief dispatch by Crew Controllers) require valid session validation.
+        </p>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="policy-section">
+        <span class="section-num mono">SECTION 04</span>
+        <h2 class="section-heading display">Data Retention & Compliance</h2>
+        <p class="policy-text">
+          Prediction audit records are retained for historical evaluation, model calibration audits, and performance verification. Personal identifier fields in session logs are automatically scrubbed upon session termination.
+        </p>
+        <p class="policy-text">
+          RippleETA complies with applicable Digital Personal Data Protection (DPDP) standards and Indian Railways operational data guidelines.
+        </p>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="policy-section">
+        <span class="section-num mono">SECTION 05</span>
+        <h2 class="section-heading display">Contact & Governance Inquiries</h2>
+        <p class="policy-text">
+          For queries regarding telemetry data practices or privacy rights under RippleETA operational guidelines, contact the Data Protection & Governance Officer:
+        </p>
+        <div style="background:var(--bg-subtle); border:1px solid var(--line); border-radius:var(--radius-m); padding:20px; margin-top:16px;">
+          <p style="font-weight:700; color:var(--rail-blue-dark); margin-bottom:4px;">RippleETA Governance Desk</p>
+          <p style="font-size:0.88rem; color:var(--text-secondary);">Indian Railways Decision Support Initiative</p>
+          <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:6px;" class="mono">Email: privacy@rippleeta.internal &bull; Helpdesk: +91 (011) 2338-7500</p>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>&copy; 2026 RippleETA — Calibrated Indian Railways ETA Decision Engine</div>
+    <div class="footer-links">
+      <a href="/dashboard/index.html">Dashboard</a>
+      <a href="/eta/index.html">3D Network View</a>
+      <a href="/docs">API Docs</a>
+    </div>
+  </footer>
+
+</body>
+</html>

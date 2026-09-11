@@ -1137,6 +1137,30 @@
         transform: none !important;
       }
     }
+
+    /* Google Translate Widget Dark Mode Styling */
+    .goog-te-gadget { color: transparent !important; font-size: 0px !important; }
+    .goog-te-gadget .goog-te-combo {
+      padding: 0.45rem 1rem;
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--text-light);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      outline: none;
+      margin: 0;
+    }
+    .goog-te-gadget .goog-te-combo:hover {
+      border-color: var(--primary);
+      background-color: var(--bg-subtle);
+    }
+    .goog-logo-link { display: none !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    body { top: 0px !important; }
   </style>
 </head>
 <body class="has-grain">
@@ -1165,13 +1189,7 @@
       <button type="button" id="btn-a11y-toggle" class="utility-btn" aria-label="Toggle Colorblind Mode">
         <span aria-hidden="true">&#128065;</span> <span id="a11y-label">A11Y: NORMAL</span>
       </button>
-      <div class="lang-selector-wrap" style="display:inline-flex; align-items:center; gap:0.4rem;">
-        <select id="lang-select" class="lang-select" aria-label="Select Language">
-          <option value="en" selected>ENGLISH</option>
-          <option value="hi">हिंदी (Hindi)</option>
-          <option value="mr">मराठी (Marathi)</option>
-        </select>
-      </div>
+      <div id="google_translate_element" style="display: inline-block; margin-left: 0.5rem;"></div>
     </div>
 
     <div class="utility-group">
@@ -1319,7 +1337,7 @@
       </div>
 
       <!-- Live Telemetry Strip -->
-      <div class="telemetry-strip" id="telemetry-strip">
+      <div class="telemetry-strip" id="telemetry-strip" style="display: none;">
         <div class="telemetry-cell">
           <span class="tele-label">System Status</span>
           <span class="tele-value"><span class="dot-live"></span> <span id="tele-status-val">API ONLINE</span></span>
@@ -1589,15 +1607,6 @@
       </p>
 
       <div class="ripple-diagram-card">
-        <div class="graph-code-banner">
-          <div class="formula-line">
-            x<sub>i</sub>(k) = max<sub>j</sub> [ x<sub>j</sub>(k &minus; d<sub>ji</sub>) + a<sub>ji</sub> ]
-          </div>
-          <p class="formula-note">
-            Goverde (2010) Timed Event Graph Formulation &bull; Station-pair headway conflict detection over shared track sections.
-          </p>
-        </div>
-
         <div class="conflict-event-grid">
           <div class="event-block">
             <span class="event-block-title">PRIMARY SOURCE TRAIN</span>
@@ -1825,26 +1834,10 @@
 
       <div class="footer-meta-grid">
         <div class="footer-meta-col">
-          <strong>RippleETA Architecture</strong>
-          <span>SIH 2026 Problem Statement SIH26028</span><br>
-          <span>Dynamic Forecast of ETA for Coaching Trains</span>
-        </div>
-        <div class="footer-meta-col">
-          <strong>Technical Provenance</strong>
-          <span>Prediction: XGBoost v1.0.0</span><br>
-          <span>Calibration: MAPIE Conformal</span><br>
-          <span>Propagation: Timed Event Graph</span>
-        </div>
-        <div class="footer-meta-col">
-          <strong>Operational Bounds</strong>
-          <span>Statutory HOER 9-Hour Compliance</span><br>
-          <span>4.2&times; Asymmetric Platform Triage</span><br>
-          <span>97.7% Certified P10&ndash;P90 Coverage</span>
-        </div>
-        <div class="footer-meta-col">
           <strong>Navigation</strong>
           <a href="#hero" style="color:var(--primary); text-decoration:none;">&uarr; Return to Top</a><br>
-          <a href="/" style="color:var(--primary); text-decoration:none;">&larr; Return to 3D Landing</a>
+          <a href="/" style="color:var(--primary); text-decoration:none;">&larr; Return to 3D Landing</a><br>
+          <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--primary); text-decoration:none;">Privacy Policy</a>
         </div>
       </div>
     </div>
@@ -2127,9 +2120,9 @@
       }
 
       // 5. Render SVG station nodes dynamically
-      const layer = document.getElementById('track-stations-layer');
-      if (layer) {
-        layer.innerHTML = meta.stations.map(st => {
+      const svg = document.getElementById('corridor-track-svg');
+      if (svg) {
+        const stationsHTML = meta.stations.map(st => {
           if (st.isConflict) {
             return `
               <g transform="translate(${st.x}, 45)">
@@ -2149,6 +2142,19 @@
             `;
           }
         }).join('');
+
+        svg.innerHTML = `
+          <line x1="20" y1="45" x2="580" y2="45" class="track-ties"></line>
+          <line x1="20" y1="45" x2="580" y2="45" class="track-line-base"></line>
+          <g id="track-stations-layer">
+            ${stationsHTML}
+          </g>
+          <g class="train-token-wrap" id="corridor-train-token">
+            <rect x="-14" y="-7" width="28" height="14" rx="3" fill="var(--primary)"></rect>
+            <circle cx="-6" cy="0" r="2.5" fill="#111827"></circle>
+            <circle cx="6" cy="0" r="2.5" fill="var(--signal)"></circle>
+          </g>
+        `;
       }
 
       // 6. Reset train token animation to re-traverse
@@ -2436,5 +2442,18 @@
     }
     wirePortalReturnRouting();
   </script>
+
+  <!-- Google Translate Widget -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,hi,mr',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 </body>
 </html>

@@ -8,7 +8,7 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from statistics import NormalDist
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -234,13 +234,16 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         # FALLBACK 3: Stale Data Widen
         elif is_stale and not is_degraded:
             widen_factor = 1.5
-            width = prediction["p90_delay_min"] - prediction["p10_delay_min"]
+            p90_val = float(prediction["p90_delay_min"])
+            p10_val = float(prediction["p10_delay_min"])
+            width = p90_val - p10_val
             extra = (width * widen_factor - width) / 2.0
-            prediction["p10_delay_min"] = max(0.0, prediction["p10_delay_min"] - extra)
-            prediction["p90_delay_min"] = prediction["p90_delay_min"] + extra
+            prediction["p10_delay_min"] = max(0.0, p10_val - extra)
+            prediction["p90_delay_min"] = p90_val + extra
             prediction["status"] = "stale_data_widened"
-            if "message" in prediction:
-                prediction["message"] += " (Interval widened due to stale feed > 15m)"
+            existing_msg = str(prediction.get("message", ""))
+            if existing_msg:
+                prediction["message"] = f"{existing_msg} (Interval widened due to stale feed > 15m)"
             else:
                 prediction["message"] = "Interval widened due to stale feed > 15m"
 
@@ -286,7 +289,8 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
                       stale_since TEXT, last_updated TEXT,
                       git_commit TEXT, dataset_sha256 TEXT, model_artifact_sha256 TEXT,
                       input_features_json TEXT, shap_text TEXT)""")
-        provenance = prediction.get("provenance") or {}
+        provenance = prediction.get("provenance")
+        provenance_dict: dict[str, Any] = provenance if isinstance(provenance, dict) else {}
         c.execute(
             """INSERT INTO prediction_audit_log
                      (train_id, status, degraded, anomaly_flag, p10, p50, p90,
@@ -303,9 +307,9 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
                 prediction.get("p90_delay_min"),
                 stale_since,
                 last_updated,
-                provenance.get("git_commit"),
-                provenance.get("dataset_sha256"),
-                provenance.get("saved_model_artifact_sha256"),
+                provenance_dict.get("git_commit"),
+                provenance_dict.get("dataset_sha256"),
+                provenance_dict.get("saved_model_artifact_sha256"),
                 (
                     json.dumps(prediction.get("input_features"))
                     if prediction.get("input_features")
@@ -767,36 +771,41 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             **prediction,
         )
 
+    # Mount the static frontends
+    internal_frontend = Path(__file__).resolve().parent.parent.parent / "frontend"
+    external_frontend = (
+        Path(__file__).resolve().parent.parent.parent.parent / "outliers-frontend"
+    )
+    frontend_path = internal_frontend if internal_frontend.exists() else external_frontend
+    dashboard_path = Path(__file__).resolve().parent.parent.parent / "dashboard"
+
+    if dashboard_path.exists():
+        app.mount(
+            "/dashboard",
+            StaticFiles(directory=str(dashboard_path), html=True),
+            name="dashboard",
+        )
+
+    # Mount the 3D train viewer
+    eta_path = Path(__file__).resolve().parent.parent.parent / "eta"
+    if eta_path.exists():
+        app.mount(
+            "/eta",
+            StaticFiles(directory=str(eta_path), html=True),
+            name="eta",
+        )
+
+    if frontend_path.exists():
+        app.mount(
+            "/frontend",
+            StaticFiles(directory=str(frontend_path), html=True),
+            name="frontend_alias",
+        )
+        app.mount(
+            "/", StaticFiles(directory=str(frontend_path), html=True), name="frontend"
+        )
+
     return app
 
 
 app = create_app()
-
-# Mount the static frontends
-internal_frontend = Path(__file__).resolve().parent.parent.parent / "frontend"
-external_frontend = (
-    Path(__file__).resolve().parent.parent.parent.parent / "outliers-frontend"
-)
-frontend_path = internal_frontend if internal_frontend.exists() else external_frontend
-dashboard_path = Path(__file__).resolve().parent.parent.parent / "dashboard"
-
-if dashboard_path.exists():
-    app.mount(
-        "/dashboard",
-        StaticFiles(directory=str(dashboard_path), html=True),
-        name="dashboard",
-    )
-
-# Mount the 3D train viewer
-eta_path = Path(__file__).resolve().parent.parent.parent / "eta"
-if eta_path.exists():
-    app.mount(
-        "/eta",
-        StaticFiles(directory=str(eta_path), html=True),
-        name="eta",
-    )
-
-if frontend_path.exists():
-    app.mount(
-        "/", StaticFiles(directory=str(frontend_path), html=True), name="frontend"
-    )
