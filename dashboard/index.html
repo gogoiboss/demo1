@@ -6,7 +6,7 @@
   <title>RippleETA | Network Control</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
     <header class="topbar">
       <a class="brand" href="#passenger" aria-label="RippleETA home">
         <span class="brand-mark">R</span>
-        <span><strong>RippleETA</strong><small>NETWORK-AWARE ETA CONTROL</small></span>
+        <span><strong>RippleETA</strong></span>
 <span id="mode-badge" style="margin-left: 1rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; background: var(--warning); color: #000; display: none;"></span>
       </a>
       <div class="topbar-status">
@@ -25,27 +25,42 @@
       </div>
     </header>
 
+    <!-- RIGHT-EDGE STATION NAV: persistent vertical strip of 7 station-stop markers
+         connected by a double-rail track segment. Active one pulses signal-lamp amber.
+         Hover shows view name via data-label. -->
+    <nav class="signal-nav" aria-label="Section quick nav">
+      <button class="signal-dot is-active" data-nav="station" data-label="STATION MASTER" title="Station Master"><span></span></button>
+      <button class="signal-dot" data-nav="passenger" data-label="PASSENGER" title="Passenger"><span></span></button>
+      <button class="signal-dot" data-nav="crew" data-label="CREW CONTROLLER" title="Crew Controller"><span></span></button>
+      <button class="signal-dot" data-nav="feeder" data-label="FEEDER TRANSPORT" title="Feeder Transport"><span></span></button>
+      <button class="signal-dot" data-nav="maintenance" data-label="MAINTENANCE YARD" title="Maintenance Yard"><span></span></button>
+      <button class="signal-dot" data-nav="network" data-label="CONTROL ROOM" title="Network Control Room"><span></span></button>
+      <button class="signal-dot" data-nav="sandbox" data-label="GHOST TRAIN" title="Ghost Train Sandbox"><span></span></button>
+    </nav>
+
+    <!-- LIVE STATUS TICKER: bottom-left, shows data mode + last updated with
+         departure-board flip animation on digit changes -->
+    <div class="live-ticker" aria-live="polite">
+      <span id="ticker-mode" class="ticker-mode is-replay">REPLAY</span>
+      <span class="ticker-sep"></span>
+      <span class="ticker-update">
+        UPDATED <span id="ticker-value" class="ticker-digit">0</span>s AGO
+      </span>
+    </div>
+
+    <!-- ACCESSIBILITY TOGGLE: high-contrast button, stays in railway palette -->
+    <button class="a11y-toggle" id="a11y-toggle" title="Toggle high contrast" aria-label="Toggle high contrast mode">A</button>
+
     <main>
       <section class="command-bar" aria-label="Dashboard controls">
-        <div>
-          <p class="eyebrow">C4 LIVE PREDICTION · C3 SCENARIO REPLAY</p>
-          <h1>One forecast. Five decisions.</h1>
-        </div>
+        <div><h1>RippleETA</h1></div>
         <div class="controls">
           <label class="train-picker">TRAIN <input id="train-id" value="20507" inputmode="numeric" aria-label="Train number"></label>
           <button id="refresh-button" class="icon-button" type="button" title="Refresh prediction" aria-label="Refresh prediction">↻</button>
         </div>
       </section>
 
-      <nav class="view-tabs" aria-label="Stakeholder views">
-        <button class="tab is-active" data-view="station">Station Master · Live</button>
-        <button class="tab tab-wireframe" data-view="passenger">Passenger · Wireframe</button>
-        <button class="tab tab-wireframe" data-view="crew">Crew · Wireframe</button>
-        <button class="tab tab-wireframe" data-view="feeder">Feeder · Wireframe</button>
-        <button class="tab tab-wireframe" data-view="maintenance">Maintenance · Wireframe</button>
-        <button class="tab" data-view="network">Control Room</button>
-        <button class="tab tab-sandbox" data-view="sandbox">⬡ Ghost Train Sandbox</button>
-      </nav>
+      
 
       <div id="notice" class="notice" role="status"></div>
 
@@ -53,224 +68,386 @@
         <div class="pipeline-cell"><span class="pipeline-label">DATA PATH</span><strong id="pipeline-mode">CHECKING</strong></div>
         <div class="pipeline-cell"><span class="pipeline-label">API HEALTH</span><strong id="pipeline-health">CHECKING</strong></div>
         <div class="pipeline-cell"><span class="pipeline-label">MODEL STATE</span><strong id="pipeline-model">CHECKING</strong></div>
-        <div class="pipeline-cell pipeline-explanation"><span class="pipeline-label">OPERATING CONTRACT</span><span id="pipeline-explanation">Loading replay-safe prediction path.</span></div>
+        <div class="pipeline-cell pipeline-explanation"><span class="pipeline-label">SYSTEM</span><span id="pipeline-explanation">Loading...</span></div>
       </section>
 
-      <section id="passenger-view" class="view-panel is-hidden wireframe-panel" data-panel="passenger">
-        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Passenger decision surface</strong><small>Design intent only. This screen does not call the passenger endpoint.</small></div>
-        <div class="passenger-layout">
-          <div class="passenger-main">
-            <div class="section-kicker"><span class="live-pulse"></span> PASSENGER SIGNAL <span id="passenger-updated">UPDATED --</span></div>
-            <p id="passenger-train" class="train-label">TRAIN 20507</p>
-            <h2 id="passenger-delay" class="hero-delay">--<span>min late</span></h2>
-            <p id="passenger-message" class="hero-copy">Loading the calibrated arrival signal.</p>
-            <div class="range-card">
-              <div class="range-heading"><span>CALIBRATED ARRIVAL WINDOW</span><strong id="passenger-window">-- to -- min</strong></div>
-              <div class="range-track" aria-label="Calibrated delay interval"><span class="range-fill"></span><span id="range-p50" class="range-marker"></span></div>
-              <div class="range-scale"><span id="range-p10">LOWER --</span><span id="range-p50-label">P50 --</span><span id="range-p90">UPPER --</span></div>
-            </div>
-            <div class="passenger-footer"><span class="trend-chip" id="passenger-trend">STABLE</span><span>Next update <strong id="passenger-next-update">--</strong></span></div>
+      <div class="km-rule" aria-hidden="true"></div>
+
+      <section id="passenger-view" class="view-panel is-hidden" data-panel="passenger">
+
+        <!-- ── Language Toggle ──────────────────────────────────────────── -->
+        <div class="pax-lang-strip" aria-label="Language selector">
+          <span class="pax-lang-label" aria-hidden="true">PASSENGER DISPLAY · भाषा</span>
+          <div class="pax-lang-toggle" role="group" aria-label="Select display language" id="lang-toggle">
+            <button class="lang-btn is-active" data-lang="en" type="button" aria-pressed="true">ENGLISH</button>
+            <button class="lang-btn" data-lang="hi" type="button" aria-pressed="false">हिंदी</button>
           </div>
-          <aside class="passenger-side">
-            <div class="quiet-card">
-              <span class="card-label">CONNECTION DEADLINE</span>
-              <p style="margin: 4px 0; font-size: 0.9rem; color: var(--muted);">Time you need to arrive by:</p>
-              <input type="time" id="passenger-deadline-input" value="03:00" style="margin-top: 4px; width: 100%; font-size: 1.2rem; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 4px; color-scheme: dark;">
-              <div id="passenger-safety-flag" class="decision-value" style="margin-top: 12px; font-size: 1rem; padding: 8px; border-radius: 4px; text-align: center; font-weight: bold; border: 1px solid var(--line);">--</div>
-            </div>
-            <div class="quiet-card"><span class="card-label">WHAT THIS MEANS</span><p>Use the range to decide when to leave. It narrows as the train approaches.</p></div>
-            <div class="amber-card"><span class="card-label">GRAPH SCENARIO (REPLAY)</span><strong id="passenger-conflict">No conflict in current prediction</strong><button id="trace-passenger" class="text-button" type="button">View fixed scenario replay →</button></div>
-          </aside>
         </div>
+
+        <!-- ── Departure Board ─────────────────────────────────────────── -->
+        <div class="pax-board dotmatrix-bg" role="region" aria-label="Arrival window board" aria-live="polite">
+
+          <div class="pax-board-header">
+            <span class="pax-board-kicker" data-en="YOUR ARRIVAL WINDOW" data-hi="आपके आगमन का समय">YOUR ARRIVAL WINDOW</span>
+            <span class="pax-board-train" id="pax-board-train">TRAIN ·····</span>
+          </div>
+
+          <div class="pax-board-cells" aria-label="P10 to P90 delay window">
+
+            <div class="pax-board-col">
+              <div class="pax-flap-label" data-en="EARLIEST" data-hi="जल्द से जल्द">EARLIEST</div>
+              <div class="pax-flap-group" id="pax-flap-p10" aria-label="P10 delay">
+                <div class="flap-cell" data-value="--">
+                  <div class="flap-top"><span>--</span></div>
+                  <div class="flap-bottom"><span>--</span></div>
+                  <div class="flap-fold"></div>
+                </div>
+              </div>
+              <div class="pax-flap-unit" data-en="MINUTES LATE" data-hi="मिनट देर">MINUTES LATE</div>
+            </div>
+
+            <div class="pax-board-divider" aria-hidden="true">·</div>
+
+            <div class="pax-board-col pax-board-col--primary">
+              <div class="pax-flap-label" data-en="MOST LIKELY" data-hi="सबसे संभावित">MOST LIKELY</div>
+              <div class="pax-flap-group" id="pax-flap-p50" aria-label="P50 delay">
+                <div class="flap-cell" data-value="--">
+                  <div class="flap-top"><span>--</span></div>
+                  <div class="flap-bottom"><span>--</span></div>
+                  <div class="flap-fold"></div>
+                </div>
+              </div>
+              <div class="pax-flap-unit" data-en="MINUTES LATE" data-hi="मिनट देर">MINUTES LATE</div>
+            </div>
+
+            <div class="pax-board-divider" aria-hidden="true">·</div>
+
+            <div class="pax-board-col">
+              <div class="pax-flap-label" data-en="LATEST" data-hi="अधिकतम">LATEST</div>
+              <div class="pax-flap-group" id="pax-flap-p90" aria-label="P90 delay">
+                <div class="flap-cell" data-value="--">
+                  <div class="flap-top"><span>--</span></div>
+                  <div class="flap-bottom"><span>--</span></div>
+                  <div class="flap-fold"></div>
+                </div>
+              </div>
+              <div class="pax-flap-unit" data-en="MINUTES LATE" data-hi="मिनट देर">MINUTES LATE</div>
+            </div>
+
+          </div><!-- /pax-board-cells -->
+
+          <div class="pax-board-footer">
+            <span class="pax-board-status"><span class="live-pulse" id="pax-pulse"></span> <span id="passenger-updated" data-en="UPDATED --" data-hi="अपडेट --" data-mr="अपडेट --">UPDATED --</span></span>
+            <span class="pax-board-next"><span data-en="Next:" data-hi="अगला:" data-mr="पुढील:">Next:</span> <strong id="passenger-next-update">--</strong></span>
+          </div>
+
+        </div><!-- /pax-board -->
+
+        <!-- ── Two-column module row ────────────────────────────────────── -->
+        <div class="pax-modules-row">
+
+          <!-- ── Departure Advisory ──────────────────────────────────────── -->
+          <div class="pax-advisory" role="region" aria-label="Departure advisory">
+
+            <span class="card-label" data-en="DEPARTURE ADVISORY" data-hi="प्रस्थान सलाह" data-mr="निघण्याचा सल्ला">DEPARTURE ADVISORY</span>
+
+            <!-- Connection cutoff time input -->
+            <label class="pax-cutoff-label" for="passenger-deadline-input">
+              <span data-en="I need to be at the station by" data-hi="मुझे स्टेशन पहुँचना है">I need to be at the station by</span>
+              <input type="time" id="passenger-deadline-input" class="pax-time-input" value="03:00" aria-label="Connection cutoff time">
+            </label>
+
+            <!-- Platform signal indicator -->
+            <div class="pax-signal-wrap">
+              <div class="signal-lamp" id="pax-signal-lamp" aria-live="polite" aria-label="Departure signal">
+                <div class="signal-lamp-inner"></div>
+              </div>
+              <div class="pax-advisory-badge" id="pax-advisory-badge" aria-live="polite">--</div>
+            </div>
+
+            <p class="pax-advisory-sub" id="passenger-message"></p>
+
+          </div><!-- /pax-advisory -->
+
+          <!-- ── Delay Trend Panel ───────────────────────────────────────── -->
+          <div class="pax-trend" role="region" aria-label="Delay trend over recent updates">
+
+            <span class="card-label" data-en="THE LAST EIGHT UPDATES" data-hi="पिछले आठ अपडेट">THE LAST EIGHT UPDATES</span>
+
+            <div class="pax-trend-header">
+              <span class="trend-chip" id="passenger-trend">STABLE</span>
+              <span class="pax-trend-sub" data-en="newest at right" data-hi="नवीनतम दाईं ओर">newest at right</span>
+            </div>
+
+            <!-- Sparkline SVG — drawn by JS -->
+            <svg class="pax-sparkline"
+                 id="pax-sparkline"
+                 viewBox="0 0 220 52"
+                 aria-hidden="true"
+                 preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spark-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--ir-marigold)" stop-opacity="0.22"/>
+                  <stop offset="100%" stop-color="var(--ir-marigold)" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Area fill -->
+              <path id="pax-spark-area" fill="url(#spark-grad)" d=""/>
+              <!-- Line -->
+              <polyline id="pax-spark-line"
+                        fill="none"
+                        stroke="var(--ir-marigold)"
+                        stroke-width="1.8"
+                        stroke-linejoin="round"
+                        stroke-linecap="round"
+                        points=""/>
+              <!-- Endpoint dot -->
+              <circle id="pax-spark-dot" r="3" fill="var(--ir-marigold)" cx="0" cy="0"/>
+            </svg>
+
+            <div class="pax-trend-scale">
+              <span id="pax-spark-min" class="pax-spark-label">·</span>
+              <span id="pax-spark-max" class="pax-spark-label">·</span>
+            </div>
+
+            <ol class="pax-chronicle" id="pax-chronicle" aria-label="Eight most recent arrival updates"></ol>
+
+          </div><!-- /pax-trend -->
+
+        </div><!-- /pax-modules-row -->
+
+        <!-- Hidden legacy ID kept so existing renderNetwork() reference to
+             #passenger-conflict still works without a JS change there -->
+        <span id="passenger-conflict" style="display:none"></span>
+        <span id="passenger-train" style="display:none">TRAIN 20507</span>
+
       </section>
 
       <section id="station-view" class="view-panel" data-panel="station">
-        <div class="view-heading"><div><p class="eyebrow">JUNCTION OPERATIONS / PLATFORM ALLOCATION</p><h2>Commit with evidence.</h2></div><span class="data-stamp" id="station-stamp">LIVE SNAPSHOT</span></div>
-        <div class="station-live-note"><span class="live-pulse"></span><strong>FUNCTIONAL SCREEN</strong><span>Live or replay prediction from the actual API · selected train <b id="station-train-label">20507</b></span></div>
-        <div class="station-grid">
-          <article class="decision-card decision-card-large" id="station-decision-card">
+
+        <!-- ── Header ──────────────────────────────────────────────────── -->
+        <div class="view-heading"><h2>Station Master</h2></div>
+          
+        </div>
+        <div class="station-live-note"><span class="live-pulse"></span><strong>LIVE</strong><span>TRAIN <b id="station-train-label">20507</b></span></div>
+
+        <!-- ── Top row: Lever + VHF + Gauges ───────────────────────────── -->
+        <div class="sm-top-row">
+
+          <!-- Signal-box lever card -->
+          <article class="sm-lever-card" id="station-decision-card">
             <span class="card-label">PLATFORM COMMITMENT</span>
-            <strong id="station-decision" class="decision-value">DEFER</strong>
-            <p id="station-message">Waiting for interval confidence.</p>
-            <div id="station-conflict-forecast" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 0.9rem;">
-              <span style="color: var(--amber); font-weight: bold; display: block; margin-bottom: 4px;">ACTIVE SECTION CONFLICT FORECAST</span>
-              <ul style="margin: 0; padding-left: 16px; color: var(--text);">
-                <li id="station-conflict-detail">Train -- on -- (+--m)</li>
-              </ul>
+
+            <!-- Lever visual -->
+            <div class="sm-lever-wrap">
+              <div class="sm-lever-track">
+                <div class="sm-lever-labels">
+                  <span class="sm-lever-label-commit">COMMIT</span>
+                  <span class="sm-lever-label-defer">DEFER</span>
+                </div>
+                <div class="sm-lever-arm" id="sm-lever-arm">
+                  <div class="sm-lever-knob"></div>
+                </div>
+                <div class="sm-lever-pivot"></div>
+              </div>
             </div>
-            <div class="decision-rule"><span>DECISION NEEDED IN</span><strong id="station-deadline">-- min</strong></div>
+
+            <strong id="station-decision" class="sm-decision-text">DEFER</strong>
+            <p id="station-message" class="sm-decision-msg">Waiting for interval confidence.</p>
+
+            <!-- Conflict forecast (shown when conflict > 0) -->
+            <div id="station-conflict-forecast" class="sm-conflict-forecast" style="display:none">
+              <span class="sm-conflict-kicker">ACTIVE SECTION CONFLICT</span>
+              <span id="station-conflict-detail" class="sm-conflict-detail">Train -- on -- (+--m)</span>
+            </div>
+
+            <div class="sm-lever-rule">
+              <span>DECISION NEEDED IN</span>
+              <strong id="station-deadline">-- min</strong>
+            </div>
           </article>
-          <article class="metric-card"><span class="card-label">LOWER INTERVAL BOUND</span><strong id="station-p10">--</strong><span>minutes</span></article>
-          <article class="metric-card"><span class="card-label">UPPER INTERVAL BOUND</span><strong id="station-p90">--</strong><span>minutes</span></article>
-          <article class="metric-card"><span class="card-label">P50 EXPECTED DELAY</span><strong id="station-p50">--</strong><span>minutes</span></article>
-          <article class="signal-table"><div class="table-title">DECISION SIGNALS</div><div class="signal-row"><span>Interval width</span><strong id="station-width">-- min</strong></div><div class="signal-row"><span>Conflict propagation</span><strong id="station-conflict">--</strong></div><div class="signal-row"><span>Prediction state</span><strong id="station-state">--</strong></div><div class="signal-row"><span>Recommended line</span><strong>HOLD ALTERNATE</strong></div></article>
+
+          <!-- VHF Radio Readout -->
+          <article class="sm-vhf-card">
+            <span class="card-label" style="color:var(--ir-brass)">VHF RADIO SYNTHESIS</span>
+            <div class="sm-vhf-screen">
+              <div class="sm-vhf-header">
+                <span class="sm-vhf-dot" aria-label="Transmitting"></span>
+                <span class="sm-vhf-freq">156.800 MHz</span>
+              </div>
+              <pre class="sm-vhf-text" id="sm-vhf-text">AWAITING DATA...</pre>
+            </div>
+            <span class="sm-vhf-caption"></span>
+          </article>
+
+          <!-- Gauge pair -->
+          <div class="sm-gauge-pair">
+            <!-- Criticality gauge -->
+            <article class="sm-gauge-card">
+              <span class="card-label">CRITICALITY SCORE</span>
+              <div class="sm-gauge" id="sm-gauge-crit">
+                <svg class="sm-gauge-svg" viewBox="0 0 120 70" aria-hidden="true">
+                  <!-- Background arc -->
+                  <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(176,141,87,.2)" stroke-width="6" stroke-linecap="round"/>
+                  <!-- Colored arc segments: green → amber → red -->
+                  <path d="M 10 65 A 50 50 0 0 1 43 18" fill="none" stroke="rgba(42,122,80,.35)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M 43 18 A 50 50 0 0 1 77 18" fill="none" stroke="rgba(245,166,35,.35)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M 77 18 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(193,39,45,.35)" stroke-width="6" stroke-linecap="round"/>
+                  <!-- Needle -->
+                  <line class="sm-gauge-needle" id="sm-needle-crit" x1="60" y1="65" x2="60" y2="18" stroke="var(--ir-navy)" stroke-width="2" stroke-linecap="round"/>
+                  <!-- Center pivot -->
+                  <circle cx="60" cy="65" r="4" fill="var(--ir-navy)"/>
+                </svg>
+                <strong class="sm-gauge-value" id="sm-gauge-crit-val">--</strong>
+                <span class="sm-gauge-unit">/100</span>
+              </div>
+            </article>
+
+            <!-- INR cost gauge -->
+            <article class="sm-gauge-card">
+              <span class="card-label">DELAY COST (EST.)</span>
+              <div class="sm-gauge" id="sm-gauge-cost">
+                <svg class="sm-gauge-svg" viewBox="0 0 120 70" aria-hidden="true">
+                  <path d="M 10 65 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(176,141,87,.2)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M 10 65 A 50 50 0 0 1 43 18" fill="none" stroke="rgba(42,122,80,.35)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M 43 18 A 50 50 0 0 1 77 18" fill="none" stroke="rgba(245,166,35,.35)" stroke-width="6" stroke-linecap="round"/>
+                  <path d="M 77 18 A 50 50 0 0 1 110 65" fill="none" stroke="rgba(193,39,45,.35)" stroke-width="6" stroke-linecap="round"/>
+                  <line class="sm-gauge-needle" id="sm-needle-cost" x1="60" y1="65" x2="60" y2="18" stroke="var(--ir-navy)" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="60" cy="65" r="4" fill="var(--ir-navy)"/>
+                </svg>
+                <strong class="sm-gauge-value" id="sm-gauge-cost-val">--</strong>
+                <span class="sm-gauge-unit">INR</span>
+              </div>
+            </article>
+          </div>
+
+        </div><!-- /sm-top-row -->
+
+        <!-- ── Signals strip ───────────────────────────────────────────── -->
+        <div class="sm-signals-strip">
+          <div class="sm-signal-tile"><span class="card-label">P10 LOWER</span><strong id="station-p10">--</strong><span>min</span></div>
+          <div class="sm-signal-tile"><span class="card-label">P50 EXPECTED</span><strong id="station-p50">--</strong><span>min</span></div>
+          <div class="sm-signal-tile"><span class="card-label">P90 UPPER</span><strong id="station-p90">--</strong><span>min</span></div>
+          <div class="sm-signal-tile"><span class="card-label">INTERVAL WIDTH</span><strong id="station-width">--</strong><span></span></div>
+          <div class="sm-signal-tile"><span class="card-label">CONFLICT ADJ.</span><strong id="station-conflict">--</strong><span></span></div>
+          <div class="sm-signal-tile"><span class="card-label">PREDICTION</span><strong id="station-state">--</strong><span></span></div>
+        </div>
+
+        <!-- ── Junction Operations Table ───────────────────────────────── -->
+        <div class="sm-junction" role="region" aria-label="Junction train overview">
+          <div class="sm-junction-header">
+            <span class="card-label">JUNCTION OPERATIONS — MULTI-TRAIN</span>
+            <span class="sm-junction-count" id="sm-junction-count">5 TRAINS</span>
+          </div>
+          <table class="sm-junction-table">
+            <thead>
+              <tr>
+                <th>TRAIN</th>
+                <th>P50 DELAY</th>
+                <th>INTERVAL</th>
+                <th>COMMIT</th>
+                <th>DEADLINE</th>
+                <th>LOAD</th>
+              </tr>
+            </thead>
+            <tbody id="junction-body">
+              <tr><td colspan="6" class="junction-loading">Loading junction data…</td></tr>
+            </tbody>
+          </table>
         </div>
 
       </section>
 
       <!-- ═══ CREW CONTROLLER VIEW ═══════════════════════════════════════════ -->
-      <section id="crew-view" class="view-panel is-hidden wireframe-panel" data-panel="crew">
-        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Crew dispatch surface</strong><small>Design intent only. The functional API path is Station Master.</small></div>
-        <div class="view-heading">
-          <div>
-            <p class="eyebrow">CREW OPERATIONS / RELIEF DISPATCH PLANNING</p>
-            <h2>Deploy crew at the right moment.</h2>
-          </div>
-          <span class="data-stamp" id="crew-stamp">LIVE SNAPSHOT</span>
+      <section id="crew-view" class="view-panel is-hidden" data-panel="crew">
+        <div class="view-heading"><h2>Crew Controller</h2></div>
+          
         </div>
-        <div class="crew-layout">
-          <!-- Main deadline card -->
-          <article class="crew-deadline-card">
-            <span class="card-label">DISPATCH RELIEF CREW BY</span>
-            <div class="crew-clock" id="crew-clock">--:--</div>
-            <div class="crew-clock-sub">IST · based on P90 upper bound</div>
-            <div id="crew-action-badge" class="crew-action-badge crew-badge-hold">CALCULATING</div>
-            <p id="crew-message" class="crew-message">Loading crew dispatch signal…</p>
-          </article>
-          <!-- Side metrics -->
-          <div class="crew-side">
-            <article class="metric-card">
-              <span class="card-label">PREDICTED DELAY (P50)</span>
-              <strong id="crew-delay">--</strong>
-              <span>minutes</span>
-            </article>
-            <article class="metric-card">
-              <span class="card-label">PREDICTION STATUS</span>
-              <strong id="crew-status" style="font-size:18px;letter-spacing:-.02em">--</strong>
-              <span></span>
-            </article>
-            <div class="quiet-card">
-              <span class="card-label">HOW THIS IS CALCULATED</span>
-              <p>The relief dispatch deadline is derived from the P90 upper bound of the calibrated conformal interval. This guarantees the crew is always mobilised with safety margin — not against the optimistic P50.</p>
-            </div>
-          </div>
+        <div class="crew-summary" aria-label="Crew duty summary">
+          <article class="crew-summary-cell"><span class="card-label">CREW SET IN VIEW</span><strong id="crew-count">--</strong><span>upcoming handovers</span></article>
+          <article class="crew-summary-cell crew-summary-risk"><span class="card-label">HOER BREACH RISK</span><strong id="crew-risk-count">--</strong><span>rows crossing P90</span></article>
+          <article class="crew-summary-cell"><span class="card-label">NEXT DUTY LIMIT</span><strong id="crew-next-limit">--:--</strong><span id="crew-next-limit-sub">IST · remaining</span></article>
+          <article class="crew-summary-note"><span class="card-label">PRIORITY</span><p>EARLIEST LIMIT FIRST</p></article>
+        </div>
+        <div class="crew-register-head">
+          <div><span class="eyebrow">RELIEF REGISTER</span><strong>UPCOMING HANDOVERS · URGENCY ORDER</strong></div>
+          <span class="crew-register-legend"><i class="crew-legend-watch"></i> P50 / P90 window <i class="crew-legend-risk"></i> HOER at risk</span>
+        </div>
+        <div id="crew-register" class="crew-register" role="table" aria-label="Upcoming crew relief points">
+          <div class="crew-register-loading">Loading crew duty register...</div>
         </div>
       </section>
 
       <!-- ═══ FEEDER TRANSPORT VIEW ════════════════════════════════════════ -->
-      <section id="feeder-view" class="view-panel is-hidden wireframe-panel" data-panel="feeder">
-        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Feeder coordination surface</strong><small>Design intent only. The functional API path is Station Master.</small></div>
-        <div class="view-heading">
-          <div>
-            <p class="eyebrow">FEEDER BUS / METRO COORDINATOR</p>
-            <h2>Hold or depart — with a probability.</h2>
-          </div>
-          <span class="data-stamp" id="feeder-stamp">LIVE SNAPSHOT</span>
+      <section id="feeder-view" class="view-panel is-hidden" data-panel="feeder">
+        <div class="view-heading"><h2>Feeder Transport</h2></div>
+          
         </div>
-        <div class="feeder-layout">
-          <!-- Time input + probability hero -->
-          <div class="feeder-main">
-            <div class="feeder-picker-row">
-              <label class="feeder-time-label">
-                <span class="card-label">BUS DEPARTURE CUTOFF (LOCAL TIME)</span>
-                <input type="time" id="feeder-cutoff-input" class="feeder-time-input" value="03:00">
-              </label>
-              <div class="feeder-helper">Set the last time your bus/metro can wait for this train.</div>
-            </div>
-            <div class="feeder-prob-row">
-              <div>
-                <div class="card-label">PROBABILITY TRAIN ARRIVES BEFORE CUTOFF</div>
-                <div class="probability-hero" id="feeder-probability">--%</div>
-              </div>
-              <div id="feeder-recommendation" class="recommendation-badge rec-hold">CALCULATING</div>
-            </div>
-            <!-- Interval vs cutoff visual strip -->
-            <div class="feeder-strip-wrap">
-              <div class="card-label" style="margin-bottom:10px">DELAY INTERVAL vs CUTOFF WINDOW</div>
-              <div class="feeder-strip" id="feeder-strip">
-                <div class="feeder-strip-fill" id="feeder-strip-fill"></div>
-                <div class="feeder-strip-marker" id="feeder-strip-cutoff-marker" title="Your cutoff"></div>
-                <div class="feeder-strip-p50" id="feeder-strip-p50-marker" title="P50 delay"></div>
-              </div>
-              <div class="feeder-strip-scale">
-                <span id="feeder-scale-p10">P10 --</span>
-                <span id="feeder-scale-p50">P50 --</span>
-                <span id="feeder-scale-cutoff">CUTOFF --</span>
-                <span id="feeder-scale-p90">P90 --</span>
-              </div>
-            </div>
-            <p id="feeder-message" class="hero-copy" style="margin-top:22px;font-size:14px"></p>
-          </div>
-          <!-- Side cards -->
-          <aside class="feeder-side">
-            <div class="quiet-card">
-              <span class="card-label">WHAT THE % MEANS</span>
-              <p>A normal approximation is fitted to the calibrated P10–P90 interval. The probability is P(train delay ≤ minutes until your cutoff). At ≥80% we recommend WAIT; below 40% we recommend DEPART.</p>
-            </div>
-            <div class="quiet-card">
-              <span class="card-label">DECISION THRESHOLDS</span>
-              <p><strong style="color:var(--teal)">≥ 80% → WAIT</strong> · Hold the feeder.<br><strong style="color:var(--amber)">40–79% → USE JUDGMENT</strong><br><strong style="color:var(--red)">< 40% → DEPART</strong> · Depart on schedule.</p>
-            </div>
-          </aside>
+        <div class="feeder-control-strip">
+          <label class="feeder-time-label"><span class="card-label">INCOMING TRAIN CUTOFF / LOCAL TIME</span><input type="time" id="feeder-cutoff-input" class="feeder-time-input" value="14:40"></label>
+          <label class="feeder-threshold-label"><span class="card-label">HOLD THRESHOLD</span><span class="feeder-threshold-input"><input type="number" id="feeder-threshold" min="1" max="99" value="80" aria-label="Hold probability threshold"><b>%</b></span></label>
+          <div class="feeder-helper">THRESHOLD GOVERNS HOLD</div>
         </div>
+        <article class="feeder-hero-board">
+          <div class="feeder-board-top"><span class="card-label">CONNECTING SERVICE INDICATOR / SELECTED ROUTE</span><span class="feeder-board-live" id="feeder-board-status">DEMO SNAPSHOT</span></div>
+          <div class="feeder-board-main"><div><strong id="feeder-probability" class="probability-hero">--%</strong><p id="feeder-hero-copy">likely to arrive before the connecting service departure.</p></div><div id="feeder-recommendation" class="recommendation-badge rec-hold">CALCULATING</div></div>
+          <div class="feeder-board-route"><strong id="feeder-hero-route">AIRPORT LINK / 14A</strong><span>FEEDER DEPARTURE <b id="feeder-hero-cutoff">14:40</b></span><span>INCOMING TRAIN <b id="feeder-hero-train">20507</b></span></div>
+        </article>
+        <div class="feeder-register-head"><div><span class="eyebrow">DISPATCH REGISTER / DOWNSTREAM CONNECTIONS</span><strong>FEEDERS DEPENDENT ON TRAIN <span id="feeder-register-train">20507</span></strong></div><span class="feeder-register-note">PREDICTION WINDOW / P10–P90</span></div>
+        <div id="feeder-register" class="feeder-register" role="table" aria-label="Downstream feeder connections"><div class="feeder-register-loading">Loading connection register...</div></div>
       </section>
 
       <!-- ═══ MAINTENANCE YARD VIEW ════════════════════════════════════════ -->
-      <section id="maintenance-view" class="view-panel is-hidden wireframe-panel" data-panel="maintenance">
-        <div class="wireframe-banner"><span>WIREFRAME / NOT CONNECTED</span><strong>Maintenance turnaround surface</strong><small>Design intent only. The functional API path is Station Master.</small></div>
-        <div class="view-heading">
-          <div>
-            <p class="eyebrow">MAINTENANCE YARD / RAKE TURNAROUND PLANNING</p>
-            <h2>Know your turnaround window.</h2>
-          </div>
-          <span class="data-stamp" id="maintenance-stamp">LIVE SNAPSHOT</span>
+      <section id="maintenance-view" class="view-panel is-hidden" data-panel="maintenance">
+        <div class="view-heading"><h2>Maintenance Yard</h2></div>
+          
         </div>
-        <div class="maintenance-layout">
-          <!-- Budget card -->
+        <div class="maintenance-hero-grid">
           <article class="maintenance-budget-card">
-            <span class="card-label">AVAILABLE TURNAROUND WINDOW</span>
+            <div class="maintenance-budget-kicker"><span class="card-label">SELECTED RAKE / TRAIN <b id="maintenance-train">20507</b></span><span class="maintenance-live-pin">LIVE BUDGET</span></div>
             <div class="turnaround-hero" id="maintenance-minutes">--</div>
-            <div class="turnaround-unit">minutes available (360 min max window)</div>
-            <!-- Progress bar -->
-            <div class="turnaround-bar-wrap">
-              <div class="turnaround-bar-track">
-                <div class="turnaround-bar-fill" id="maintenance-bar"></div>
-                <div class="turnaround-bar-threshold" style="left:50%" title="180 min — adequate threshold"></div>
-              </div>
-              <div class="turnaround-scale">
-                <span>0</span><span>90</span><span style="color:var(--teal)">180 ✓</span><span>270</span><span>360</span>
-              </div>
+            <div class="turnaround-unit">minutes remaining · 360 minute maximum window</div>
+            <div class="turnaround-tape" aria-label="Turnaround budget countdown">
+              <div class="turnaround-tape-track"><div class="turnaround-tape-fill" id="maintenance-bar"></div><div class="turnaround-tape-notch" style="left:25%"></div><div class="turnaround-tape-notch" style="left:50%"></div><div class="turnaround-tape-notch" style="left:75%"></div></div>
+              <div class="turnaround-scale"><span>0</span><span>90</span><span>180</span><span>270</span><span>360</span></div>
             </div>
             <div id="maintenance-adequacy" class="adequacy-badge adequacy-ok">CALCULATING</div>
           </article>
-          <!-- Side info -->
-          <div class="maintenance-side">
-            <article class="metric-card">
-              <span class="card-label">P90 DELAY (WORST-CASE BOUND)</span>
-              <strong id="maintenance-p90">--</strong>
-              <span>minutes late</span>
-            </article>
-            <article class="metric-card">
-              <span class="card-label">CREW MODE</span>
-              <strong id="maintenance-crew-mode" style="font-size:18px;letter-spacing:-.02em;color:var(--teal)">--</strong>
-              <span></span>
-            </article>
-            <div class="amber-card" id="maintenance-action-card">
-              <span class="card-label">RECOMMENDED ACTION</span>
-              <strong id="maintenance-message">Loading…</strong>
-            </div>
-            <div class="quiet-card">
-              <span class="card-label">HOW THIS IS CALCULATED</span>
-              <p>Available window = 360 min − P90 delay. The P90 upper bound ensures yard planning accounts for the worst credible arrival. ≥ 180 min = standard turnaround. 90–179 min = compressed. &lt; 90 min = critical escalation.</p>
-            </div>
-          </div>
+          <aside class="maintenance-signal">
+            <div class="maintenance-signal-line"><span class="card-label">P90 DELAY / ARRIVAL BOUND</span><strong id="maintenance-p90">--</strong><span>MIN LATE</span></div>
+            <div class="maintenance-signal-line"><span class="card-label">YARD PROTOCOL</span><strong id="maintenance-crew-mode">--</strong></div>
+            <div class="maintenance-action" id="maintenance-action-card"><span class="card-label">YARD INSTRUCTION</span><strong id="maintenance-message">Loading...</strong></div>
+          </aside>
         </div>
+        <div class="yard-register-head"><div><span class="eyebrow">YARD CLIPBOARD / NEXT MOVEMENTS</span><strong>RAKES DUE FOR TURNAROUND</strong></div><span class="yard-register-note">BUDGETS SORTED BY ARRIVAL</span></div>
+        <div id="maintenance-queue" class="yard-register" role="table" aria-label="Trains due for turnaround"><div class="yard-register-loading">Loading yard clipboard...</div></div>
       </section>
 
       <section id="network-view" class="view-panel is-hidden" data-panel="network">
-        <div class="view-heading"><div><p class="eyebrow">CONTROL ROOM / SCENARIO REPLAY</p><h2>See the ripple move.</h2></div><button id="trace-conflict" class="amber-button" type="button">▶ SCENARIO REPLAY — station-pair conflict example</button></div>
+        <div class="view-heading"><h2>Network Control</h2></div><button id="trace-conflict" class="amber-button" type="button">▶ SCENARIO REPLAY — station-pair conflict example</button></div>
+        <!-- Live prediction counter (Alpha Wave translation: running counter rebuilt as
+             departure-board style ticking number in Plex Mono) -->
+        <div class="prediction-counter">
+          <span class="card-label">PREDICTIONS PROCESSED TODAY · SIMULATED REPLAY</span>
+          <strong id="prediction-count" class="counter-value">0</strong>
+        </div>
         <div class="network-summary"><div><span class="card-label">FIXED CORRIDOR (NOT LIVE)</span><strong>KANPUR → ALLAHABAD</strong></div><div><span class="card-label">REPLAY STATE</span><strong id="network-state">READY</strong></div><div><span class="card-label">TRAINS IN SCENARIO</span><strong>12301 / 56789</strong></div></div>
-        <div class="network-canvas" id="network-canvas">
+        <div class="network-canvas" id="network-canvas" aria-label="Schematic max-plus propagation replay">
+          <div class="network-axis-label axis-left">UPSTREAM</div><div class="network-axis-label axis-right">DOWNSTREAM</div>
           <div class="track-line track-top"></div><div class="track-line track-bottom"></div>
+          <div class="route-edge edge-kanpur-allahabad"><span>KANPUR → ALLAHABAD · SHARED SECTION</span></div>
+          <div class="route-edge edge-allahabad-mughal"><span>ALLAHABAD → MUGHALSARAI · HANDOVER</span></div>
+          <div class="propagation-pulse pulse-upstream"></div><div class="propagation-pulse pulse-downstream"></div>
           <div class="station-node node-kanpur"><span></span><strong>KANPUR</strong><small>22:25</small></div>
           <div class="station-node node-allahabad"><span></span><strong>ALLAHABAD</strong><small>02:04</small></div>
           <div class="station-node node-mughal"><span></span><strong>MUGHALSARAI</strong><small>04:10</small></div>
           <div class="train-token token-56789"><i></i><strong>56789</strong><small>EXPRESS · +15</small></div>
           <div class="train-token token-12301"><i></i><strong>12301</strong><small>RAJDHANI · +55</small></div>
+          <div class="conflict-point" id="conflict-point"><span>HEADWAY CONFLICT</span></div>
           <div id="conflict-path" class="conflict-path"><span>+9 MIN PROPAGATED</span></div>
         </div>
         <div class="network-detail"><div><span class="card-label">BEFORE TRACE</span><strong id="network-before">12301 · +55.0 min base delay</strong></div><div class="trace-arrow">→</div><div class="amber-detail"><span class="card-label">AFTER HEADWAY CHECK</span><strong id="network-after">12301 · awaiting trace</strong><small>56789 clears section + minimum headway</small></div></div>
-        <p class="demo-caption">FIXED SCENARIO REPLAY — trains 12301 / 56789, Kanpur–Allahabad · does not change when you select a different train · station-pair approximation · requires live block-occupancy data to run on real predictions</p>
+        <p class="demo-caption"></p>
       </section>
 
       <section id="sandbox-view" class="view-panel is-hidden" data-panel="sandbox">
@@ -287,7 +464,7 @@
 
         <!-- 3D isometric scene -->
         <div class="sandbox-scene" id="sandbox-scene">
-          <div class="scene-label">TIMED EVENT GRAPH · KANPUR → ALLAHABAD → MUGHALSARAI</div>
+          <div class="scene-label">MAX-PLUS PLAYGROUND · KANPUR → ALLAHABAD → MUGHALSARAI</div>
 
           <!-- Track bed with sleeper ties -->
           <div class="iso-track">
@@ -314,8 +491,9 @@
           </div>
 
           <!-- Train 1: Express 56789 (user-controlled delay) -->
-          <div class="iso-train" id="sandbox-train1" style="left: 22%; top: 38%;">
+          <div class="iso-train livery-lhb" id="sandbox-train1" style="left: 22%; top: 38%;">
             <div class="train-body">
+              <div class="train-cream-band"></div>
               <div class="train-chimney"></div>
               <div class="train-window"></div>
             </div>
@@ -328,8 +506,9 @@
           </div>
 
           <!-- Train 2: Rajdhani 12301 (receives propagated delay) -->
-          <div class="iso-train iso-train-rajdhani" id="sandbox-train2" style="left: 30%; top: 56%;">
+          <div class="iso-train iso-train-rajdhani livery-rajdhani" id="sandbox-train2" style="left: 30%; top: 56%;">
             <div class="train-body">
+              <div class="train-cream-band"></div>
               <div class="train-chimney"></div>
               <div class="train-window"></div>
             </div>
@@ -388,11 +567,11 @@
           </article>
         </div>
 
-        <p class="demo-caption">INTERACTIVE PROOF — drag the slider to inject delay on Express 56789 and watch it propagate to Rajdhani 12301 via the shared Kanpur→Allahabad section · real timed-event graph computation · Goverde (2010) max-plus algebra</p>
+        <p class="demo-caption"></p>
       </section>
     </main>
 
-    <footer class="footer"><span>RIPPLEETA / CALIBRATED NETWORK ETA</span><span>MAPIE COVERAGE 97.7% / 174 ROWS · STATION-PAIR GRAPH</span></footer>
+    <footer class="footer"><span>RIPPLEETA</span><span id="footer-state">LIVE NETWORK ETA</span></footer>
   </div>
   <script src="app.js"></script>
   <script src="sandbox.js"></script>
