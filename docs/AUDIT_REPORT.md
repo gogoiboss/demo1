@@ -198,3 +198,57 @@ Given the session's remaining scope for Part 4 (the centerpiece), naming consist
 **CHECKPOINT COMMITS:** `chore: remove dead scratch scripts, fix ruff-flagged dead code`; `fix: correct E402 misplaced imports (previous commit's claim was wrong)`; `style: apply black formatting across the Python backend`; `fix: corrupted CSS declarations and unbalanced div in frontend/dashboard`; `docs: pin REAL/PARTIAL/HARDCODED status as code comments, not just docs`
 
 ---
+
+## 4. Prior-session claim verification
+
+The Part 4 connection-map pass (full table: `docs/CONNECTION_MAP.md`) was used as the vehicle for this verification, since most of these claims are frontend-visibility questions. Summary here; evidence lives in `docs/CONNECTION_MAP.md` section 0 and its per-page tables.
+
+| Prior claim | Verdict | Evidence |
+|---|---|---|
+| Hardcoded JWT secret — fixed | **CONFIRMED RESOLVED** | `src/api/auth.py:19` — env var required, random per-process fallback only, no hardcoded string anywhere in `src/`. Re-verified independently in Part 1 (both by the fork and cross-checked directly). |
+| Message-overwrite bug in degraded API responses — fixed | **CONFIRMED RESOLVED at the API layer; the fix's value is mostly lost at the frontend layer** | `src/api/app.py`'s `predict()` correctly preserves `original_message` (Part 1). But `docs/CONNECTION_MAP.md` section 0 found Crew Controller and Feeder Transport **discard** their own endpoint's `message` field and overwrite it with a client template on every branch — so the backend fix doesn't reach the user on 2 of 7 pages. Passenger/Station Master show the raw `status` string undecorated; no page reads `degraded`/`stale_since` at all. |
+| Audit-log persistence gap — fixed | **CONFIRMED RESOLVED** | `src/api/app.py`'s `get_prediction()` writes a real `prediction_audit_log` table with real provenance (git commit, dataset/model SHA-256), input features, and SHAP text — read directly in Part 1/this session, not just cited from `PROGRESS.md`. |
+| SHAP surfaced through `/predict/{train_id}` — fixed | **CONFIRMED RESOLVED at the API layer; NEVER surfaced to a user** | `shap_explanation`/`shap_text` are genuinely computed and returned over the wire (verified by tracing `conformal.py` → `pipeline.py` → `app.py`). But zero references to either field exist anywhere in frontend JS — see `docs/CONNECTION_MAP.md` section 0. The only "SHAP" text client-side is static bibliography copy, unrelated to any actual prediction's data. |
+| Training-serving skew (latent fallback risk) — mitigated with a warning log | **CONFIRMED, not re-verified in depth this session** | `docs/LIMITATIONS.md` section 7 describes this precisely and a regression test was cited in `PROGRESS.md`; not independently re-run this session (out of this audit's declared scope — Part 1/2 focus on security, Part 3/4 on cleanliness/connections). No new evidence found that contradicts it. |
+| A "reconciliation audit," an "architecture-doc verification pass," and "8 screenshot-grounded UI bugs" — referenced in this audit's own brief as having happened in prior sessions | **COULD NOT VERIFY THESE EXIST** | Searched `PROGRESS.md` (full read), `git log --oneline --all` for "reconcil"/"screenshot"/"architecture.*verif", and `docs/` for "screenshot"/"UI bug"/"Bug #" patterns. Found only one commit, `54437ac docs: reconcile evaluation anomalies...`, about numeric/statistical reconciliation (regression-to-the-mean framing), not a UI or architecture audit. No trace of an architecture-doc verification pass or 8 enumerated screenshot bugs anywhere in this repo's history or docs. This is itself informative: `docs/PAGE_ARCHITECTURE.md` is demonstrably stale (still describes a tab-based single-page `dashboard/index.html` and "OAuth: zero code written," both false — see Section 5 below), which is exactly the kind of drift an architecture-doc verification pass would have caught. Stating this plainly rather than fabricating specifics for claims that don't appear to exist in this codebase's history. |
+
+**CHECKPOINT COMMIT:** `docs: complete frontend-backend connection map, all elements audited` (the connection-map commit doubles as this section's evidence-gathering pass)
+
+---
+
+## 5. Design system conflict — decision needed
+
+**Factual state only — not resolved, not recommended.** Inspected the actual, currently-shipping CSS/token values in every relevant file (not what any doc claims). Found **five** distinct, non-interoperable color systems currently coexisting in this repo, not the two originally suspected:
+
+| # | Source | Type | Base | Primary accent 1 | Primary accent 2 | Notes |
+|---|---|---|---|---|---|---|
+| 1 | `docs/DESIGN_SYSTEM.md` (documented) | Light, warm cream | `--base:#F3EDE3` | `--primary:#1B2A4A` (indigo) | `--signal:#E8A33D` (marigold) | States "This file is the single source of truth for all frontend work... If `styles.css` contradicts this document, the CSS is wrong." Explicitly lists **"Dark mode"** as an **anti-pattern** ("the warm cream base IS the identity"). Implemented nowhere in the current codebase. |
+| 2 | `dashboard/styles.css` (actual, shipping) | Dark cinematic | `--base:#0B0F1A` | `--primary:#E8EDF5` | `--signal:#F0A500` | The file's own header comment says "Source of truth: docs/DESIGN_SYSTEM.md ... If this file contradicts that document, this file is wrong" — directly beneath that, its `:root` block is internally labeled `/* Palette (Dark Cinematic) */` and uses entirely different hex values under the SAME token names as #1 (`--base`, `--primary`, `--signal`, `--stamp`, `--success`). Self-contradicting: the comment claims fidelity to a doc it visibly does not implement. |
+| 3 | `docs/FRONTEND_PAGES_FEATURES.md` + `docs/PAGE_ARCHITECTURE.md` (documented, agree with each other) | Dark ink/teal/amber | Ink `#091113` | Teal `#61c5bd` | Amber `#f5b84b` | A third specification, matching neither #1 nor #2. Reads as documentation of an *earlier* iteration of `dashboard/`'s actual CSS that has since drifted — plausible given `PAGE_ARCHITECTURE.md` also describes a tab-based single-page `dashboard/index.html` architecture that no longer exists (see below). |
+| 4 | `frontend/style.css` (actual, shipping — the teammate's newly-arrived "Outliers" cinematic UI) | Dark cinematic railway | `--bg:#090a09` | Amber `#d8a548` | Green `#7da887` / Red `#c97970` / Blue `#7896a7` | Entirely disjoint token vocabulary from #1-#3 (no shared variable names at all). Closest in spirit to #2 (both dark) but different exact values and no overlap in naming convention. |
+| 5 | `eta/index.html` (actual, shipping — new 3D train viewer, linked from `frontend/index.html`'s nav) | Light | `--bg:#F5F3EE` | Rail-blue `#123B5D` | Yellow `#E5B83F` | A fifth, independent specification — closest in *spirit* (light background) to #1's stated identity, but different token names and different exact hex values from #1. |
+
+**Concrete on-page collision (not just an abstract "docs disagree" issue):** `dashboard/app.js`'s Station Master approach-scene signal lamp (`sm-sig-green/amber1/red`) sets SVG `fill` via hardcoded hex literals matching system #1's exact values (`#3D7A5C`, `#E8A33D`, `#A13D2E`) via `setAttribute()`, while every other color on that same page comes from system #2's CSS variables. The signal lamp will visibly not match the rest of the page it's on, regardless of which system "wins" — this one is a bug under any resolution, not a matter of taste.
+
+**Architecture drift, closely related**: `docs/PAGE_ARCHITECTURE.md` (source of system #3 above) also describes `dashboard/`'s 7 stakeholder views as tabs within one single-page `dashboard/index.html` application, and describes Google OAuth as "🔮 PLANNED — not built... zero code written." Both are now false: `dashboard/index.html` is a role-selection hub linking to 7 separate HTML files (`passenger.html`, `station-master.html`, etc. — confirmed via `grep`), and Google OAuth is fully implemented (`frontend/js/auth.js`, `src/api/auth.py`, `/api/auth/google`). This document was not caught by any "architecture-doc verification pass" — see Section 4 (prior-claim verification) below; no evidence such a pass ever ran in this repo's history.
+
+**Not resolved here, per instructions.** This is a product decision (which visual identity RippleETA actually presents to judges), not an engineering one — reported factually so the human can decide before anything gets merged or presented together.
+
+---
+
+## 6. What needs explicit decision or a follow-up session
+
+**Decisions only the user can make:**
+1. **Which design system RippleETA actually ships with** (Section 5) — light cream/indigo/marigold per the documented `DESIGN_SYSTEM.md`, the dark cinematic palette `dashboard/styles.css` actually implements, or `frontend/style.css`'s independent third dark palette (the newly-arrived teammate frontend). Everything in the Part 6 visual backlog is downstream of this.
+2. **Which frontend is canonical for the demo**: `frontend/` (a single-page "Outliers" cinematic-3D-scene app with its own login flow, `frontend/js/auth.js`) or `dashboard/` (7 separate role pages, hub-and-spoke via `dashboard/index.html`, login in `dashboard/app.js`)? Both are live, both work, both call the same backend — this audit did not judge which is "better," only that they are genuinely duplicated, independently-maintained implementations (confirmed in Part 0/4).
+3. **Whether Crew Controller's fabricated HOER duty-elapsed math (Section 4/`CONNECTION_MAP.md` section 3) should be disclosed as illustrative, replaced with something that reads `relief_dispatch_deadline` directly, or left as-is for the demo.** This is the single most misleading element found in this audit — it looks like a calibrated operational output but has no real data behind it — and fixing it (switching the decision badge to derive from the already-fetched `crew.relief_dispatch_deadline` instead of the invented duty-elapsed formula) is a real behavior change to flag, not something to silently patch.
+4. **Whether to add a `POST /api/auth/logout` route** (Section 2) so "Sign Out" actually invalidates the session cookie server-side, rather than only clearing client-side state.
+
+**Follow-up technical work, lower priority / needs more time than this session had:**
+- Verify `PassengerResponse.historical_stations`'s true per-train variance (traced partway through `src/pipeline.py`, not conclusively).
+- Confirm the Ghost Sandbox's "before/after baseline value" element binding (UNVERIFIED in `CONNECTION_MAP.md`).
+- A browser-based pass for the UNVERIFIED items in `docs/VISUAL_BACKLOG.md` (contrast ratios, mobile viewport, loading-state affordances, hover/focus coverage) — this session had no dev server running and no way to render the pages visually.
+- Decide whether to wire up `dashboard/sandbox.js`'s orphaned offline-fallback code (Section 4/`CONNECTION_MAP.md`) or delete it, now that it's confirmed dead.
+- Naming consistency (Part 3) was not given a dedicated exhaustive pass — flagged as unaudited, not claimed clean.
+
+---
