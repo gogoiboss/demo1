@@ -1,0 +1,24 @@
+# Ignore backend and heavy data files for Vercel static frontend deployment
+src/
+pyproject.toml
+requirements.txt
+Dockerfile
+docker-compose.yml
+Procfile
+models/
+data/
+eval/
+jobs/
+notebooks/
+tests/
+scripts/
+docs/
+.venv/
+.hypothesis/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+predictions_history.db
+backtest_output.txt
+demo.bat
+Makefile
