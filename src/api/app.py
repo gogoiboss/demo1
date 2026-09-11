@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from fastapi import Response, Depends
+from fastapi.responses import RedirectResponse
 from .auth import create_session_token, verify_google_token, get_current_user, role_required
 from pydantic import BaseModel
 
@@ -277,6 +278,11 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         result = compute_sandbox_propagation(source_delay)
         return SandboxResponse(**result)
 
+
+    @app.get("/demo-launcher", tags=["demo"])
+    def demo_launcher():
+        """Direct entry point to the 7-Role Demo Launcher for live evaluations."""
+        return RedirectResponse(url="/dashboard/index.html#roles")
 
     @app.get("/api/auth/config", tags=["auth"])
     def auth_config() -> dict:
