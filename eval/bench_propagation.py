@@ -219,7 +219,7 @@ def main():
             print(f"  [WARN] Marginal: {cached_time*1000:.1f} ms (consider rustworkx if this grows)")
         else:
             print(f"  [FAIL] TOO SLOW: {cached_time*1000:.1f} ms — NetworkX is the bottleneck.")
-            print(f"    Recommendation: replace with rustworkx for topo sort + adjacency.")
+            print("    Recommendation: replace with rustworkx for topo sort + adjacency.")
 
     print("\n" + "=" * 72)
     print("  BENCHMARK COMPLETE")

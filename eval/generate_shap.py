@@ -94,7 +94,7 @@ def main():
         print(f"Date Range: {min_date} to {max_date}")
         print(f"Global Pearson Correlation (Rake Lateness -> Next Leg): {corr_global:.3f}")
         print(f"Intra-Day Avg Correlation (Weather/Storm confound check): {avg_daily_corr:.3f}")
-        print(f"Train/Test Split Methodology: Chronological TimeSeriesSplit (No Shuffling)")
+        print("Train/Test Split Methodology: Chronological TimeSeriesSplit (No Shuffling)")
         print("=============================================\n")
         
         with open("docs/assets/correlation_results.txt", "w") as f:

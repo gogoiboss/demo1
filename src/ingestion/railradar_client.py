@@ -34,7 +34,7 @@ try:
         _KNOWN_STATIONS = set(_df["station_code"].dropna().unique())
         # For replay mock stations:
         _KNOWN_STATIONS.update(["NDLS", "KANPUR", "ALLAHABAD", "MUGHAL", "HWH", "MMCT", "SURAT", "BRC"])
-except Exception as e:
+except Exception:
     pass
 
 _VALIDATION_METRICS = {

@@ -72,7 +72,7 @@ def time_str_to_mins(t_str: str) -> float:
         h = int(parts[0])
         m = int(parts[1])
         return h * 60 + m
-    except:
+    except (ValueError, IndexError):
         return np.nan
 
 def parse_times(df: pd.DataFrame) -> pd.DataFrame:
@@ -169,7 +169,7 @@ def derive_section_times(df: pd.DataFrame) -> pd.DataFrame:
 def print_summary(df: pd.DataFrame) -> None:
     """Print schema and stats."""
     print(f"\n{'='*60}")
-    print(f"  Indian Railways Static Timetable")
+    print("  Indian Railways Static Timetable")
     print(f"{'='*60}")
     print(f"  Shape        : {df.shape[0]:,} rows × {df.shape[1]} columns")
     print(f"  Columns      : {list(df.columns)}")

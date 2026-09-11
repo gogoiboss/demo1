@@ -57,8 +57,8 @@ def run_comprehensive_eval():
     combined_pinball = (l10 + l50 + l90) / 3.0
     
     print("\n### STEP 1: Global Quantile Loss")
-    print(f"| Metric | Value |")
-    print(f"| :--- | :--- |")
+    print("| Metric | Value |")
+    print("| :--- | :--- |")
     print(f"| P10 Pinball | {l10:.2f} |")
     print(f"| P50 Pinball (~ MAE/2) | {l50:.2f} |")
     print(f"| P90 Pinball | {l90:.2f} |")
@@ -69,8 +69,8 @@ def run_comprehensive_eval():
     global_coverage = covered.mean() * 100
     df_test["is_covered"] = covered
     
-    print(f"\n### STEP 2: Empirical Coverage")
-    print(f"Target Coverage (P10 to P90): 90.0%")
+    print("\n### STEP 2: Empirical Coverage")
+    print("Target Coverage (P10 to P90): 90.0%")
     print(f"Actual Empirical Coverage: **{global_coverage:.1f}%**")
     
     # --- STEP 3: Segmentation ---
@@ -78,7 +78,8 @@ def run_comprehensive_eval():
     def eval_segment(df_seg, name_col):
         results = []
         for name, group in df_seg.groupby(name_col):
-            if len(group) < 5: continue
+            if len(group) < 5:
+                continue
             mae = np.mean(np.abs(group[target] - group["p50"]))
             cov = group["is_covered"].mean() * 100
             

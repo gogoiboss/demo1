@@ -1,5 +1,4 @@
 import sys
-import logging
 from pathlib import Path
 from unittest import mock
 
