@@ -43,8 +43,8 @@
       width: 9px;
       height: 9px;
       border-radius: 50%;
-      background: rgba(232, 237, 245, 0.22);
-      border: 1px solid rgba(232, 237, 245, 0.35);
+      background: rgba(18, 59, 93, 0.25);
+      border: 1px solid rgba(18, 59, 93, 0.4);
       cursor: pointer;
       position: relative;
       transition: all 0.25s var(--ease-editorial);
@@ -57,7 +57,7 @@
     .nav-dot.active {
       background: var(--primary);
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(232, 237, 245, 0.15);
+      box-shadow: 0 0 0 3px rgba(18, 59, 93, 0.15);
       transform: scale(1.35);
     }
     .nav-dot::after {
@@ -71,15 +71,14 @@
       font-size: 0.68rem;
       font-weight: 600;
       letter-spacing: 0.08em;
-      color: var(--primary);
+      color: #FFFFFF;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease, right 0.2s ease;
-      background: rgba(6, 10, 18, 0.95);
+      background: #123B5D;
       padding: 3px 8px;
       border-radius: 3px;
-      border: 1px solid var(--line);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 6px rgba(18, 59, 93, 0.2);
     }
     .nav-dot:hover::after, .nav-dot.active::after {
       opacity: 1;
@@ -89,10 +88,14 @@
     /* ── Sections Common Layout ─────────────────────────────────────────── */
     .portal-section {
       position: relative;
-      padding: 5.5rem clamp(1.5rem, 6.5vw, 8rem);
+      padding: 1.85rem clamp(1.5rem, 6.5vw, 8rem);
       max-width: 1440px;
       margin: 0 auto;
       box-sizing: border-box;
+    }
+    #hero.portal-section {
+      padding-top: 1.15rem;
+      padding-bottom: 0.5rem;
     }
     .section-rule {
       width: 100%;
@@ -118,7 +121,7 @@
       height: 7px;
       border-radius: 50%;
       background: var(--signal);
-      box-shadow: 0 0 0 2px rgba(240, 165, 0, 0.25);
+      box-shadow: 0 0 0 2px rgba(229, 184, 63, 0.25);
     }
     .section-title {
       font-family: var(--display);
@@ -133,10 +136,10 @@
       font-family: var(--sans);
       font-size: clamp(1rem, 1.4vw, 1.25rem);
       line-height: 1.6;
-      color: var(--text);
+      color: var(--muted);
       max-width: 740px;
       margin: 0 0 2.5rem;
-      opacity: 0.9;
+      opacity: 0.95;
     }
 
     /* ── Top Utility Header ─────────────────────────────────────────────── */
@@ -147,12 +150,14 @@
       flex-wrap: wrap;
       gap: 0.75rem;
       padding: 1.25rem clamp(1.5rem, 6.5vw, 8rem);
-      border-bottom: 1px solid var(--line);
-      background: rgba(6, 10, 18, 0.95);
-      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #CBD5E1;
+      background: rgba(245, 243, 238, 0.94);
+      backdrop-filter: blur(10px);
+      color: #17202B;
       position: sticky;
       top: 0;
       z-index: 900;
+      box-shadow: 0 2px 8px rgba(18, 59, 93, 0.04);
     }
     .utility-group {
       display: flex;
@@ -163,23 +168,23 @@
     .utility-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.45rem;
       font-family: var(--mono);
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: var(--primary);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #123B5D;
       text-decoration: none;
       padding: 0.4rem 0.85rem;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: #111827;
+      border-radius: 20px;
+      background: rgba(18, 59, 93, 0.07);
+      border: 1px solid rgba(18, 59, 93, 0.12);
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(232, 237, 245, 0.05);
     }
     .utility-btn:hover {
-      border-color: var(--primary);
-      background: #1A2235;
+      background: rgba(18, 59, 93, 0.14);
+      border-color: rgba(18, 59, 93, 0.25);
       transform: translateY(-1px);
     }
     .telemetry-pill {
@@ -188,11 +193,11 @@
       gap: 0.45rem;
       font-family: var(--mono);
       font-size: 0.76rem;
-      color: var(--primary);
+      color: #123B5D;
       padding: 0.4rem 0.85rem;
-      border-radius: 4px;
-      background: rgba(232, 237, 245, 0.05);
-      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(18, 59, 93, 0.07);
+      border: 1px solid rgba(18, 59, 93, 0.12);
     }
     .telemetry-pulse {
       width: 7px;
@@ -211,16 +216,16 @@
     .hero-container {
       display: grid;
       grid-template-columns: 1.15fr 1fr;
-      gap: 3.5rem;
+      gap: 2.5rem;
       align-items: center;
-      min-height: calc(88vh - 70px);
-      padding-top: 2.5rem;
-      padding-bottom: 3rem;
+      min-height: auto;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
     }
     @media (max-width: 1020px) {
       .hero-container {
         grid-template-columns: 1fr;
-        gap: 2.5rem;
+        gap: 1.75rem;
         min-height: auto;
       }
     }
@@ -228,13 +233,13 @@
       font-family: var(--display);
       font-size: clamp(3.2rem, 6.5vw, 5.2rem);
       font-weight: 700;
-      color: var(--primary);
+      color: #17202B;
       line-height: 1.05;
-      margin: 0 0 1.25rem;
+      margin: 0 0 0.85rem;
       letter-spacing: -0.025em;
     }
     .hero-h1 span.accent {
-      color: var(--signal);
+      color: var(--primary);
       font-style: italic;
       font-weight: 400;
     }
@@ -244,16 +249,16 @@
       font-weight: 500;
       color: var(--primary);
       line-height: 1.35;
-      margin: 0 0 1.2rem;
+      margin: 0 0 0.85rem;
     }
     .hero-desc {
       font-family: var(--sans);
       font-size: 1.05rem;
-      line-height: 1.65;
-      color: var(--text);
+      line-height: 1.6;
+      color: var(--muted);
       max-width: 580px;
-      margin: 0 0 2rem;
-      opacity: 0.88;
+      margin: 0 0 1.25rem;
+      opacity: 0.95;
     }
     .hero-cta-row {
       display: flex;
@@ -286,20 +291,21 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: transparent;
-      color: var(--primary);
+      background: #FFFFFF;
+      color: #123B5D;
       font-family: var(--mono);
       font-size: 0.85rem;
       font-weight: 600;
       padding: 0.75rem 1.25rem;
-      border-radius: 4px;
+      border-radius: 6px;
       text-decoration: none;
-      border: 1px solid var(--line);
+      border: 1px solid #CBD5E1;
+      box-shadow: 0 2px 6px rgba(18, 59, 93, 0.04);
       transition: all 0.2s ease;
     }
     .cta-secondary:hover {
-      background: #111827;
-      border-color: var(--primary);
+      background: #F8FAFC;
+      border-color: #123B5D;
     }
     /* ── Hero Right Motion Column ───────────────────────────────────────── */
     .hero-right-motion {
@@ -310,11 +316,11 @@
 
     /* ── Hero Cinematic Railway Vignette ───────────────────────────────── */
     .hero-cinematic-card {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 6px 24px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       position: relative;
     }
     .cinematic-video-wrap {
@@ -322,7 +328,7 @@
       width: 100%;
       aspect-ratio: 16 / 9;
       overflow: hidden;
-      background: var(--primary);
+      background: #123B5D;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -341,22 +347,22 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      box-shadow: inset 0 0 28px rgba(232, 237, 245, 0.22);
+      box-shadow: inset 0 0 28px rgba(18, 59, 93, 0.15);
     }
     .cinematic-card-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.55rem 1rem;
-      border-top: 1px solid var(--line);
-      background: #1A2235;
+      padding: 0.65rem 1.1rem;
+      border-top: 1px solid #E2E8F0;
+      background: #F8FAFC;
       font-family: var(--mono);
     }
     .cinematic-label {
       font-size: 0.68rem;
       font-weight: 600;
       letter-spacing: 0.08em;
-      color: var(--primary);
+      color: #123B5D;
       text-transform: uppercase;
       display: flex;
       align-items: center;
@@ -378,11 +384,11 @@
 
     /* ── Hero Native Railway Motion Visualization ───────────────────────── */
     .hero-motion-card {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       padding: 1.75rem 2rem;
-      box-shadow: 0 6px 24px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       position: relative;
       overflow: hidden;
     }
@@ -423,17 +429,17 @@
       overflow: visible;
     }
     .track-line-base {
-      stroke: rgba(232, 237, 245, 0.15);
+      stroke: #CBD5E1;
       stroke-width: 2.5;
     }
     .track-ties {
-      stroke: rgba(232, 237, 245, 0.15);
+      stroke: #9AAEC1;
       stroke-width: 1.5;
       stroke-dasharray: 2, 8;
     }
     .station-node-circle {
-      fill: #111827;
-      stroke: var(--primary);
+      fill: #FFFFFF;
+      stroke: #123B5D;
       stroke-width: 2.5;
       transition: all 0.3s ease;
     }
@@ -441,7 +447,7 @@
       font-family: var(--mono);
       font-size: 9.5px;
       font-weight: 600;
-      fill: var(--primary);
+      fill: #123B5D;
       text-anchor: middle;
     }
     .station-node-sub {
@@ -498,17 +504,17 @@
       font-family: var(--mono);
       font-size: 0.88rem;
       font-weight: 600;
-      color: var(--primary);
+      color: #123B5D;
       transition: color 0.25s ease;
     }
     .legend-val.amber {
       color: var(--signal);
     }
     .legend-val.green {
-      color: #22C55E;
+      color: #24824F;
     }
     .legend-val.red {
-      color: #E53E3E;
+      color: #C94B43;
     }
     .legend-val.pulse {
       animation: val-flash 0.5s ease;
@@ -520,21 +526,21 @@
 
     /* ── Live System Telemetry Strip ────────────────────────────────────── */
     .telemetry-strip {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       padding: 1.1rem 1.75rem;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 1.5rem;
       align-items: center;
       margin: 2.5rem 0 0;
-      box-shadow: 0 4px 16px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
     }
     .telemetry-cell {
       display: flex;
       flex-direction: column;
-      border-right: 1px solid var(--line);
+      border-right: 1px solid #E2E8F0;
       padding-right: 1rem;
     }
     .telemetry-cell:last-child {
@@ -553,7 +559,7 @@
       font-family: var(--mono);
       font-size: 0.95rem;
       font-weight: 600;
-      color: var(--primary);
+      color: #123B5D;
       display: flex;
       align-items: center;
       gap: 0.45rem;
@@ -568,11 +574,11 @@
 
     /* ── Live Train Selector ────────────────────────────────────────────── */
     .selector-bar-wrap {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 1.5rem 2rem;
-      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
+      padding: 1.15rem 1.4rem;
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       margin-bottom: 2.5rem;
     }
     .selector-topline {
@@ -613,23 +619,24 @@
       font-family: var(--mono);
       font-size: 0.78rem;
       font-weight: 600;
-      color: var(--primary);
-      background: #1A2235;
-      border: 1px solid var(--line);
+      color: #123B5D;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
       padding: 0.45rem 0.9rem;
-      border-radius: 4px;
+      border-radius: 20px;
       cursor: pointer;
+      box-shadow: 0 2px 6px rgba(18, 59, 93, 0.04);
       transition: all 0.15s ease;
     }
     .train-chip-btn:hover {
-      border-color: var(--primary);
-      background: #111827;
+      border-color: #123B5D;
+      background: #F8FAFC;
     }
     .train-chip-btn.active {
-      background: var(--primary);
-      color: var(--text-inv);
-      border-color: var(--primary);
-      box-shadow: 0 2px 6px rgba(232, 237, 245, 0.15);
+      background: #123B5D;
+      color: #FFFFFF;
+      border-color: #123B5D;
+      box-shadow: 0 2px 8px rgba(18, 59, 93, 0.18);
     }
     .search-input-group {
       display: flex;
@@ -641,46 +648,46 @@
       font-size: 0.85rem;
       font-weight: 500;
       padding: 0.45rem 0.8rem;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: #111827;
-      color: var(--primary);
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      background: #FFFFFF;
+      color: #123B5D;
       cursor: pointer;
       outline: none;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
     .active-train-select:focus {
-      outline: 2px solid var(--primary);
+      outline: 2px solid #123B5D;
       outline-offset: -1px;
     }
     .train-search-box {
       font-family: var(--mono);
       font-size: 0.85rem;
       padding: 0.45rem 0.8rem;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: #111827;
-      color: var(--primary);
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      background: #FFFFFF;
+      color: #123B5D;
       width: 120px;
     }
     .train-search-box:focus {
-      outline: 2px solid var(--primary);
+      outline: 2px solid #123B5D;
       outline-offset: -1px;
     }
     .search-action-btn {
       font-family: var(--mono);
       font-size: 0.78rem;
       font-weight: 600;
-      background: var(--primary);
-      color: var(--text-inv);
-      border: 1px solid var(--primary);
+      background: #123B5D;
+      color: #FFFFFF;
+      border: 1px solid #123B5D;
       padding: 0.45rem 0.85rem;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       transition: background 0.15s ease;
     }
     .search-action-btn:hover {
-      background: #2a3b5c;
+      background: #0D263D;
     }
 
     /* ── Seven Stakeholder Gateways Section ─────────────────────────────── */
@@ -691,17 +698,17 @@
       margin-top: 1rem;
     }
     .ticket-gateway-card {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       padding: 2.2rem 2.25rem;
       text-decoration: none;
-      color: var(--text);
+      color: #17202B;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       transition: all 0.3s var(--ease-editorial);
     }
     .ticket-gateway-card::before {
@@ -711,14 +718,14 @@
       left: 0;
       width: 4px;
       height: 100%;
-      background: var(--line);
+      background: #CBD5E1;
       transition: all 0.3s ease;
     }
     .ticket-gateway-card:hover {
-      background: #1A2235;
+      background: #F8FAFC;
       transform: translateY(-4px);
-      box-shadow: 0 14px 32px rgba(232, 237, 245, 0.08);
-      border-color: rgba(232, 237, 245, 0.22);
+      box-shadow: 0 14px 32px rgba(18, 59, 93, 0.12);
+      border-color: #123B5D;
     }
     .ticket-gateway-card:hover::before {
       background: var(--signal);
@@ -748,7 +755,7 @@
       font-family: var(--display);
       font-size: 1.8rem;
       font-weight: 600;
-      color: var(--primary);
+      color: #123B5D;
       margin: 0 0 0.5rem;
       line-height: 1.15;
       transition: transform 0.2s ease;
@@ -757,9 +764,9 @@
       transform: translateX(3px);
     }
     .card-decision-box {
-      background: #1A2235;
-      border: 1px solid var(--line);
-      border-radius: 4px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
       padding: 0.75rem 0.95rem;
       margin: 0.75rem 0 1rem;
     }
@@ -836,18 +843,18 @@
 
     /* ── Network Ripple Section ─────────────────────────────────────────── */
     .ripple-diagram-card {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       padding: 2.5rem;
-      box-shadow: 0 4px 20px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       margin-top: 1.5rem;
     }
     .graph-code-banner {
-      background: #1A2235;
-      border: 1px solid var(--line);
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
       border-left: 4px solid var(--signal);
-      border-radius: 4px;
+      border-radius: 6px;
       padding: 1.25rem 1.5rem;
       margin-bottom: 2rem;
     }
@@ -855,7 +862,7 @@
       font-family: var(--mono);
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--primary);
+      color: #123B5D;
       margin: 0 0 0.5rem;
     }
     .formula-note {
@@ -877,9 +884,9 @@
       }
     }
     .event-block {
-      background: #1A2235;
-      border: 1px solid var(--line);
-      border-radius: 4px;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
       padding: 1.25rem;
     }
     .event-block-title {
@@ -893,7 +900,7 @@
       font-family: var(--mono);
       font-size: 1.4rem;
       font-weight: 700;
-      color: var(--primary);
+      color: #123B5D;
     }
     .event-arrow {
       font-family: var(--mono);
@@ -915,11 +922,11 @@
       }
     }
     .certainty-card {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       padding: 2rem;
-      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
     }
     .certainty-card.stamp-border {
       border-top: 4px solid var(--stamp);
@@ -929,15 +936,15 @@
     }
     .interval-bar-wrap {
       margin: 1.5rem 0 1rem;
-      background: #1A2235;
-      border: 1px solid var(--line);
-      border-radius: 4px;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
       padding: 1.25rem 1.5rem;
     }
     .interval-track {
       position: relative;
       height: 12px;
-      background: rgba(232, 237, 245, 0.08);
+      background: #E2E8F0;
       border-radius: 6px;
       margin: 1rem 0;
     }
@@ -947,7 +954,7 @@
       right: 15%;
       top: 0;
       bottom: 0;
-      background: linear-gradient(90deg, rgba(34, 197, 94, 0.4), rgba(240, 165, 0, 0.5));
+      background: linear-gradient(90deg, rgba(36, 130, 79, 0.4), rgba(229, 184, 63, 0.5));
       border-radius: 6px;
     }
     .interval-marker-p50 {
@@ -956,7 +963,7 @@
       top: -6px;
       bottom: -6px;
       width: 4px;
-      background: var(--primary);
+      background: #123B5D;
       border-radius: 2px;
     }
     .interval-scale-labels {
@@ -964,17 +971,17 @@
       justify-content: space-between;
       font-family: var(--mono);
       font-size: 0.72rem;
-      color: var(--primary);
+      color: #123B5D;
       font-weight: 600;
     }
 
     /* ── Explainability Micro-UI ────────────────────────────────────────── */
     .explain-ui-card {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       padding: 2.25rem;
-      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       margin-top: 2rem;
     }
     .factor-breakdown-list {
@@ -984,9 +991,9 @@
       margin: 1.5rem 0;
     }
     .factor-item {
-      background: #1A2235;
-      border: 1px solid var(--line);
-      border-radius: 4px;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
       padding: 1rem 1.25rem;
     }
     .factor-item.positive {
@@ -1007,7 +1014,7 @@
       font-family: var(--mono);
       font-size: 0.78rem;
       font-weight: 600;
-      color: var(--primary);
+      color: #123B5D;
     }
     .factor-detail {
       font-family: var(--sans);
@@ -1018,11 +1025,11 @@
 
     /* ── System Pipeline Section ────────────────────────────────────────── */
     .pipeline-strip-card {
-      background: #111827;
-      border: 1px solid var(--line);
-      border-radius: 6px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 12px;
       padding: 2rem;
-      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.06);
       margin-top: 2rem;
     }
     .pipeline-grid-6 {
@@ -1037,9 +1044,9 @@
       }
     }
     .pipe-step-box {
-      background: #1A2235;
-      border: 1px solid var(--line);
-      border-radius: 4px;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
       padding: 1rem;
       text-align: center;
     }
@@ -1066,32 +1073,26 @@
 
     /* ── Editorial Footer ───────────────────────────────────────────────── */
     .editorial-footer {
-      border-top: 1px solid var(--line);
+      border-top: 3px solid var(--signal);
       padding: 4.5rem clamp(1.5rem, 6.5vw, 8rem) 3.5rem;
-      background: rgba(6, 10, 18, 0.8);
-    }
-    .footer-content-wrap {
-      max-width: 1440px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
+      background: #123B5D;
+      color: #FFFFFF;
     }
     .footer-hero-headline {
       font-family: var(--display);
       font-size: clamp(2rem, 3.8vw, 3.2rem);
       font-weight: 600;
-      color: var(--primary);
+      color: #FFFFFF;
       margin: 0;
       line-height: 1.15;
     }
     .footer-hero-sub {
       font-family: var(--sans);
       font-size: 1.1rem;
-      color: var(--text);
+      color: #E2E8F0;
       max-width: 680px;
       margin: 0;
-      opacity: 0.85;
+      opacity: 0.9;
       line-height: 1.55;
     }
     .footer-btn-row {
@@ -1184,21 +1185,17 @@
   <header class="top-utility-bar">
     <div class="utility-group">
       <a href="/eta/index.html" class="utility-btn" id="btn-back-3d" aria-label="Launch 3D Live Train View">
-        <span>🎬</span> <span data-i18n="btn-3d-view">3D Live Train View</span>
+        <span class="status-dot-icon dot-blue"></span> <span data-i18n="btn-3d-view">3D Live Train View</span>
       </a>
       <button type="button" id="btn-a11y-toggle" class="utility-btn" aria-label="Toggle Colorblind Mode">
-        <span aria-hidden="true">&#128065;</span> <span id="a11y-label">A11Y: NORMAL</span>
+        <span class="status-dot-icon dot-amber"></span> <span id="a11y-label">A11Y: NORMAL</span>
       </button>
-      <div id="google_translate_element" style="display: inline-block; margin-left: 0.5rem;"></div>
     </div>
 
     <div class="utility-group">
       <div class="telemetry-pill">
         <span class="telemetry-pulse"></span>
         <span id="telemetry-sys-label">SYSTEM CONNECTED</span> &bull; <span id="clock-ist">--:--:-- IST</span>
-      </div>
-      <div id="session-identity-pill" class="telemetry-pill" style="display:none; font-family:var(--mono);">
-        <span id="user-email-text">operator</span> &bull; <span id="user-role-badge" style="color:var(--signal); font-weight:700;">OPERATOR</span>
       </div>
     </div>
   </header>
@@ -1228,108 +1225,43 @@
             <a href="#gateways" class="cta-primary">
               Explore Operational Gateways &darr;
             </a>
-            <a href="#selector" class="cta-secondary">
-              Select Active Train &rarr;
-            </a>
           </div>
         </div>
 
-        <!-- Right / Native Railway Motion Diagram -->
+        <!-- Right / Active Train Selector Card -->
         <div class="hero-right-motion">
-          <!-- Cinematic Railway Visual Element -->
-          <div class="hero-cinematic-card">
-            <div class="cinematic-video-wrap">
-              <video
-                autoplay
-                muted
-                loop
-                playsinline
-                poster="video/poster.jpg"
-                class="cinematic-video"
-                aria-label="Cinematic railway corridor visual"
-              >
-                <source src="../video/WhatsApp Video 2026-09-11 at 3.37.20 PM (1).mp4" type="video/mp4">
-                <source src="video/WhatsApp Video 2026-09-11 at 3.37.20 PM (1).mp4" type="video/mp4">
-              </video>
-              <div class="cinematic-video-overlay"></div>
-            </div>
-            <div class="cinematic-card-footer">
-              <span class="cinematic-label">
-                <span class="cinematic-dot"></span> RIPPLEETA &bull; OPERATIONAL INTELLIGENCE
-              </span>
-              <span class="cinematic-sub">NORTHERN RAILWAY CORRIDOR</span>
-            </div>
-          </div>
-
-          <div class="hero-motion-card">
-            <div class="hero-motion-header">
-              <span class="motion-title">Corridor Conflict Propagation Trace</span>
-              <span class="motion-indicator">
-                <span class="telemetry-pulse" id="motion-telemetry-pulse" style="background:var(--signal);"></span> LIVE TRACK SCHEMATIC
-              </span>
-            </div>
-
-            <!-- SVG Railway Corridor Motion -->
-            <div class="motion-diagram-wrap">
-              <svg id="corridor-track-svg" class="track-svg" viewBox="0 0 600 90" preserveAspectRatio="xMidYMid meet" aria-label="Railway corridor schematic">
-                <!-- Track Ties & Base Rail -->
-                <line x1="20" y1="45" x2="580" y2="45" class="track-ties"></line>
-                <line x1="20" y1="45" x2="580" y2="45" class="track-line-base"></line>
-
-                <!-- Dynamic Station Nodes Layer -->
-                <g id="track-stations-layer">
-                  <!-- Station 01: NDLS -->
-                  <g transform="translate(60, 45)">
-                    <circle r="7" class="station-node-circle"></circle>
-                    <text y="-14" class="station-node-label">NDLS</text>
-                    <text y="22" class="station-node-sub">NEW DELHI</text>
-                  </g>
-
-                  <!-- Station 02: CNB -->
-                  <g transform="translate(230, 45)">
-                    <circle r="7" class="station-node-circle"></circle>
-                    <text y="-14" class="station-node-label">CNB</text>
-                    <text y="22" class="station-node-sub">KANPUR</text>
-                  </g>
-
-                  <!-- Station 03: PRYJ (Active Junction) -->
-                  <g transform="translate(400, 45)">
-                    <!-- Amber Ripple Wave from Junction -->
-                    <circle cx="0" cy="0" r="10" class="ripple-wave"></circle>
-                    <circle r="8" class="station-node-circle" style="stroke:var(--signal); fill:#1A2235;"></circle>
-                    <text y="-14" class="station-node-label" style="fill:var(--signal);">PRYJ</text>
-                    <text y="22" class="station-node-sub">PRAYAGRAJ</text>
-                  </g>
-
-                  <!-- Station 04: DDU -->
-                  <g transform="translate(540, 45)">
-                    <circle r="7" class="station-node-circle"></circle>
-                    <text y="-14" class="station-node-label">DDU</text>
-                    <text y="22" class="station-node-sub">MUGHALSARAI</text>
-                  </g>
-                </g>
-
-                <!-- Moving Train Token -->
-                <g class="train-token-wrap" id="corridor-train-token">
-                  <rect x="-14" y="-7" width="28" height="14" rx="3" fill="var(--primary)"></rect>
-                  <circle cx="-6" cy="0" r="2.5" fill="#111827"></circle>
-                  <circle cx="6" cy="0" r="2.5" fill="var(--signal)"></circle>
-                </g>
-              </svg>
-            </div>
-
-            <div class="motion-legend">
-              <div class="legend-item">
-                <span class="legend-lbl">ACTIVE CORRIDOR</span>
-                <span class="legend-val" id="motion-corridor-val">NDLS &rarr; PRYJ</span>
+          <div class="selector-bar-wrap" style="margin-bottom: 0;">
+            <div class="selector-topline">
+              <div>
+                <h3 class="selector-header-title">Select an Active Train</h3>
+                <p class="selector-sub">Explore calibrated predictions through seven operational perspectives.</p>
               </div>
-              <div class="legend-item">
-                <span class="legend-lbl">PROPAGATED DELAY</span>
-                <span class="legend-val amber" id="motion-delay-val">+27.9 MIN</span>
+              <div class="search-input-group">
+                <select id="active-train-select" class="active-train-select" aria-label="Select active train">
+                  <option value="20507">20507 &bull; Patna Rajdhani</option>
+                  <option value="12301">12301 &bull; Howrah Rajdhani</option>
+                  <option value="12004">12004 &bull; Lucknow Shatabdi</option>
+                  <option value="12951">12951 &bull; Mumbai Rajdhani</option>
+                  <option value="12002">12002 &bull; Bhopal Shatabdi</option>
+                  <option value="22436">22436 &bull; Vande Bharat Express</option>
+                  <option value="56789">56789 &bull; Replay Express</option>
+                </select>
+                <input type="text" id="train-search-box" class="train-search-box" value="20507" placeholder="Train ID" list="trains-datalist" aria-label="Train ID Search">
+                <datalist id="trains-datalist"></datalist>
+                <button type="button" id="btn-search-train" class="search-action-btn">Update</button>
+                <button type="button" id="btn-refresh-trains" class="utility-btn" title="Refresh from API" style="padding:0.45rem 0.65rem;">&#8635;</button>
               </div>
-              <div class="legend-item">
-                <span class="legend-lbl">RIPPLE STATE</span>
-                <span class="legend-val" id="motion-state-val">PROPAGATING</span>
+            </div>
+
+            <div class="chips-and-search">
+              <div class="train-chips-row" id="train-chips-container">
+                <button type="button" class="train-chip-btn active" data-train="20507">20507 &bull; Patna Rajdhani</button>
+                <button type="button" class="train-chip-btn" data-train="12301">12301 &bull; Howrah Rajdhani</button>
+                <button type="button" class="train-chip-btn" data-train="12004">12004 &bull; Lucknow Shatabdi</button>
+                <button type="button" class="train-chip-btn" data-train="12951">12951 &bull; Mumbai Rajdhani</button>
+                <button type="button" class="train-chip-btn" data-train="12002">12002 &bull; Bhopal Shatabdi</button>
+                <button type="button" class="train-chip-btn" data-train="22436">22436 &bull; Vande Bharat Express</button>
+                <button type="button" class="train-chip-btn" data-train="56789">56789 &bull; Replay Express</button>
               </div>
             </div>
           </div>
@@ -1364,44 +1296,82 @@
     <hr class="section-rule">
 
     <!-- ====================================================================
-         01. LIVE OPERATIONAL TRAIN SELECTOR
+         01. CORRIDOR CONFLICT PROPAGATION TRACE (EXPANDED SCHEMATIC)
          ==================================================================== -->
     <section id="selector" class="portal-section">
       <div class="section-kicker">
-        <span class="kicker-dot"></span> 01 / OPERATIONAL CONTEXT
+        <span class="kicker-dot"></span> 01 / CORRIDOR PROPAGATION SCHEMATIC
       </div>
-      <div class="selector-bar-wrap">
-        <div class="selector-topline">
-          <div>
-            <h3 class="selector-header-title">Select an Active Train</h3>
-            <p class="selector-sub">Explore the same calibrated prediction through seven operational perspectives.</p>
-          </div>
-          <div class="search-input-group">
-            <select id="active-train-select" class="active-train-select" aria-label="Select active train">
-              <option value="20507">20507 &bull; Patna Rajdhani</option>
-              <option value="12301">12301 &bull; Howrah Rajdhani</option>
-              <option value="12004">12004 &bull; Lucknow Shatabdi</option>
-              <option value="12951">12951 &bull; Mumbai Rajdhani</option>
-              <option value="12002">12002 &bull; Bhopal Shatabdi</option>
-              <option value="22436">22436 &bull; Vande Bharat Express</option>
-              <option value="56789">56789 &bull; Replay Express</option>
-            </select>
-            <input type="text" id="train-search-box" class="train-search-box" value="20507" placeholder="Train ID" list="trains-datalist" aria-label="Train ID Search">
-            <datalist id="trains-datalist"></datalist>
-            <button type="button" id="btn-search-train" class="search-action-btn">Update</button>
-            <button type="button" id="btn-refresh-trains" class="utility-btn" title="Refresh from API" style="padding:0.45rem 0.65rem;">&#8635;</button>
-          </div>
+
+      <div class="hero-motion-card" style="margin-bottom: 0;">
+        <div class="hero-motion-header">
+          <span class="motion-title">Corridor Conflict Propagation Trace</span>
+          <span class="motion-indicator">
+            <span class="telemetry-pulse" id="motion-telemetry-pulse" style="background:var(--signal);"></span> LIVE TRACK SCHEMATIC
+          </span>
         </div>
 
-        <div class="chips-and-search">
-          <div class="train-chips-row" id="train-chips-container">
-            <button type="button" class="train-chip-btn active" data-train="20507">20507 &bull; Patna Rajdhani</button>
-            <button type="button" class="train-chip-btn" data-train="12301">12301 &bull; Howrah Rajdhani</button>
-            <button type="button" class="train-chip-btn" data-train="12004">12004 &bull; Lucknow Shatabdi</button>
-            <button type="button" class="train-chip-btn" data-train="12951">12951 &bull; Mumbai Rajdhani</button>
-            <button type="button" class="train-chip-btn" data-train="12002">12002 &bull; Bhopal Shatabdi</button>
-            <button type="button" class="train-chip-btn" data-train="22436">22436 &bull; Vande Bharat Express</button>
-            <button type="button" class="train-chip-btn" data-train="56789">56789 &bull; Replay Express</button>
+        <!-- SVG Railway Corridor Motion -->
+        <div class="motion-diagram-wrap">
+          <svg id="corridor-track-svg" class="track-svg" viewBox="0 0 600 90" preserveAspectRatio="xMidYMid meet" aria-label="Railway corridor schematic">
+            <!-- Track Ties & Base Rail -->
+            <line x1="20" y1="45" x2="580" y2="45" class="track-ties"></line>
+            <line x1="20" y1="45" x2="580" y2="45" class="track-line-base"></line>
+
+            <!-- Dynamic Station Nodes Layer -->
+            <g id="track-stations-layer">
+              <!-- Station 01: NDLS -->
+              <g transform="translate(60, 45)">
+                <circle r="7" class="station-node-circle"></circle>
+                <text y="-14" class="station-node-label">NDLS</text>
+                <text y="22" class="station-node-sub">NEW DELHI</text>
+              </g>
+
+              <!-- Station 02: CNB -->
+              <g transform="translate(230, 45)">
+                <circle r="7" class="station-node-circle"></circle>
+                <text y="-14" class="station-node-label">CNB</text>
+                <text y="22" class="station-node-sub">KANPUR</text>
+              </g>
+
+              <!-- Station 03: PRYJ (Active Junction) -->
+              <g transform="translate(400, 45)">
+                <!-- Amber Ripple Wave from Junction -->
+                <circle cx="0" cy="0" r="10" class="ripple-wave"></circle>
+                <circle r="8" class="station-node-circle" style="stroke:var(--signal); fill:#1A2235;"></circle>
+                <text y="-14" class="station-node-label" style="fill:var(--signal);">PRYJ</text>
+                <text y="22" class="station-node-sub">PRAYAGRAJ</text>
+              </g>
+
+              <!-- Station 04: DDU -->
+              <g transform="translate(540, 45)">
+                <circle r="7" class="station-node-circle"></circle>
+                <text y="-14" class="station-node-label">DDU</text>
+                <text y="22" class="station-node-sub">MUGHALSARAI</text>
+              </g>
+            </g>
+
+            <!-- Moving Train Token -->
+            <g class="train-token-wrap" id="corridor-train-token">
+              <rect x="-14" y="-7" width="28" height="14" rx="3" fill="var(--primary)"></rect>
+              <circle cx="-6" cy="0" r="2.5" fill="#111827"></circle>
+              <circle cx="6" cy="0" r="2.5" fill="var(--signal)"></circle>
+            </g>
+          </svg>
+        </div>
+
+        <div class="motion-legend">
+          <div class="legend-item">
+            <span class="legend-lbl">ACTIVE CORRIDOR</span>
+            <span class="legend-val" id="motion-corridor-val">NDLS &rarr; PRYJ</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-lbl">PROPAGATED DELAY</span>
+            <span class="legend-val amber" id="motion-delay-val">+27.9 MIN</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-lbl">RIPPLE STATE</span>
+            <span class="legend-val" id="motion-state-val">PROPAGATING</span>
           </div>
         </div>
       </div>
@@ -1742,7 +1712,7 @@
           </div>
         </div>
 
-        <div style="background:#1A2235; border:1px solid var(--line); border-radius:4px; padding:0.85rem 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+        <div style="background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; padding:0.85rem 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
           <span style="font-family:var(--mono); font-size:0.8rem; font-weight:600; color:var(--primary);">
             NET ESTIMATE RECALIBRATION:
           </span>
@@ -1891,22 +1861,40 @@
         const token = localStorage.getItem('rippleeta_token');
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         const res = await fetch(`${API_BASE}/api/me`, { credentials: 'include', headers });
+        const logoutBtn = document.getElementById('btn-logout');
+        const pill = document.getElementById('session-identity-pill');
         if (res.ok) {
           const user = await res.json();
-          const pill = document.getElementById('session-identity-pill');
           const emailTxt = document.getElementById('user-email-text');
           const roleBadge = document.getElementById('user-role-badge');
           if (pill && emailTxt && roleBadge) {
             pill.style.display = 'inline-flex';
-            emailTxt.textContent = user.email || 'operator';
-            roleBadge.textContent = (user.role || 'operator').toUpperCase();
+            emailTxt.textContent = user.email || 'operator@rippleeta.in';
+            roleBadge.textContent = (user.role || 'passenger').toUpperCase();
           }
+          if (logoutBtn) logoutBtn.style.display = 'inline-flex';
         }
       } catch (err) {
         console.warn('Session verification notice:', err);
       }
     }
     checkSessionState();
+
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+        } catch (e) {}
+        localStorage.removeItem('rippleeta_token');
+        localStorage.removeItem('user');
+        sessionStorage.clear();
+        const pill = document.getElementById('session-identity-pill');
+        if (pill) pill.style.display = 'none';
+        logoutBtn.style.display = 'none';
+        window.location.reload();
+      });
+    }
 
     // ── Fetch Telemetry & System Status ──────────────────────────────────────
     async function loadSystemTelemetry() {
@@ -2442,18 +2430,6 @@
     }
     wirePortalReturnRouting();
   </script>
-
-  <!-- Google Translate Widget -->
-  <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'en',
-        includedLanguages: 'en,hi,mr',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-      }, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </body>
 </html>

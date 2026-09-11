@@ -2556,12 +2556,34 @@ function wireAuthReturnRouting() {
   });
 }
 
+// ── Global Logout Button Wiring ──────────────────────────────────────────────
+function wireGlobalLogout() {
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn && !logoutBtn.dataset.wired) {
+    logoutBtn.dataset.wired = 'true';
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+      } catch (e) {}
+      localStorage.removeItem('rippleeta_token');
+      localStorage.removeItem('user');
+      sessionStorage.clear();
+      const pill = document.getElementById('session-identity-pill');
+      if (pill) pill.style.display = 'none';
+      logoutBtn.style.display = 'none';
+      window.location.reload();
+    });
+  }
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     wireAuthReturnRouting();
     initGlobalLanguage();
+    wireGlobalLogout();
   });
 } else {
   wireAuthReturnRouting();
   initGlobalLanguage();
+  wireGlobalLogout();
 }

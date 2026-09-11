@@ -11,40 +11,51 @@
 /* ── Design Tokens ─────────────────────────────────────────────────────── */
 
 :root {
-  /* ── DESIGN_SYSTEM.md: Single Source of Truth ── */
-  /* Palette (Dark Cinematic) */
-  --base: #0B0F1A;          /* Deepest storm sky shadow (Dark mode background) */
-  --primary: #E8EDF5;       /* Near-white steel (Headings/Primary text) */
-  --signal: #F0A500;        /* Fire-amber (Action, Alerts, Accents) */
-  --signal-soft: rgba(240, 165, 0, 0.14);
-  --stamp: #E53E3E;         /* Crimson (Urgency/Breach) */
-  --success: #22C55E;       /* Signal green */
-  --text: #B8C4D4;          /* Storm cloud mid-tone (Body text) */
-  --text-inv: #0B0F1A;      /* Text on light elements (Inverted) */
-  --line: rgba(232, 237, 245, 0.08); /* Fine rail seam (Borders) */
-  --surface: #111827;       /* Night rail surface (Card backgrounds) */
-  --surface-alt: #1A2235;   /* Gunmetal blue (Secondary cards/Chips) */
-  --surface-dark: #060A12;  /* Absolute void (Hero/Nav backgrounds) */
-  --muted: #5A6A80;         /* Slate (Secondary text/Muted) */
+  /* ── 3D Network Overview Palette Tokens (Creamy White Theme - Exact as eta/index.html) ── */
+  --base: #F5F3EE;            /* Creamy white canvas background */
+  --surface: #FFFFFF;         /* Crisp white card surface */
+  --surface-alt: #FAF9F6;     /* Subtle creamy sub-box background */
+  --surface-dark: #123B5D;    /* Deep rail blue header / footer background */
+  
+  --primary: #123B5D;         /* Deep rail blue for headings & active states */
+  --primary-900: #123B5D;     /* Deep navy text */
+  --text: #17202B;            /* Charcoal body text */
+  --text-inv: #FFFFFF;        /* Inverted text */
+  --muted: #65717D;           /* Slate grey muted text */
+  --text-muted-dark: #8A949D;
+
+  --signal: #E5B83F;          /* Golden marigold amber accent */
+  --signal-soft: rgba(229, 184, 63, 0.16);
+  --stamp: #C94B43;           /* Crimson alert red */
+  --success: #24824F;         /* Railway green */
+  
+  --line: rgba(23, 32, 43, 0.08); /* Soft card border seam */
+  --line-strong: rgba(23, 32, 43, 0.16); /* Strong border line */
+  --line-dark: rgba(255, 255, 255, 0.15);
+  --border-300: #CBD5E1;
+  --brass-line: #CBD5E1;
+
+  --shadow-card: 0 8px 24px rgba(18, 59, 93, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-float: 0 14px 34px rgba(18, 59, 93, 0.09), 0 2px 6px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 2px 6px rgba(18, 59, 93, 0.04);
 
   /* Legacy compatibility mappings */
   --bg: var(--base);
-  --surface-2: var(--surface);
-  --primary-900: var(--primary);
-  --warning-500: var(--signal);
-  --danger-500: var(--stamp);
-  --danger: var(--stamp);
-  --surface-100: var(--surface);
-  --text-900: var(--text);
-  --border-300: var(--line);
-  --brass-line: var(--line);
-  --info: #0EA5E9;          /* Teal accent */
-  --warning: var(--signal);
+  --surface-2: #FAF9F6;
+  --warning-500: #E5B83F;
+  --danger-500: #C94B43;
+  --danger: #C94B43;
+  --surface-100: #FFFFFF;
+  --text-900: #123B5D;
+  --text-on-dark: #FFFFFF;
+  --info: #123B5D;
+  --warning: #E5B83F;
 
   /* Typography */
-  --display: "Fraunces", Georgia, serif;
+  --display: "Archivo", "Fraunces", Georgia, serif;
+  --serif: "Archivo", "Fraunces", Georgia, serif;
   --sans: "Inter", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 }
 
 body {
@@ -221,14 +232,15 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
 /* ── Topbar (navy = station name-board background) ──────────────────────── */
 .topbar {
   min-height: 76px;
-  background: var(--primary-900);
-  border-bottom: 3px solid var(--warning-500);
+  background: rgba(245, 243, 238, 0.95);
+  border-bottom: 1px solid #CBD5E1;
+  box-shadow: 0 2px 8px rgba(18, 59, 93, 0.04);
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 0 -42px;
   padding: 0 42px;
-  color: var(--text-on-dark);
+  color: #17202B;
 }
 .brand {
   color: var(--surface-100);
@@ -251,10 +263,35 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
 .brand strong, .brand small { display: block; }
 .brand strong { font-family: var(--serif); font-size: 15px; color: var(--surface-100); letter-spacing: .04em; }
 .brand small { color: var(--text-muted-dark); font-family: var(--mono); font-size: 8px; letter-spacing: .13em; margin-top: 3px; }
-.topbar-status { color: var(--text-muted-dark); display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
-.status-dot, .live-pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--warning-500); box-shadow: 0 0 0 4px rgba(245,166,35,.25); }
-.status-dot.is-online { background: #4D7A64; box-shadow: 0 0 0 4px rgba(77,122,100,.2); }
-.separator { width: 1px; height: 13px; background: var(--line-dark); }
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.topbar-right .btn-refresh,
+.topbar-right a.btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #123B5D;
+  text-decoration: none;
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  background: rgba(18, 59, 93, 0.07);
+  border: 1px solid rgba(18, 59, 93, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.topbar-right .btn-refresh:hover,
+.topbar-right a.btn-refresh:hover {
+  background: rgba(18, 59, 93, 0.14);
+  border-color: rgba(18, 59, 93, 0.25);
+  transform: translateY(-1px);
+}
 
 /* ── Command bar ────────────────────────────────────────────────────────── */
 .command-bar { padding: 48px 0 28px; display: flex; align-items: end; justify-content: space-between; }
@@ -568,7 +605,7 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
   height: clamp(54px, 14vw, 80px);
   display: flex;
   flex-direction: column;
-  background: #0d1e3a;
+  background: #123B5D;
   border-radius: 3px;
   overflow: hidden;
   user-select: none;
@@ -581,7 +618,7 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 2px;
-  background: #102040;
+  background: #1C4E73;
   border-radius: 3px 3px 0 0;
   overflow: hidden;
   position: relative;
@@ -600,7 +637,7 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
   align-items: flex-start;
   justify-content: center;
   padding-top: 2px;
-  background: #0a1a30;
+  background: #123B5D;
   border-radius: 0 0 3px 3px;
   overflow: hidden;
   position: relative;
@@ -642,7 +679,7 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
   border-radius: 3px 3px 0 0;
   overflow: hidden;
   padding-bottom: 2px;
-  background: #102040;
+  background: #1C4E73;
   z-index: 3;
 }
 /* ::before = OLD value, starts upright, flips to face down */
@@ -656,7 +693,7 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
   content: attr(data-next);
   top: 0;
   transform: rotateX(-180deg);
-  background: #0d1e3a;
+  background: #123B5D;
   transition: none;
 }
 
@@ -3364,6 +3401,28 @@ h3 { font-family: var(--sans); font-size: 1.125rem; font-weight: 600; color: var
     animation: breathe 2s ease-in-out infinite;
     display: inline-block;
 }
+.status-dot-icon {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+.status-dot-icon.dot-green {
+    background: var(--success);
+    box-shadow: 0 0 0 2px rgba(36, 130, 79, 0.25);
+    animation: breathe 2s ease-in-out infinite;
+}
+.status-dot-icon.dot-blue {
+    background: var(--primary);
+    box-shadow: 0 0 0 2px rgba(18, 59, 93, 0.25);
+    animation: breathe 2s ease-in-out infinite;
+}
+.status-dot-icon.dot-amber {
+    background: var(--signal);
+    box-shadow: 0 0 0 2px rgba(229, 184, 63, 0.3);
+    animation: breathe 2s ease-in-out infinite;
+}
 .snapshot-timestamp {
     font-family: var(--mono);
     font-size: 0.8rem;
@@ -3735,9 +3794,9 @@ select,
 .lang-select,
 .form-select,
 .input-select {
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
-  border: 1px solid #334155 !important;
+  background-color: #FFFFFF !important;
+  color: #123B5D !important;
+  border: 1px solid #CBD5E1 !important;
   border-radius: 6px !important;
   padding: 6px 12px !important;
   font-family: inherit !important;
@@ -3750,31 +3809,31 @@ select,
 select:focus,
 .lang-select:focus,
 .form-select:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+  border-color: #123B5D !important;
+  box-shadow: 0 0 0 2px rgba(18, 59, 93, 0.2) !important;
 }
 
 select option,
 .lang-select option,
 .form-select option {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
+  background-color: #FFFFFF !important;
+  color: #17202B !important;
   padding: 8px 12px !important;
 }
 
 select option:hover,
 select option:focus,
 select option:checked {
-  background-color: #2563eb !important;
+  background-color: #123B5D !important;
   color: #ffffff !important;
 }
 
-/* Ensure text elements on dark cards remain high-contrast & visible */
+/* Ensure text elements on cards remain high-contrast & visible */
 .card, .panel, .stakeholder-card, .widget {
-  color: #f8fafc;
+  color: #17202B;
 }
 
 .text-muted, .subtitle, .meta-text {
-  color: #94a3b8 !important;
+  color: #5F7185 !important;
 }
 

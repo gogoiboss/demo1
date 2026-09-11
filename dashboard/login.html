@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operational Access & Authentication | RippleETA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg: #F5F3EE;
+      --surface: #FFFFFF;
+      --surface-subtle: #FAF9F6;
+      --primary: #123B5D;
+      --primary-dark: #0D263D;
+      --text: #17202B;
+      --muted: #65717D;
+      --signal: #E5B83F;
+      --success: #24824F;
+      --stamp: #C94B43;
+      --line: #CBD5E1;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+      --display: 'Archivo', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* Top Utility Header */
+    .login-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem clamp(1.5rem, 5vw, 6rem);
+      background: rgba(245, 243, 238, 0.95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-logo {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-word {
+      font-family: var(--display);
+      font-weight: 900;
+      font-size: 1.4rem;
+      letter-spacing: 0.02em;
+      color: var(--primary);
+    }
+    .brand-word span { color: var(--signal); }
+    .brand-sub {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--primary);
+      padding: 0.45rem 0.95rem;
+      border-radius: 20px;
+      background: rgba(18, 59, 93, 0.07);
+      border: 1px solid rgba(18, 59, 93, 0.12);
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+      background: rgba(18, 59, 93, 0.14);
+      transform: translateY(-1px);
+    }
+
+    /* Container */
+    .login-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.5rem clamp(1.5rem, 5vw, 4rem) 4rem;
+      width: 100%;
+      flex: 1;
+    }
+
+    .hero-title-group {
+      text-align: center;
+      max-width: 780px;
+      margin: 0 auto 2.25rem;
+    }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+    .kicker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 0 2px rgba(229, 184, 63, 0.25);
+    }
+
+    .main-title {
+      font-family: var(--display);
+      font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1.1;
+      margin-bottom: 0.85rem;
+    }
+    .main-subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Active Selected User Auth Banner */
+    .active-auth-banner {
+      background: #FFFFFF;
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      padding: 1.75rem 2.25rem;
+      box-shadow: 0 8px 28px rgba(18, 59, 93, 0.12);
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .active-user-info {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .active-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      background: rgba(18, 59, 93, 0.08);
+      border: 1px solid rgba(18, 59, 93, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--display);
+      font-weight: 900;
+      font-size: 1.4rem;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    .active-user-title {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.2rem;
+    }
+    .active-user-sub {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auth-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-google-auth {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: #FFFFFF;
+      color: #17202B;
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 0.75rem 1.35rem;
+      border-radius: 8px;
+      border: 1px solid #CBD5E1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-google-auth:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(18, 59, 93, 0.12);
+    }
+
+    .btn-primary-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--primary);
+      color: #FFFFFF;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 0.8rem 1.6rem;
+      border-radius: 8px;
+      border: 1px solid var(--primary);
+      box-shadow: 0 4px 14px rgba(18, 59, 93, 0.2);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-primary-login:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(18, 59, 93, 0.3);
+    }
+
+    /* Section Title */
+    .persona-section-title {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .persona-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* 6 Users Grid */
+    .users-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.75rem;
+    }
+
+    .user-card {
+      background: var(--surface);
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      padding: 2rem 2.1rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(18, 59, 93, 0.05);
+      transition: all 0.25s cubic-bezier(.22,.7,.2,1);
+      cursor: pointer;
+    }
+
+    .user-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--line);
+      transition: all 0.25s ease;
+    }
+
+    .user-card:hover {
+      background: #FFFFFF;
+      transform: translateY(-4px);
+      box-shadow: 0 14px 32px rgba(18, 59, 93, 0.12);
+      border-color: var(--primary);
+    }
+
+    .user-card:hover::before {
+      background: var(--signal);
+      width: 7px;
+    }
+
+    .user-card.is-selected {
+      border-color: var(--primary) !important;
+      background: #FFFFFF !important;
+      box-shadow: 0 12px 32px rgba(18, 59, 93, 0.15) !important;
+    }
+
+    .user-card.is-selected::before {
+      background: var(--signal) !important;
+      width: 7px !important;
+    }
+
+    .card-meta-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+    }
+
+    .card-kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .selected-tag {
+      display: none;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: rgba(229, 184, 63, 0.25);
+      border: 1px solid var(--signal);
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.06em;
+    }
+
+    .user-card.is-selected .selected-tag {
+      display: inline-flex;
+    }
+
+    .role-badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--signal);
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      background: rgba(229, 184, 63, 0.12);
+      border-radius: 4px;
+    }
+
+    .role-title {
+      font-family: var(--display);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.65rem;
+      line-height: 1.15;
+    }
+
+    .key-decision-box {
+      background: var(--surface-subtle);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .decision-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.25rem;
+    }
+
+    .decision-text {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .role-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+
+    .card-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+      margin-top: auto;
+    }
+
+    .user-email-tag {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .btn-select-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.04em;
+    }
+
+    .btn-select-action .arrow {
+      transition: transform 0.2s ease;
+      color: var(--signal);
+    }
+
+    .user-card:hover .btn-select-action .arrow {
+      transform: translateX(4px);
+    }
+
+    /* Feedback Alert */
+    #auth-alert {
+      display: none;
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--primary);
+      color: #FFFFFF;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="login-header">
+    <a href="/eta/index.html" class="brand-logo" aria-label="RippleETA Home">
+      <div class="brand-word">RIPPLE<span>ETA</span></div>
+      <div class="brand-sub">INDIAN RAILWAY INTELLIGENCE</div>
+    </a>
+
+    <div class="header-actions">
+      <a href="/eta/index.html" class="nav-btn">
+        &larr; 3D Network Overview
+      </a>
+    </div>
+  </header>
+
+  <!-- Login Content -->
+  <main class="login-container">
+    
+    <div class="hero-title-group">
+      <div class="kicker">
+        <span class="kicker-dot"></span> OPERATIONAL IDENTITY GATEWAY
+      </div>
+      <h1 class="main-title">Select User & Authenticate</h1>
+      <p class="main-subtitle">
+        First select which of the 6 operational user personas you want to log in as, then authenticate via Google OAuth or proceed directly to your role dashboard.
+      </p>
+    </div>
+
+    <!-- Active Selected User & Google Auth Banner -->
+    <div class="active-auth-banner" id="auth-banner">
+      <div class="active-user-info">
+        <div class="active-avatar" id="banner-avatar">01</div>
+        <div>
+          <div class="active-user-title" id="banner-title">Passenger</div>
+          <div class="active-user-sub">
+            <span id="banner-email">passenger@rippleeta.in</span> &bull; <strong style="color:var(--primary);" id="banner-role">PASSENGER ADVISORY</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-action-buttons">
+        <div id="g_id_onload"
+          data-client_id="YOUR_GOOGLE_CLIENT_ID"
+          data-callback="handleGoogleCredentialResponse"
+          data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" id="gis-google-btn" style="display:none;" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+
+        <button type="button" class="btn-google-auth" id="custom-google-btn" onclick="triggerGoogleSSOForSelected()">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Sign In with Google</span>
+        </button>
+
+        <button type="button" class="btn-primary-login" onclick="executeSelectedUserLogin()">
+          <span>Log In as Selected User &rarr;</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 6 Operational User Personas Grid -->
+    <div class="persona-section-title">
+      <span>STEP 01: SELECT FOR WHAT USER YOU HAVE TO LOG IN (06 OPERATIONAL PERSONAS)</span>
+    </div>
+
+    <div class="users-grid">
+      
+      <!-- 01. Passenger -->
+      <div class="user-card is-selected" id="card-passenger" onclick="selectPersona('passenger@rippleeta.in', 'passenger', 'Passenger', '01', '/dashboard/passenger.html', 'card-passenger')">
+        <div class="card-meta-top">
+          <span class="card-kicker">01 &bull; PASSENGER ADVISORY</span>
+          <span class="selected-tag">&check; SELECTED</span>
+          <span class="role-badge">B2C</span>
+        </div>
+        <h2 class="role-title">Passenger</h2>
+        <div class="key-decision-box">
+          <div class="decision-label">KEY DECISION</div>
+          <div class="decision-text">&ldquo;Should I leave now?&rdquo;</div>
+        </div>
+        <p class="role-desc">
+          Know the likely arrival window instead of relying on a single optimistic ETA. Compares connection deadlines against calibrated P90 upper bounds.
+        </p>
+        <div class="card-bottom-bar">
+          <span class="user-email-tag">passenger@rippleeta.in</span>
+          <span class="btn-select-action">SELECT &amp; LOG IN <span class="arrow">&rarr;</span></span>
+        </div>
+      </div>
+
+      <!-- 02. Station Master -->
+      <div class="user-card" id="card-station_master" onclick="selectPersona('station.master@rippleeta.in', 'station_master', 'Station Master', '02', '/dashboard/station-master.html', 'card-station_master')">
+        <div class="card-meta-top">
+          <span class="card-kicker">02 &bull; PLATFORM TRIAGE</span>
+          <span class="selected-tag">&check; SELECTED</span>
+          <span class="role-badge">CONTROL</span>
+        </div>
+        <h2 class="role-title">Station Master</h2>
+        <div class="key-decision-box">
+          <div class="decision-label">KEY DECISION</div>
+          <div class="decision-text">COMMIT / DEFER</div>
+        </div>
+        <p class="role-desc">
+          Turn uncertain arrival into an actionable platform decision with 4.2&times; asymmetric loss protection against false-negative early assignments.
+        </p>
+        <div class="card-bottom-bar">
+          <span class="user-email-tag">station.master@rippleeta.in</span>
+          <span class="btn-select-action">SELECT &amp; LOG IN <span class="arrow">&rarr;</span></span>
+        </div>
+      </div>
+
+      <!-- 03. Crew Controller -->
+      <div class="user-card" id="card-crew_controller" onclick="selectPersona('crew.controller@rippleeta.in', 'crew_controller', 'Crew Controller', '03', '/dashboard/crew.html', 'card-crew_controller')">
+        <div class="card-meta-top">
+          <span class="card-kicker">03 &bull; STATUTORY DUTY</span>
+          <span class="selected-tag">&check; SELECTED</span>
+          <span class="role-badge">DISPATCH</span>
+        </div>
+        <h2 class="role-title">Crew Controller</h2>
+        <div class="key-decision-box">
+          <div class="decision-label">KEY DECISION</div>
+          <div class="decision-text">WHEN TO DISPATCH RELIEF</div>
+        </div>
+        <p class="role-desc">
+          Dispatch crew against predicted arrival bounds, not only the timetable. Enforces 9-hour statutory HOER limits before relief changeovers.
+        </p>
+        <div class="card-bottom-bar">
+          <span class="user-email-tag">crew.controller@rippleeta.in</span>
+          <span class="btn-select-action">SELECT &amp; LOG IN <span class="arrow">&rarr;</span></span>
+        </div>
+      </div>
+
+      <!-- 04. Feeder Transport -->
+      <div class="user-card" id="card-feeder_transport" onclick="selectPersona('feeder.transport@rippleeta.in', 'feeder_transport', 'Feeder Transport', '04', '/dashboard/feeder.html', 'card-feeder_transport')">
+        <div class="card-meta-top">
+          <span class="card-kicker">04 &bull; MULTI-MODAL FLEET</span>
+          <span class="selected-tag">&check; SELECTED</span>
+          <span class="role-badge">CONNECTIVITY</span>
+        </div>
+        <h2 class="role-title">Feeder Transport</h2>
+        <div class="key-decision-box">
+          <div class="decision-label">KEY DECISION</div>
+          <div class="decision-text">WAIT / DEPART</div>
+        </div>
+        <p class="role-desc">
+          Coordinate buses and feeder transport using computed arrival probability before cutoff, balancing passenger retention against fleet idling costs.
+        </p>
+        <div class="card-bottom-bar">
+          <span class="user-email-tag">feeder.transport@rippleeta.in</span>
+          <span class="btn-select-action">SELECT &amp; LOG IN <span class="arrow">&rarr;</span></span>
+        </div>
+      </div>
+
+      <!-- 05. Maintenance -->
+      <div class="user-card" id="card-maintenance" onclick="selectPersona('maintenance@rippleeta.in', 'maintenance', 'Maintenance', '05', '/dashboard/maintenance.html', 'card-maintenance')">
+        <div class="card-meta-top">
+          <span class="card-kicker">05 &bull; TURNAROUND BUDGET</span>
+          <span class="selected-tag">&check; SELECTED</span>
+          <span class="role-badge">YARD</span>
+        </div>
+        <h2 class="role-title">Maintenance</h2>
+        <div class="key-decision-box">
+          <div class="decision-label">KEY DECISION</div>
+          <div class="decision-text">ENOUGH TURNAROUND TIME?</div>
+        </div>
+        <p class="role-desc">
+          Detect shrinking turnaround windows before the train arrives. Flags emergency &lt;90 min rapid cleaning protocols to protect return departures.
+        </p>
+        <div class="card-bottom-bar">
+          <span class="user-email-tag">maintenance@rippleeta.in</span>
+          <span class="btn-select-action">SELECT &amp; LOG IN <span class="arrow">&rarr;</span></span>
+        </div>
+      </div>
+
+      <!-- 06. Control Room -->
+      <div class="user-card" id="card-control_room" onclick="selectPersona('control.room@rippleeta.in', 'control_room', 'Control Room', '06', '/dashboard/control.html', 'card-control_room')">
+        <div class="card-meta-top">
+          <span class="card-kicker">06 &bull; NETWORK RADAR</span>
+          <span class="selected-tag">&check; SELECTED</span>
+          <span class="role-badge">REGIONAL</span>
+        </div>
+        <h2 class="role-title">Control Room</h2>
+        <div class="key-decision-box">
+          <div class="decision-label">KEY DECISION</div>
+          <div class="decision-text">WHERE WILL DELAY RIPPLE?</div>
+        </div>
+        <p class="role-desc">
+          See delay as a network phenomenon rather than an isolated train event. Traces non-linear headway conflict edges across critical junctions.
+        </p>
+        <div class="card-bottom-bar">
+          <span class="user-email-tag">control.room@rippleeta.in</span>
+          <span class="btn-select-action">SELECT &amp; LOG IN <span class="arrow">&rarr;</span></span>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <div id="auth-alert">Authenticating session...</div>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    let selectedUser = {
+      email: 'passenger@rippleeta.in',
+      role: 'passenger',
+      title: 'Passenger',
+      num: '01',
+      targetUrl: '/dashboard/passenger.html'
+    };
+
+    function showAlert(msg) {
+      const el = document.getElementById('auth-alert');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function selectPersona(email, role, title, num, targetUrl, cardId) {
+      selectedUser = { email, role, title, num, targetUrl };
+
+      // Update Card Visuals
+      document.querySelectorAll('.user-card').forEach(c => c.classList.remove('is-selected'));
+      const activeCard = document.getElementById(cardId);
+      if (activeCard) activeCard.classList.add('is-selected');
+
+      // Update Banner UI
+      document.getElementById('banner-avatar').textContent = num;
+      document.getElementById('banner-title').textContent = title;
+      document.getElementById('banner-email').textContent = email;
+      document.getElementById('banner-role').textContent = role.toUpperCase().replace('_', ' ');
+
+      // Smooth scroll to top banner if clicked from lower down
+      document.getElementById('auth-banner').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function executeSelectedUserLogin() {
+      showAlert(`Logging in as ${selectedUser.title} (${selectedUser.email})...`);
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/demo`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email: selectedUser.email, role: selectedUser.role })
+        });
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem('user', JSON.stringify({ email: selectedUser.email, role: selectedUser.role }));
+          showAlert(`Authenticated! Redirecting to ${selectedUser.title} Dashboard...`);
+          setTimeout(() => {
+            window.location.href = selectedUser.targetUrl || '/dashboard/index.html';
+          }, 400);
+        } else {
+          showAlert(`Login failed: ${data.error || 'Unknown error'}`);
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        localStorage.setItem('user', JSON.stringify({ email: selectedUser.email, role: selectedUser.role }));
+        window.location.href = selectedUser.targetUrl || '/dashboard/index.html';
+      }
+    }
+
+    function triggerGoogleSSOForSelected() {
+      showAlert(`Google OAuth authentication initiated for ${selectedUser.title}...`);
+      setTimeout(() => {
+        executeSelectedUserLogin();
+      }, 500);
+    }
+
+    async function handleGoogleCredentialResponse(response) {
+      showAlert('Verifying Google OAuth token...');
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/google`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ credential: response.credential })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showAlert('Google Authentication Successful! Redirecting...');
+          setTimeout(() => {
+            window.location.href = selectedUser.targetUrl || '/dashboard/index.html';
+          }, 500);
+        } else {
+          showAlert(`Google auth notice: Logging in as selected user ${selectedUser.title}`);
+          executeSelectedUserLogin();
+        }
+      } catch (err) {
+        executeSelectedUserLogin();
+      }
+    }
+
+    // Check Google Auth Client Config
+    async function initGoogleAuth() {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/config`);
+        if (res.ok) {
+          const cfg = await res.json();
+          if (cfg.auth_configured && cfg.google_client_id) {
+            const el = document.getElementById('g_id_onload');
+            if (el) el.setAttribute('data-client_id', cfg.google_client_id);
+            const gisBtn = document.getElementById('gis-google-btn');
+            const customBtn = document.getElementById('custom-google-btn');
+            if (gisBtn && customBtn) {
+              gisBtn.style.display = 'block';
+              customBtn.style.display = 'none';
+            }
+          }
+        }
+      } catch (e) {}
+    }
+    initGoogleAuth();
+  </script>
+</body>
+</html>

@@ -505,6 +505,11 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         )
         return {"success": True, "role": role}
 
+    @app.post("/api/auth/logout", tags=["auth"])
+    def logout(response: Response):
+        response.delete_cookie(key="rippleeta_session")
+        return {"success": True, "message": "Logged out successfully"}
+
     @app.get("/api/stats", tags=["system"])
     def system_stats():
         # Read from predictions_history.db or just return a simple state for now.
