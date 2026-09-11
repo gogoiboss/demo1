@@ -728,6 +728,18 @@
 
     function triggerGoogleSSOForSelected() {
       showAlert(`Google OAuth authentication initiated for ${selectedUser.title}...`);
+      if (window.google && window.google.accounts && window.google.accounts.id && window.googleClientIdConfigured) {
+        try {
+          window.google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              executeSelectedUserLogin();
+            }
+          });
+          return;
+        } catch (e) {
+          console.warn('Google prompt fallback:', e);
+        }
+      }
       setTimeout(() => {
         executeSelectedUserLogin();
       }, 500);
@@ -757,25 +769,27 @@
       }
     }
 
-    // Check Google Auth Client Config
+    // Check Google Auth Client Config & Initialize GIS
     async function initGoogleAuth() {
       try {
         const res = await fetch(`${API_BASE}/api/auth/config`);
         if (res.ok) {
           const cfg = await res.json();
           if (cfg.auth_configured && cfg.google_client_id) {
+            window.googleClientIdConfigured = true;
             const el = document.getElementById('g_id_onload');
             if (el) el.setAttribute('data-client_id', cfg.google_client_id);
-            const gisBtn = document.getElementById('gis-google-btn');
-            const customBtn = document.getElementById('custom-google-btn');
-            if (gisBtn && customBtn) {
-              gisBtn.style.display = 'block';
-              customBtn.style.display = 'none';
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+              window.google.accounts.id.initialize({
+                client_id: cfg.google_client_id,
+                callback: handleGoogleCredentialResponse
+              });
             }
           }
         }
       } catch (e) {}
     }
+    window.addEventListener('load', initGoogleAuth);
     initGoogleAuth();
   </script>
 </body>
