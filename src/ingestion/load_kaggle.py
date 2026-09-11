@@ -14,6 +14,14 @@ from pathlib import Path
 
 import pandas as pd
 
+# Windows consoles default stdout to a legacy code page (cp1252) that can't
+# encode the arrows/symbols this script prints (found the hard way: it
+# crashed with UnicodeEncodeError partway through printing the dataset
+# summary, before ever reaching the save step). reconfigure() is a no-op on
+# platforms where stdout is already UTF-8.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 
 # ---------------------------------------------------------------------------
 # Constants
