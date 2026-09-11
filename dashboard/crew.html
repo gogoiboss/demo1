@@ -1173,6 +1173,16 @@
           <article class="relief-hero-card is-prepare" id="triage-card">
             <div>
               <span class="decision-kicker-tag">OPERATIONAL DIRECTIVE &bull; CREW MANAGEMENT SYSTEM</span>
+              <!-- Option B disclosure (post-audit decision, 2026-09-11): the
+                   HOER duty-elapsed math behind this badge is illustrative
+                   estimation, not a live Crew Management System feed — no
+                   real crew sign-on time exists in this prototype. Same
+                   visual pattern as Station Master's "REPLAY / SIMULATION
+                   SNAPSHOT" tag (station-master.html), reused here rather
+                   than inventing a new one-off disclosure style. -->
+              <div style="font-family:var(--mono); font-size:0.72rem; color:var(--muted); background:rgba(232, 237, 245, 0.08); padding:3px 8px; border-radius:4px; display:inline-block; margin-bottom:0.5rem;">
+                ⚠ ILLUSTRATIVE HOER ESTIMATE &bull; NOT LIVE CMS / CREW SIGN-ON DATA
+              </div>
               <div class="relief-dominant-status prepare" id="hoer-directive-badge">PREPARE RELIEF</div>
               <div class="relief-station-sub" id="crew-change-point">
                 RELIEF POINT: PRAYAGRAJ JUNCTION (PRYJ) &bull; UP CREW LOBBY
@@ -1369,6 +1379,9 @@
             <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
               UPDATED: <strong style="color:var(--primary);" id="board-sync-clock">LIVE SYNC</strong>
             </div>
+          </div>
+          <div style="font-family:var(--mono); font-size:0.72rem; color:var(--muted); background:rgba(232, 237, 245, 0.08); padding:3px 8px; border-radius:4px; display:inline-block; margin:0.4rem 0 0.75rem;">
+            ⚠ DISPATCH/BUFFER column uses the same illustrative HOER estimate &bull; not live CMS data
           </div>
 
           <table class="dispatch-table" aria-label="Multi-Train Crew Dispatch Matrix">

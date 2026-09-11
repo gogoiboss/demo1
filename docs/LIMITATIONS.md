@@ -43,9 +43,15 @@ This distinction is baked directly into the graph data structure and surfaced th
 ## 8. Low-Bandwidth / 2G Station Display Mode (Acknowledged, Unaddressed)
 **Finding (Round 2 verification):** Checked `dashboard/` and `frontend/` directly for any low-bandwidth fallback (text-only mode, reduced asset loading, offline-friendly rendering) — none exists. Every view loads the full dashboard/frontend asset set regardless of connection quality. This is a genuine, acknowledged gap, not a stub or partial implementation to describe further. Given how low a priority this is relative to the core prediction and stakeholder-decision features, it has not been built, and none should be assumed or claimed in a demo. A real low-bandwidth mode (text-only rendering, minimal payload, no client-side JS framework weight) remains future work.
 
+## 10. Crew Controller HOER Duty-Elapsed Estimate (Illustrative, Disclosed in UI)
+**Limitation:** The Crew Controller view's primary decision badge (DISPATCH NOW / PREPARE RELIEF / NO RELIEF REQUIRED) is derived from an estimated "duty elapsed" figure (`dashboard/app.js`'s `loadCrew()`: `clamp(360, 520, 430 + p50*1.5)`), not a real crew sign-on time. No Crew Management System (CMS) integration exists in this prototype, so there is no live source for when a crew's duty actually began.
+**Workaround:** The badge, the duty-timeline visualization, and the "Will the Crew Make It?" risk matrix all use this same illustrative estimate. As of 2026-09-11 this is now explicitly disclosed in the UI itself — a visible "⚠ ILLUSTRATIVE HOER ESTIMATE • NOT LIVE CMS / CREW SIGN-ON DATA" tag on the decision card and the multi-train dispatch board, matching the same disclosure pattern already used for Station Master's "REPLAY / SIMULATION SNAPSHOT" tag — rather than presenting it as if it were sourced from a real roster. The one genuinely real field on this page, `relief_dispatch_deadline` (server-computed from the calibrated P90 delay), is fetched and displayed on a secondary countdown clock but does not currently drive the primary badge.
+**Future work:** Promoting the real `relief_dispatch_deadline` field to drive the primary badge (and removing the illustrative duty-elapsed math and everything downstream of it — the timeline visualization and risk matrix) is scoped as a post-Round-2 improvement, not attempted this round; it requires more than a variable swap since the duty-timeline visualization has no real replacement without actual CMS data.
+
 ## Phase 1 Audit Disclosures
 - **Cross-Train Attribution:** NOT IMPLEMENTED. The UI field is a stub based on train ID hashing.
 - **Downstream Congestion Score:** NOT IMPLEMENTED. The UI field is a stub.
 - **Ripple Score & Financial INR Impact:** NOT IMPLEMENTED. Currently computed via modulo arithmetic.
 - **Cost Asymmetry:** NOT IMPLEMENTED. Hardcoded to True in the API.
 - **Nightly Recalibration:** PARTIALLY IMPLEMENTED. The script exists and trains a model, but explicitly prevents auto-deployment.
+- **Crew Controller HOER Duty-Elapsed Estimate:** ILLUSTRATIVE, now disclosed in the UI (see section 10 above). Not sourced from a real Crew Management System.

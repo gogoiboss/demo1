@@ -54,6 +54,13 @@
 
 ---
 
+### 🔴 Q47. "Is the Crew Controller's DISPATCH NOW / PREPARE RELIEF badge using real crew roster data?"
+
+**Answer:**
+> "No, and the UI now says so directly rather than leaving it implied. That badge is driven by an illustrative duty-elapsed estimate — a formula anchored to the predicted delay, not a real crew sign-on time — because no Crew Management System (CMS) integration exists in this prototype; there's no live source for when a specific crew's duty actually began. We flagged this ourselves in an internal audit pass and made a deliberate choice: rather than either quietly leaving the badge looking like live operational data, or attempting a rushed real-data replacement under Round 2 time pressure that would still have gaps (the duty-timeline visualization and risk matrix have no real substitute without actual CMS data), we added a visible '⚠ ILLUSTRATIVE HOER ESTIMATE — NOT LIVE CMS / CREW SIGN-ON DATA' label directly on the decision card and the multi-train dispatch board. What *is* real on this page: the secondary `relief_dispatch_deadline` clock, computed server-side from the calibrated P90 delay (`now + max(15, 120 - P90)`) — the same pattern described in Q3 above — is genuine, just not yet what drives the primary badge. Promoting it to drive the badge, and removing the illustrative math underneath the timeline and risk matrix, is scoped as a concrete post-Round-2 improvement, not attempted this round."
+
+---
+
 ## Operational & Edge Case Q&A
 
 ### 🔴 Q1. "What happens when a train is diverted or cancelled?"
