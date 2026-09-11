@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 import pandas as pd
 
 from src.features.engineering import engineer_all_features
 from src.graph.timed_event_graph import detect_conflicts
+
+logger = logging.getLogger(__name__)
 
 
 class CalibratedPredictionPipeline:
@@ -24,6 +27,23 @@ class CalibratedPredictionPipeline:
     ) -> list[dict[str, Any]]:
         state = current_state.copy()
         if not set(self.engine.features).issubset(state.columns):
+            # Every real caller today (RippleETAPipeline.run(), the eval
+            # scripts, the scalability benchmark) passes rows already
+            # sliced from a batch-engineered DataFrame, so this branch is
+            # not currently exercised in production. It exists for callers
+            # that hand this pipeline raw data directly. That is only safe
+            # when `state` retains enough per-train history for rake
+            # inheritance (a groupby().shift(1) over the full batch) to see
+            # a real previous row — a single isolated row cannot produce a
+            # real prior_leg_delay and will silently default to 0 instead
+            # of the true value (see
+            # tests/test_features.py::test_isolated_single_row_reengineering_cannot_reproduce_batch_prior_leg_delay).
+            if "train_number" in state.columns and state["train_number"].value_counts().max() < 2:
+                logger.warning(
+                    "engineer_all_features() called on a DataFrame with < 2 rows "
+                    "for at least one train_number; prior_leg_delay cannot be "
+                    "computed from history and will default to 0 for those rows."
+                )
             state = engineer_all_features(state)
 
         adjustments: dict[str, float] = {}

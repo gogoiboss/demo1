@@ -29,7 +29,7 @@
 - [x] F. Mondrian conformal — IMPLEMENTED this session: stratified by delay bucket, per-bucket coverage reporting, synthetic test passing
 
 ### Training-serving correctness
-- [x] G. Shared features module — `src/features/engineering.py` used by both training and serving paths; byte-identical test NOT yet confirmed — verify or add
+- [x] G. Shared features module — VERIFIED THIS SESSION with real tests, plus one genuine latent risk found and mitigated. `engineer_all_features()` is the single shared implementation (no duplicated feature logic anywhere — confirmed by grep). The actual exercised serving path (`RippleETAPipeline.run()` slicing an already-batch-engineered row) is proven byte-identical to the training path (`tests/test_features.py::test_training_and_serving_paths_agree_when_serving_uses_preengineered_batch_row`). However, `CalibratedPredictionPipeline.predict()`'s fallback re-engineering branch would silently produce a wrong `prior_leg_delay` (defaults to 0) if ever called with an isolated single row with no per-train history — confirmed empirically and pinned by a regression test; not reachable by any current caller, but added a runtime warning log and a `docs/LIMITATIONS.md` entry so it can't regress silently
 - [ ] H. Point-in-time backfill correctness — NOT yet explicitly audited this session
 
 ### Performance

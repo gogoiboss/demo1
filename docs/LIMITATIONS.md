@@ -4,7 +4,7 @@ This document clearly outlines the current limitations of the RippleETA prototyp
 
 ## 1. Ground Truth & MLOps Recalibration
 **Limitation:** Due to the lack of live NTES (National Train Enquiry System) or COA (Control Office Application) API keys during this hackathon, we cannot log live actual arrival times.
-**Current behavior (Backtest Mode):** `jobs/nightly_recalibration.py` evaluates the current model and an unsaved candidate against a deterministic chronological holdout from the historical dataset. It reports the comparison and never replaces the deployed artifact. It does not run live rolling-MAE monitoring, ADWIN, or automatic retraining.
+**Current behavior (Backtest Mode):** `jobs/nightly_recalibration.py` computes MAE on a deterministic chronological holdout from the historical dataset and applies a real threshold-based drift trigger (retrains a candidate only when MAE exceeds a configurable 15-minute default). Any candidate is evaluated against the current model and never replaces the deployed artifact. This is a static threshold, not statistical change-point detection — it does not run live rolling-MAE monitoring, ADWIN, or automatic retraining.
 **Phase 2 roadmap:** Add live ground-truth collection, a rolling-MAE monitor, ADWIN change-point detection, and a human-reviewed retraining workflow. A candidate must beat or match the frozen holdout's pinball loss and coverage before any explicitly approved promotion; drift alerts must not silently swap models.
 
 ## 6. Validated Scope & Deployment Path
@@ -32,6 +32,10 @@ Rather than silently ignoring this gap, we made an explicit modeling choice to s
 - **SOFT Conflicts (`conflict_type="soft"`):** Shared-section headway. These are **probabilistic approximations**. We infer section congestion dynamically from the scheduled timetable's station-pairs rather than relying on absent signal-state telemetry.
 
 This distinction is baked directly into the graph data structure and surfaced through the API (`get_prediction`) so that downstream consumers (e.g. Station Masters) can assign different confidence levels to a deterministic hardware delay vs. a probabilistic congestion delay.
+
+## 7. Training-Serving Feature Skew Risk (Shared Module, Latent Only)
+**Finding (Round 2 verification):** `src/features/engineering.py` is genuinely shared — every training, backtest, and serving call site delegates to the same `engineer_all_features()` function, with no duplicated feature logic anywhere in the codebase. The real, exercised serving path (`RippleETAPipeline.run()`) engineers features once over the full historical batch and slices an already-engineered row out for prediction; this is verified byte-identical to the training path in `tests/test_features.py`.
+**Latent risk:** `CalibratedPredictionPipeline.predict()` has a fallback that calls `engineer_all_features()` itself when handed a DataFrame missing the model's feature columns. Rake inheritance (`prior_leg_delay`) is a `groupby().shift(1)` over the full batch, so if that fallback were ever exercised with a single isolated row (no current caller does this), it cannot see a real previous leg and silently defaults `prior_leg_delay` to 0 instead of the true value — a genuine training-serving skew, confirmed empirically and pinned by a regression test. A warning is now logged if this path is hit with insufficient per-train history. Any future caller must supply pre-engineered features or a batch with real history, never a raw isolated row.
 
 ## Phase 1 Audit Disclosures
 - **Cross-Train Attribution:** NOT IMPLEMENTED. The UI field is a stub based on train ID hashing.
