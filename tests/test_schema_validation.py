@@ -1,45 +1,44 @@
-import sys
-import logging
+import pytest
 from pydantic import ValidationError
-import sys
-from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-from src.ingestion.railradar_client import LiveStatusSchema, RouteSchema, get_validation_metrics
+from src.ingestion.railradar_client import LiveStatusSchema, RouteSchema
 
-def test_validation():
-    print("Testing Validation Schemas...")
-    
-    # 1. Test Delay limits
-    try:
+
+def test_negative_delay_outlier_is_rejected():
+    with pytest.raises(ValidationError):
         LiveStatusSchema(train_number="123", current_station="NDLS", delay_min=-600)
-        print("FAILED: Did not catch -600 delay")
-    except ValidationError as e:
-        print("SUCCESS: Caught negative delay outlier (-600)")
-        
-    try:
+
+
+def test_extreme_positive_delay_outlier_is_rejected():
+    with pytest.raises(ValidationError):
         LiveStatusSchema(train_number="123", current_station="NDLS", delay_min=6000)
-        print("FAILED: Did not catch +6000 delay")
-    except ValidationError as e:
-        print("SUCCESS: Caught positive delay outlier (+6000)")
-        
-    # 2. Test GPS Bounding Box
-    try:
+
+
+def test_gps_outside_india_bounding_box_is_rejected():
+    with pytest.raises(ValidationError):
         LiveStatusSchema(train_number="123", current_station="NDLS", delay_min=10, lat=2.0, lng=80.0)
-        print("FAILED: Did not catch GPS outside India")
-    except ValidationError as e:
-        print("SUCCESS: Caught GPS outside India bounding box")
-        
-    # 3. Test Monotonic Sequence
-    try:
+
+
+def test_non_monotonic_station_sequence_is_rejected():
+    with pytest.raises(ValidationError):
         RouteSchema(stations=[
             {"station_code": "A", "seq": 1},
             {"station_code": "B", "seq": 3},
-            {"station_code": "C", "seq": 2}
+            {"station_code": "C", "seq": 2},
         ])
-        print("FAILED: Did not catch non-monotonic sequence")
-    except ValidationError as e:
-        print("SUCCESS: Caught non-monotonic sequence")
 
-if __name__ == "__main__":
-    test_validation()
+
+def test_valid_live_status_is_accepted():
+    # A real assertion in the other direction too: valid input must not be
+    # rejected by the same rules that catch the outliers above.
+    status = LiveStatusSchema(train_number="123", current_station="NDLS", delay_min=10)
+    assert status.delay_min == 10
+
+
+def test_valid_monotonic_route_is_accepted():
+    route = RouteSchema(stations=[
+        {"station_code": "A", "seq": 1},
+        {"station_code": "B", "seq": 2},
+        {"station_code": "C", "seq": 3},
+    ])
+    assert [s.seq for s in route.stations] == [1, 2, 3]
