@@ -93,14 +93,20 @@ export async function signOut() {
 
 export async function loginAsDemo(role = 'passenger', email = null) {
   try {
-    const res = await api.loginDemo(email, role);
+    // Backend DemoLoginRequest requires a non-null string for `email`.
+    // When no real email is supplied (unauthenticated demo mode), synthesise a
+    // deterministic placeholder so Pydantic validation never sees null/undefined.
+    const demoEmail = email || `demo-${(role || 'passenger').toLowerCase().replace(/\s+/g, '_')}@rippleeta.demo`;
+    const res = await api.loginDemo(demoEmail, role);
     if (!res.success) {
       throw new Error(res.error || 'Demo login failed');
     }
+    // Backend returns {success, role} — no nested `user` object.
+    const resolvedRole = res.role || role || 'passenger';
     _user = {
-      name: res.user.name,
-      email: res.user.email,
-      role: res.user.role,
+      name: `Demo ${resolvedRole.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}`,
+      email: demoEmail,
+      role: resolvedRole,
       is_demo: true,
       authenticated_at: new Date().toISOString(),
     };
@@ -210,10 +216,11 @@ async function _handleCredentialResponse(response) {
     if (!res.success) {
       throw new Error(res.error || 'Server rejected Google sign-in');
     }
+    // Backend returns {success, role} — resolve user fields defensively.
     _user = {
-      name: res.user.name,
-      email: res.user.email,
-      role: res.user.role,
+      name: (res.user && res.user.name) || res.name || res.email || 'Authenticated User',
+      email: (res.user && res.user.email) || res.email || '',
+      role: (res.user && res.user.role) || res.role || 'passenger',
       is_demo: false,
       authenticated_at: new Date().toISOString(),
     };

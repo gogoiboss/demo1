@@ -785,6 +785,15 @@ if dashboard_path.exists():
         name="dashboard",
     )
 
+# Mount the 3D train viewer
+eta_path = Path(__file__).resolve().parent.parent.parent / "eta"
+if eta_path.exists():
+    app.mount(
+        "/eta",
+        StaticFiles(directory=str(eta_path), html=True),
+        name="eta",
+    )
+
 if frontend_path.exists():
     app.mount(
         "/", StaticFiles(directory=str(frontend_path), html=True), name="frontend"
