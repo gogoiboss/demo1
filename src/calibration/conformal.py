@@ -41,7 +41,7 @@ from __future__ import annotations
 import logging
 import warnings
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -92,6 +92,63 @@ DEFAULT_FEATURES = [
     "is_weekend",
 ]
 
+# Mondrian (conditional) conformal calibration — bucket boundaries on
+# prior_leg_delay magnitude (minutes). Buckets: [0, 15), [15, 60), [60, inf).
+# Marginal (pooled) coverage can hide a split where punctual trains are
+# over-covered and significantly-delayed trains are under-covered — exactly
+# the trains where a Station Master most needs an honest wide interval.
+MONDRIAN_BUCKET_EDGES = [15.0, 60.0]
+MONDRIAN_MIN_BUCKET_SIZE = 20  # below this, fall back to the pooled calibrator
+
+
+def mondrian_bucket(value: float, edges: list[float] = MONDRIAN_BUCKET_EDGES) -> int:
+    """Return the bucket index for a delay magnitude given bucket edges.
+
+    Edge list [15, 60] yields buckets: 0 -> [0,15), 1 -> [15,60), 2 -> [60,inf).
+    """
+    for i, edge in enumerate(edges):
+        if value < edge:
+            return i
+    return len(edges)
+
+
+def bucket_label(bucket_id: int, edges: list[float] = MONDRIAN_BUCKET_EDGES) -> str:
+    """Human-readable bucket label, e.g. bucket 1 of edges [15,60] -> '15-60'."""
+    lo = 0.0 if bucket_id == 0 else edges[bucket_id - 1]
+    hi = edges[bucket_id] if bucket_id < len(edges) else None
+    return f"{lo:g}-{hi:g}" if hi is not None else f"{lo:g}+"
+
+
+def per_bucket_coverage(
+    X: pd.DataFrame,
+    y_true: np.ndarray,
+    preds: list[dict],
+    mondrian_feature: str,
+    edges: list[float] = MONDRIAN_BUCKET_EDGES,
+) -> dict[str, dict[str, float]]:
+    """Empirical P10-P90 coverage and row count, broken out per delay bucket.
+
+    Evidence that conditional (Mondrian) calibration is actually working:
+    marginal/pooled coverage can average out a bucket that is badly
+    under-covered, which is exactly the failure mode this is meant to catch.
+    """
+    bucket_ids = X[mondrian_feature].apply(lambda v: mondrian_bucket(v, edges)).values
+    p10s = np.array([r["p10_delay_min"] for r in preds])
+    p90s = np.array([r["p90_delay_min"] for r in preds])
+    covered = (y_true >= p10s) & (y_true <= p90s)
+
+    report: dict[str, dict[str, float]] = {}
+    for bucket_id in sorted(set(bucket_ids.tolist())):
+        mask = bucket_ids == bucket_id
+        n = int(mask.sum())
+        coverage_pct = round(float(np.mean(covered[mask])) * 100, 1) if n else 0.0
+        report[bucket_label(bucket_id, edges)] = {
+            "n": n,
+            "coverage_pct": coverage_pct,
+            "avg_interval_width_min": round(float(np.mean(p90s[mask] - p10s[mask])), 1) if n else 0.0,
+        }
+    return report
+
 
 # ---------------------------------------------------------------------------
 # CalibratedETAEngine
@@ -117,15 +174,27 @@ class CalibratedETAEngine:
         base_model=None,
         features: list[str] = DEFAULT_FEATURES,
         anomaly_multiplier: float = ANOMALY_MULTIPLIER,
+        use_mondrian: bool = False,
+        mondrian_feature: str = "prior_leg_delay",
+        mondrian_bucket_edges: list[float] = MONDRIAN_BUCKET_EDGES,
     ):
         self.features             = features
         self.anomaly_multiplier   = anomaly_multiplier
         self.base_model           = base_model          # fitted XGBRegressor
-        self.mapie_90_            = None                # fitted SplitConformalRegressor (90%)
-        self.explainer_           = None                # shap.TreeExplainer
-        self.delay_p90_rate_      = None                # historical 90th-percentile delay rate
+        self.mapie_90_: Any       = None                # fitted SplitConformalRegressor (90%, pooled)
+        self.explainer_: Any      = None                # shap.TreeExplainer
+        self.delay_p90_rate_: float | None = None       # historical 90th-percentile delay rate
         self.anomaly_gate_        = AnomalyGate(multiplier=anomaly_multiplier)
         self.fitted_              = False
+
+        # Mondrian (conditional) conformal calibration — optional, off by
+        # default. When enabled, calibration is stratified by
+        # `mondrian_feature` magnitude so coverage is reported (and held)
+        # per delay-severity bucket rather than only pooled/marginal.
+        self.use_mondrian         = use_mondrian
+        self.mondrian_feature     = mondrian_feature
+        self.mondrian_bucket_edges = list(mondrian_bucket_edges)
+        self.mapie_buckets_: dict[int, Any] = {}        # bucket_id -> fitted SplitConformalRegressor
 
     # ------------------------------------------------------------------
     # Fitting
@@ -151,7 +220,6 @@ class CalibratedETAEngine:
         if not MAPIE_AVAILABLE:
             raise ImportError("MAPIE not installed. Run: pip install mapie")
 
-        X_train_f = X_train[self.features]
         X_cal_f   = X_cal[self.features]
 
         # ----- Compute anomaly threshold from calibration residuals ------
@@ -174,6 +242,10 @@ class CalibratedETAEngine:
             warnings.simplefilter("ignore")
             self.mapie_90_.conformalize(X_cal_f, y_cal.values)
 
+        # ----- Mondrian (conditional) calibration, optional --------------
+        if self.use_mondrian:
+            self._fit_mondrian_buckets(X_cal, y_cal)
+
         # ----- SHAP explainer --------------------------------------------
         if SHAP_AVAILABLE:
             try:
@@ -187,6 +259,56 @@ class CalibratedETAEngine:
         self.fitted_ = True
         logger.info("CalibratedETAEngine fitted successfully.")
         return self
+
+    # ------------------------------------------------------------------
+    # Mondrian (conditional) calibration
+    # ------------------------------------------------------------------
+    def _fit_mondrian_buckets(
+        self,
+        X_cal: pd.DataFrame,
+        y_cal: pd.Series,
+        min_bucket_size: int = MONDRIAN_MIN_BUCKET_SIZE,
+    ) -> None:
+        """Fit one SplitConformalRegressor per delay-magnitude bucket.
+
+        Buckets with fewer than ``min_bucket_size`` calibration rows are
+        skipped; ``predict()`` falls back to the pooled ``mapie_90_``
+        calibrator for those rows rather than fitting an unreliable
+        few-sample conformal calibrator.
+        """
+        bucket_ids = X_cal[self.mondrian_feature].apply(
+            lambda v: mondrian_bucket(v, self.mondrian_bucket_edges)
+        )
+        self.mapie_buckets_ = {}
+        for bucket_id in sorted(bucket_ids.unique()):
+            mask = (bucket_ids == bucket_id).values
+            n = int(mask.sum())
+            if n < min_bucket_size:
+                logger.warning(
+                    "Mondrian bucket %d has only %d calibration rows (< %d); "
+                    "falling back to the pooled calibrator for this bucket.",
+                    bucket_id, n, min_bucket_size,
+                )
+                continue
+            X_bucket_f = X_cal.loc[mask, self.features]
+            y_bucket = y_cal.loc[mask]
+            mapie_bucket = SplitConformalRegressor(
+                estimator=self.base_model,
+                confidence_level=COVERAGE_90,
+                prefit=True,
+            )
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                mapie_bucket.conformalize(X_bucket_f, y_bucket.values)
+            self.mapie_buckets_[bucket_id] = mapie_bucket
+        logger.info(
+            "Mondrian calibration fitted for buckets %s of %s on '%s' "
+            "(edges=%s); remaining buckets use the pooled calibrator.",
+            sorted(self.mapie_buckets_.keys()),
+            sorted(bucket_ids.unique().tolist()),
+            self.mondrian_feature,
+            self.mondrian_bucket_edges,
+        )
 
     # ------------------------------------------------------------------
     # Prediction
@@ -229,17 +351,38 @@ class CalibratedETAEngine:
         X_f = X[self.features]
 
         # ----- MAPIE intervals -------------------------------------------
-        # SplitConformalRegressor returns point predictions and bounds.
-        y_pred_90, y_pis_90 = self.mapie_90_.predict_interval(X_f)
-        # y_pis_90 shape: (n_samples, 2) → lower=[:,0], upper=[:,1]
-        if y_pis_90.ndim == 3:
-            y_pis_90 = y_pis_90[:, :, 0]
-        lower_90 = y_pis_90[:, 0]
-        upper_90 = y_pis_90[:, 1]
+        if self.use_mondrian and self.mapie_buckets_ and self.mondrian_feature in X.columns:
+            # Route each row to its bucket-specific calibrator (falling back
+            # to the pooled one for buckets that had too few calibration
+            # rows), so interval width reflects delay-magnitude-conditional
+            # coverage rather than one marginal average.
+            bucket_ids = X[self.mondrian_feature].apply(
+                lambda v: mondrian_bucket(v, self.mondrian_bucket_edges)
+            ).values
+            y_pred_90 = np.empty(len(X_f))
+            lower_90 = np.empty(len(X_f))
+            upper_90 = np.empty(len(X_f))
+            for bucket_id in np.unique(bucket_ids):
+                idx = np.where(bucket_ids == bucket_id)[0]
+                calibrator = self.mapie_buckets_.get(int(bucket_id), self.mapie_90_)
+                y_pred_b, y_pis_b = calibrator.predict_interval(X_f.iloc[idx])
+                if y_pis_b.ndim == 3:
+                    y_pis_b = y_pis_b[:, :, 0]
+                y_pred_90[idx] = y_pred_b
+                lower_90[idx] = y_pis_b[:, 0]
+                upper_90[idx] = y_pis_b[:, 1]
+        else:
+            # SplitConformalRegressor returns point predictions and bounds.
+            y_pred_90, y_pis_90 = self.mapie_90_.predict_interval(X_f)
+            # y_pis_90 shape: (n_samples, 2) → lower=[:,0], upper=[:,1]
+            if y_pis_90.ndim == 3:
+                y_pis_90 = y_pis_90[:, :, 0]
+            lower_90 = y_pis_90[:, 0]
+            upper_90 = y_pis_90[:, 1]
 
         results = []
         for i in range(len(X_f)):
-            p50 = float(y_pred_90[i])
+            p50: float | None = float(y_pred_90[i])
             p10 = float(lower_90[i])
             p90 = float(upper_90[i])
 
@@ -266,6 +409,7 @@ class CalibratedETAEngine:
             if anomaly_flag:
                 anomaly_flag     = True
                 uncertainty_mode = True
+                assert p50 is not None
                 interval_width = p90 - p10
                 # In uncertainty mode: widen interval significantly, suppress p50
                 p10 = max(0.0, p50 - 3 * interval_width)
@@ -273,7 +417,7 @@ class CalibratedETAEngine:
                 p50 = None   # suppressed — do not display point estimate
 
             # ----- SHAP explanation --------------------------------------
-            shap_explanation = {}
+            shap_explanation: dict[str, float] = {}
             shap_text        = "Explanation unavailable."
             if self.explainer_ is not None and not anomaly_flag:
                 try:
@@ -392,6 +536,7 @@ def train_and_calibrate(
     cal_frac        = float(cfg.get("cal_fraction", 0.85))
     coverage_target = float(cfg.get("coverage_target", COVERAGE_90))
     anomaly_mult    = float(cfg.get("anomaly_multiplier", ANOMALY_MULTIPLIER))
+    use_mondrian    = bool(cfg.get("use_mondrian", False))
 
     # --- Sort chronologically, apply fractional split --------------------
     df_sorted = df.sort_values("journey_date").reset_index(drop=True)
@@ -429,6 +574,7 @@ def train_and_calibrate(
         base_model=base_model,
         features=features,
         anomaly_multiplier=anomaly_mult,
+        use_mondrian=use_mondrian,
     )
     engine.fit(X_train, y_train, X_cal, y_cal)
 
@@ -443,7 +589,7 @@ def train_and_calibrate(
     mae_p50     = float(np.mean(np.abs(y_arr[:len(p50s)] - p50s)))
     avg_width   = float(np.mean(p90s - p10s))
 
-    metrics = {
+    metrics: dict[str, Any] = {
         "coverage_90_pct":        round(coverage_90 * 100, 1),
         "mae_p50_min":            round(mae_p50, 2),
         "avg_interval_width_min": round(avg_width, 1),
@@ -451,6 +597,11 @@ def train_and_calibrate(
         "n_cal":                  len(df_cal),
         "n_test":                 len(df_test),
     }
+
+    if use_mondrian:
+        metrics["mondrian_bucket_coverage"] = per_bucket_coverage(
+            X_test, y_arr, preds, engine.mondrian_feature, engine.mondrian_bucket_edges
+        )
 
     logger.info(
         "Calibration complete — coverage: %s%% (target: %.0f%%), "

@@ -9,6 +9,12 @@
 # Why this matters: the timed event graph, anomaly gate, conformal calibration,
 # and API contract are all tested with real synthetic scenarios — these are the
 # differentiating parts of the system and worth protecting against regression.
+#
+# Ruff/mypy are pinned (see the install step) because an unpinned `pip install
+# ruff` picks up whatever is newest at CI run time; a bare `ruff check` with no
+# project config resolves its rule set from that installed version and has
+# been observed to vary drastically in scope between ruff releases. The rule
+# selection itself is pinned explicitly in pyproject.toml.
 
 name: CI
 
@@ -38,13 +44,20 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt ruff mypy
+        run: pip install -r requirements.txt "ruff==0.16.7" "mypy==2.3.1"
 
       - name: Lint with Ruff
-        run: ruff check src/model_promotion.py tests/test_model_promotion.py jobs/nightly_recalibration.py
+        run: >
+          ruff check
+          src/model_promotion.py tests/test_model_promotion.py jobs/nightly_recalibration.py
+          src/graph/ src/calibration/ src/api/ src/features/ src/pipeline.py
 
       - name: Type check with mypy
-        run: mypy src/model_promotion.py --ignore-missing-imports
+        run: >
+          mypy
+          src/model_promotion.py
+          src/graph/ src/calibration/ src/api/ src/features/ src/pipeline.py
+          --ignore-missing-imports --explicit-package-bases --follow-imports=silent
 
       - name: Validate Phase 1D data schemas
         run: pytest tests/test_validation.py -q

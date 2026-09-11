@@ -63,6 +63,19 @@ Say:
 
 > “These are not cosmetic dashboard tabs. The API translates one calibrated forecast into five decision-specific contracts.”
 
+### 4a. "Why does it predict that?" — SHAP explanation
+
+If a judge asks why the model produced a given number, do not answer in the abstract — show it live:
+
+1. In `/docs`, call `GET /predict/{train_id}` for a train (e.g. `20507`).
+2. Scroll the response to the `shap_text` and `shap_explanation` fields.
+
+Say:
+
+> “This isn’t a black box. Every prediction carries its own SHAP attribution — computed per row from the trained XGBoost model, not a canned explanation. `shap_text` gives the plain-language version, for example ‘55% rake delay; 30% schedule buffer’; `shap_explanation` gives the full ranked percentage breakdown across every feature we feed the model.”
+
+Note: when the anomaly gate has suspended a prediction, `shap_explanation` is intentionally empty and `shap_text` reads "Explanation unavailable." — the system doesn't fabricate a rationale for a number it isn't confident enough to show.
+
 ### 5. MLOps and Reproducibility (Q&A material)
 
 If judges ask "How would you tune this?" or "Is this deployable?":

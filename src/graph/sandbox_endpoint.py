@@ -1,7 +1,6 @@
 """
 Sandbox endpoint logic for delay propagation on the timed event graph.
 """
-from typing import Literal
 from src.graph.timed_event_graph import CachedPropagationEngine
 from src.graph.worked_example import SCHEDULES_DEMO
 

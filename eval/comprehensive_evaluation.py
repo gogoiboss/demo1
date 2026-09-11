@@ -8,7 +8,12 @@ import matplotlib.pyplot as plt
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from src.features.engineering import engineer_all_features
-from src.calibration.conformal import DEFAULT_FEATURES
+from src.calibration.conformal import (
+    DEFAULT_FEATURES,
+    MONDRIAN_BUCKET_EDGES,
+    per_bucket_coverage,
+    train_and_calibrate,
+)
 from src.pipeline import RippleETAPipeline
 
 def pinball_loss(y_true, y_pred, alpha):
@@ -65,7 +70,7 @@ def run_comprehensive_eval():
     df_test["is_covered"] = covered
     
     print(f"\n### STEP 2: Empirical Coverage")
-    print(f"Target Coverage (P10 to P90): 80.0%")
+    print(f"Target Coverage (P10 to P90): 90.0%")
     print(f"Actual Empirical Coverage: **{global_coverage:.1f}%**")
     
     # --- STEP 3: Segmentation ---
@@ -116,6 +121,32 @@ def run_comprehensive_eval():
     print("\n### STEP 3C: Performance by Route (Top 5 Vol)")
     print(seg_route.to_markdown(index=False, floatfmt=".1f"))
     
+    # --- STEP 3D: Mondrian (conditional) vs pooled coverage, by prior_leg_delay bucket ---
+    print("\n### STEP 3D: Conditional (Mondrian) vs Pooled Coverage — by prior_leg_delay bucket")
+    print("Marginal/pooled coverage (STEP 2) can average out a badly under-covered bucket;")
+    print("this checks each prior_leg_delay bucket individually against the same held-out rows.")
+
+    pooled_report = per_bucket_coverage(X_test, y_actual, ripple_results, "prior_leg_delay", MONDRIAN_BUCKET_EDGES)
+
+    print("Fitting a Mondrian (stratified-by-prior_leg_delay) calibrator on the same data for comparison...")
+    mondrian_engine, _ = train_and_calibrate(p._data, model_config={"use_mondrian": True})
+    mondrian_preds = mondrian_engine.predict(X_test)
+    mondrian_report = per_bucket_coverage(
+        X_test, y_actual, mondrian_preds, mondrian_engine.mondrian_feature, mondrian_engine.mondrian_bucket_edges
+    )
+
+    empty_stat = {"n": 0, "coverage_pct": 0.0, "avg_interval_width_min": 0.0}
+    print("| Bucket (prior_leg_delay, min) | N | Pooled coverage | Mondrian coverage | Pooled width | Mondrian width |")
+    print("| :--- | ---: | ---: | ---: | ---: | ---: |")
+    for bucket in sorted(set(pooled_report) | set(mondrian_report)):
+        p_stat = pooled_report.get(bucket, empty_stat)
+        m_stat = mondrian_report.get(bucket, empty_stat)
+        print(
+            f"| {bucket} | {p_stat['n']} | {p_stat['coverage_pct']:.1f}% | "
+            f"{m_stat['coverage_pct']:.1f}% | {p_stat['avg_interval_width_min']:.1f} | "
+            f"{m_stat['avg_interval_width_min']:.1f} |"
+        )
+
     # --- PLOT: Coverage vs Target ---
     plt.figure(figsize=(9, 5))
     
@@ -124,7 +155,7 @@ def run_comprehensive_eval():
     width = 0.5
     
     plt.bar(x, seg_delay["Coverage (%)"], width, color='#3b82f6', label='Empirical Coverage')
-    plt.axhline(y=80, color='#ef4444', linestyle='--', linewidth=2, label='Nominal Target (80%)')
+    plt.axhline(y=90, color='#ef4444', linestyle='--', linewidth=2, label='Nominal Target (90%)')
     
     plt.ylabel('Coverage (%)', fontweight='bold')
     plt.title('RippleETA Conformal Coverage by Delay Severity', fontweight='bold', pad=15)

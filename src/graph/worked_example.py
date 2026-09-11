@@ -163,9 +163,9 @@ def run_worked_example(verbose: bool = True) -> dict:
         print(f"    12301 delay at Allahabad:    +{alld_ppt:.1f} min")
         print(f"    12301 final delay at HWH:    +{hwh_ppt:.1f} min")
         print(f"    Conflict contribution:        +{conflict_ppt:.1f} min")
-        print(f"    --> No conflict fires because 12301's own +55 min delay")
-        print(f"        already places it well behind 56789 (+40 min).")
-        print(f"        The headway constraint is satisfied without extra delay.")
+        print("    --> No conflict fires because 12301's own +55 min delay")
+        print("        already places it well behind 56789 (+40 min).")
+        print("        The headway constraint is satisfied without extra delay.")
 
         print("\n  [SCENARIO B] — Corrected demo (12301 +55, 56789 +15, slow express)")
         print(f"    12301 delay at Allahabad:    +{alld_demo:.1f} min")
@@ -183,13 +183,13 @@ def run_worked_example(verbose: bool = True) -> dict:
             print("\n  OK — Scenario B matches PPT conflict addition (+9 min). GOOD.")
             print("     Update pitch to use Scenario B inputs.")
         else:
-            print(f"\n  MISMATCH — Update pitch materials with Scenario B numbers:")
+            print("\n  MISMATCH — Update pitch materials with Scenario B numbers:")
             print(f"     Conflict addition: {conflict_demo:.1f} min (not {PPT_CLAIMED_CONFLICT_ADDITION:.0f})")
             print(f"     Final delay at Allahabad: +{alld_demo:.1f} min")
             print(f"     Pitch should say: base +55 -> conflict adds +{conflict_demo:.1f} -> total +{alld_demo:.1f}")
 
         if conflicts_demo:
-            print(f"\n  Active conflicts in Scenario B:")
+            print("\n  Active conflicts in Scenario B:")
             for c in conflicts_demo:
                 print(f"    Train {c['delaying_train']} (+{c['source_delay_min']:.0f} min) "
                       f"--> Train {c['affected_train']}: +{c['propagated_delay_min']:.1f} min added")

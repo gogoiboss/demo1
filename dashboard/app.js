@@ -211,7 +211,7 @@ const I18N = {
     paxTitle: "Arrival Advisory",
     paxSubhead: "Calibrated delay bounds from the historical prediction snapshot.",
     paxWindowLabel: "CALIBRATED ARRIVAL WINDOW",
-    paxEarliestLatest: "P10 (Earliest) — P90 (Latest)",
+    paxEarliestLatest: "P10 (Earliest) ï¿½ P90 (Latest)",
     paxTimelineTitle: "Historical Station Trend",
     
     // Station Master
@@ -269,7 +269,7 @@ const I18N = {
     paxTitle: "???? ?????",
     paxSubhead: "???????? ??????????? ???????? ?? ???????? ????? ???????",
     paxWindowLabel: "???????? ???? ??? ???? (P10 - P90)",
-    paxEarliestLatest: "P10 (???????) — P90 (??????)",
+    paxEarliestLatest: "P10 (???????) ï¿½ P90 (??????)",
     paxTimelineTitle: "???????? ?????? ????? ??????",
     
     // Station Master
@@ -346,9 +346,9 @@ const FAQ_ITEMS = [
     a: "Predictions are suspended by the Anomaly Gate when the train experiences an unprecedented delay pattern or unscheduled stop (residual > 53.1 min). Rather than projecting false precision during a genuine disruption, the system gracefully degrades to manual operator oversight."
   },
   {
-    q: "What does the P10–P90 arrival window mean?",
+    q: "What does the P10ï¿½P90 arrival window mean?",
     tags: ["general", "passenger", "conformal"],
-    a: "Indian Railways ETA cannot be honestly represented as a single static point in time. Our Split Conformal Prediction engine provides a guaranteed 89.9% empirical coverage window: P10 is the earliest likely arrival (10th percentile), and P90 is the pessimistic bound (90th percentile)."
+    a: "Indian Railways ETA cannot be honestly represented as a single static point in time. Our Split Conformal Prediction engine measured 97.70% empirical coverage on 174 selected-route held-out journeys (106.6-minute average window width): P10 is the earliest likely arrival (10th percentile), and P90 is the pessimistic bound (90th percentile)."
   },
   {
     q: "How is the relief dispatch deadline calculated for crew?",
@@ -384,7 +384,7 @@ function initFAQModal() {
       <div class="faq-header">
         <div>
           <h3 class="faq-title" data-i18n="helpFaq">Help & Operational FAQ</h3>
-          <span class="faq-disclaimer">[ PREDEFINED KNOWLEDGE BASE · NOT CONVERSATIONAL AI ]</span>
+          <span class="faq-disclaimer">[ PREDEFINED KNOWLEDGE BASE ï¿½ NOT CONVERSATIONAL AI ]</span>
         </div>
         <button class="faq-close" id="faq-close-btn" aria-label="Close">&times;</button>
       </div>
@@ -411,7 +411,7 @@ function initFAQModal() {
 
     container.innerHTML = filtered.map(item => `
       <div class="faq-item">
-        <span class="faq-tag">${item.tags.join(' · ')}</span>
+        <span class="faq-tag">${item.tags.join(' ï¿½ ')}</span>
         <h4 class="faq-q">${item.q}</h4>
         <p class="faq-a">${item.a}</p>
       </div>
@@ -528,7 +528,7 @@ function renderRouteMapPanel() {
       <div class="route-map-header">
         <div>
           <h4 class="route-map-title">Route & Corridor Profile</h4>
-          <p style="margin: 0.25rem 0 0; font-family:var(--sans); font-size:0.8rem; color:var(--muted);">${profile.name} · ${profile.corridor}</p>
+          <p style="margin: 0.25rem 0 0; font-family:var(--sans); font-size:0.8rem; color:var(--muted);">${profile.name} ï¿½ ${profile.corridor}</p>
         </div>
         <div>
           <span class="route-badge ${profile.badgeClass}">

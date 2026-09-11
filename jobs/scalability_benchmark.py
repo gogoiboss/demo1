@@ -1,45 +1,64 @@
 import time
-import pandas as pd
-from src.pipeline import RippleETAPipeline
 import warnings
+
+from src.pipeline import RippleETAPipeline
+
 warnings.filterwarnings('ignore')
+
 
 def run_scalability_test():
     print("Loading RippleETA Pipeline for Scalability Test...")
     p = RippleETAPipeline()
     p._load()
-    
-    print("\nLoading batch of 3,000 train journeys (Simulating daily IR coaching traffic)...")
-    df = pd.read_parquet(p.config["data"]["processed_path"])
-    
-    # Sample 3000 rows
-    test_batch = df.sample(n=3000, replace=True, random_state=42)
-    train_ids = test_batch['train_number'].astype(str).tolist()
-    
-    print("Running batch inference (XGBoost + MAPIE bounds)...")
+    assert p._data is not None
+
+    print(
+        "\nSampling batch of 3,000 train journeys (simulating daily IR coaching "
+        "traffic) from the already feature-engineered dataset..."
+    )
+    test_batch = p._data.sample(n=3000, replace=True, random_state=42).reset_index(drop=True)
+
+    print("Running batch inference (XGBoost + MAPIE bounds + SHAP), one row at a time...")
     start_time = time.time()
-    
+
     success_count = 0
-    for tid in train_ids:
+    failure_count = 0
+    for idx in range(len(test_batch)):
+        row = test_batch.iloc[[idx]]
         try:
-            # Bypass the graph lookup for raw ML speed test
-            # In a real batch pipeline, we'd use .predict() on the dataframe
-            # But here we just want to prove the overhead is minimal per train
-            _ = p.model.predict(test_batch.head(1).drop(columns=['actual_delay_minutes', 'delayed_gt_15min', 'journey_date'], errors='ignore'))
+            # predict_features() bypasses the per-train-ID lookup and graph
+            # stage so this measures raw per-row inference latency
+            # (XGBoost + MAPIE + SHAP), matching the original intent of this
+            # benchmark.
+            _ = p.predict_features(row)
             success_count += 1
-        except Exception:
-            pass
-            
+        except (KeyError, ValueError) as exc:
+            failure_count += 1
+            print(f"  Row {idx} failed: {exc!r}")
+
     end_time = time.time()
-    
+
     total_time = end_time - start_time
-    ms_per_train = (total_time / 3000) * 1000
-    
+    n = len(test_batch)
+    ms_per_train = (total_time / n) * 1000 if n else 0.0
+
     print("\n=== SCALABILITY PROOF ===")
-    print(f"Total Trains Processed: 3,000")
+    print(f"Total Trains Processed: {n}")
+    print(f"Successful Predictions: {success_count}")
+    print(f"Failed Predictions: {failure_count}")
     print(f"Total Inference Time: {total_time:.3f} seconds")
     print(f"Latency per Train: {ms_per_train:.2f} ms")
-    print("Conclusion: The system easily scales to the entire Indian Railways network on a single standard CPU node.")
+    if success_count == n:
+        print(
+            "Conclusion: The system easily scales to the entire Indian Railways "
+            "network on a single standard CPU node."
+        )
+    else:
+        print(
+            f"Conclusion: {failure_count} of {n} rows failed inference — "
+            "investigate before citing this as a scale proof."
+        )
+
 
 if __name__ == "__main__":
     run_scalability_test()

@@ -24,6 +24,8 @@ class FakePredictionService:
             "anomaly_flag": anomaly,
             "uncertainty_mode": anomaly,
             "conflict_adjustment_min": 5.0,
+            "shap_explanation": None if anomaly else {"prior_leg_delay": 55.0, "schedule_buffer_hours": 30.0},
+            "shap_text": "Explanation unavailable." if anomaly else "55% rake delay; 30% schedule buffer",
         }
 
 
@@ -38,6 +40,16 @@ def test_core_prediction_is_successful():
     assert body["p10_delay_min"] == 20.0
     assert body["p50_delay_min"] == 35.0
     assert body["p90_delay_min"] == 55.0
+
+
+def test_prediction_includes_shap_explanation():
+    response = client.get("/predict/12301")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["shap_explanation"] is not None
+    assert body["shap_explanation"]["prior_leg_delay"] == 55.0
+    assert "rake delay" in body["shap_text"]
 
 
 def test_invalid_train_id_returns_clear_404():

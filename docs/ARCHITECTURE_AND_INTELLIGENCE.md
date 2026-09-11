@@ -31,8 +31,8 @@ This document details the complete backend architecture, mathematical models, an
 
 ## 6. Continuous Refinement Loop (MLOps)
 * **Tech Stack:** `sqlite3`, Python (`jobs/nightly_recalibration.py`).
-* **Current prototype:** Predictions are logged locally, and the nightly script can evaluate a candidate in backtest mode against a deterministic chronological holdout. The candidate is not written to the deployed path, and there is no live rolling-MAE or ADWIN detector.
-* **Phase 2 roadmap:** Add live ground-truth monitoring, rolling-MAE plus ADWIN change-point detection, and an alert-driven, human-reviewed retraining process. Promotion must be gated by non-regressing pinball loss and coverage on a frozen holdout.
+* **Current prototype:** Predictions are logged locally. The nightly job computes MAE on a frozen, deterministic chronological holdout (a backtest slice, not live traffic) and applies a real, working threshold-based drift trigger — it retrains a candidate only when that MAE exceeds a configurable threshold (15 minutes by default). Any candidate is then passed through the fail-closed `evaluate_promotion()` gate and is never written to the deployed path regardless of outcome. This is a genuine, defensible MLOps loop — it is a static threshold, not statistical change-point detection.
+* **Phase 2 roadmap:** Replace the static threshold with live ground-truth monitoring and statistical change-point detection (ADWIN / Page-Hinkley) at the same trigger point, plus an alert-driven, human-reviewed retraining process. Promotion continues to be gated by non-regressing pinball loss and coverage on a frozen holdout.
 
 ## 7. The API Layer
 * **Tech Stack:** `FastAPI`, `uvicorn`, `pydantic`.

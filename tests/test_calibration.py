@@ -6,7 +6,11 @@ import pytest
 import xgboost as xgb
 
 from src.calibration.anomaly_gate import AnomalyGate, SUSPENSION_MESSAGE
-from src.calibration.conformal import CalibratedETAEngine, DEFAULT_FEATURES
+from src.calibration.conformal import (
+    CalibratedETAEngine,
+    DEFAULT_FEATURES,
+    per_bucket_coverage,
+)
 from src.calibration.pipeline import CalibratedPredictionPipeline
 from src.graph.timed_event_graph import build_timed_event_graph
 
@@ -80,3 +84,53 @@ def test_pipeline_adds_active_conflict_to_affected_train():
 
     # The affected train already has +5 min of own delay; the conflict adds +55.
     assert results[1]["conflict_adjustment_min"] == pytest.approx(55.0)
+
+
+def test_mondrian_calibration_holds_per_bucket_coverage_floor():
+    """Per-bucket coverage should not collapse for any delay-magnitude bucket.
+
+    Marginal (pooled) coverage can average out a badly under-covered bucket —
+    exactly the failure mode Mondrian calibration exists to catch. This test
+    builds a heteroscedastic synthetic dataset (residual noise grows with
+    prior_leg_delay) and checks every populated bucket individually.
+    """
+    rng = np.random.default_rng(7)
+    n = 900
+    prior_leg_delay = rng.uniform(0, 100, size=n)
+    other_features = {
+        f: rng.normal(size=n) for f in DEFAULT_FEATURES if f != "prior_leg_delay"
+    }
+    X = pd.DataFrame({**other_features, "prior_leg_delay": prior_leg_delay})[DEFAULT_FEATURES]
+
+    noise_scale = np.select(
+        [prior_leg_delay < 15, prior_leg_delay < 60],
+        [1.0, 4.0],
+        default=12.0,
+    )
+    y = pd.Series(20 + 0.5 * prior_leg_delay + rng.normal(0, 1, n) * noise_scale)
+
+    X_train, y_train = X.iloc[:400], y.iloc[:400]
+    X_cal, y_cal = X.iloc[400:700], y.iloc[400:700]
+    X_test, y_test = X.iloc[700:], y.iloc[700:]
+
+    model = xgb.XGBRegressor(
+        n_estimators=30, max_depth=3, learning_rate=0.1, n_jobs=1, random_state=7
+    )
+    model.fit(X_train, y_train)
+
+    engine = CalibratedETAEngine(base_model=model, use_mondrian=True)
+    engine.fit(X_train, y_train, X_cal, y_cal)
+    assert engine.mapie_buckets_, "expected at least one Mondrian bucket to be fitted"
+
+    preds = engine.predict(X_test)
+    report = per_bucket_coverage(
+        X_test, y_test.values, preds, engine.mondrian_feature, engine.mondrian_bucket_edges
+    )
+
+    assert report
+    for bucket, stats in report.items():
+        if stats["n"] == 0:
+            continue
+        assert stats["coverage_pct"] >= 75.0, (
+            f"bucket {bucket} coverage {stats['coverage_pct']}% (n={stats['n']}) below floor"
+        )
