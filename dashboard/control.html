@@ -906,6 +906,13 @@
             One delayed train is an event. A railway is a network of interacting events. RippleETA models how delays propagate through shared railway sections, headways, and downstream train interactions &mdash; instead of treating every train as an isolated prediction.
           </p>
 
+          <!-- Shown when the selected train (top bar) has no schedule data in
+               this fixed two-train graph scenario. loadNetwork() in app.js
+               toggles this via has_network_data_for_requested_train from
+               /graph/demo. Hidden by default so it never shows for 12301/56789
+               or before the first fetch completes. -->
+          <div id="net-no-data-banner" class="net-no-data-banner" hidden></div>
+
           <!-- Operational Identity Strip: Answers First-Viewport Questions -->
           <div class="net-identity-strip">
             <div class="net-ident-item">

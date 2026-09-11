@@ -361,9 +361,16 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             model_loaded=prediction_service.model_loaded,
         )
 
+    # The only two trains the fixed timed-event-graph scenario actually has
+    # schedule data for (src/graph/worked_example.py's SCHEDULES_DEMO). Any
+    # other train_id genuinely has no network topology behind it — see the
+    # STATUS comment on GraphDemoResponse.
+    GRAPH_DEMO_TRAINS = {"12301", "56789"}
+
     @app.get("/graph/demo", response_model=GraphDemoResponse, tags=["graph"])
-    def graph_demo() -> GraphDemoResponse:
+    def graph_demo(train_id: str | None = Query(default=None)) -> GraphDemoResponse:
         result = run_worked_example(verbose=False)["scenario_b"]
+        has_data = train_id is None or train_id in GRAPH_DEMO_TRAINS
         return GraphDemoResponse(
             status="REPLAYED STATION-PAIR SCENARIO",
             section="KANPUR -> ALLAHABAD",
@@ -371,6 +378,8 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             affected_train="12301",
             source_delay_min=15.0,
             base_delay_min=55.0,
+            requested_train_id=train_id,
+            has_network_data_for_requested_train=has_data,
             conflict_addition_min=result["conflict_min"],
             final_delay_min=result["alld_delay_min"],
             historical_stations=[
@@ -402,6 +411,13 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             message=(
                 "Real timed-event graph computation on a corrected two-train "
                 "station-pair replay; not a live network backtest."
+                if has_data
+                else (
+                    f"No network topology data for Train {train_id}. This graph "
+                    "engine only has schedule data for Trains 12301/56789 on the "
+                    "Kanpur→Allahabad corridor — showing that reference "
+                    "scenario instead."
+                )
             ),
             source_type="local_replay",
             generated_at=now_utc(),

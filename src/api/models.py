@@ -67,6 +67,20 @@ class GraphDemoResponse(BaseModel):
     generated_at: datetime | None = None
     historical_stations: list[StationHistory] = Field(default_factory=list)
 
+    # STATUS: PARTIAL parameterization (audit follow-up, Task 4). The
+    # underlying timed-event graph is built from exactly two hardcoded
+    # train schedules (12301, 56789) on one fixed Kanpur->Allahabad
+    # corridor (src/graph/worked_example.py) — there is no route/schedule
+    # data for any other train, so a genuinely different network diagram
+    # per arbitrary train_id is not implementable without building out
+    # real timetable data for every other train (a data-modeling task,
+    # not an endpoint-parameter fix). What IS real: the endpoint now
+    # accepts and responds to which of the two in-scenario trains was
+    # requested. For any other train_id, it says so honestly instead of
+    # silently rendering the fixed scenario as if it applied.
+    requested_train_id: str | None = None
+    has_network_data_for_requested_train: bool = True
+
 
 class SupportedTrain(BaseModel):
     train_id: str

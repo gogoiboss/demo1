@@ -1909,6 +1909,21 @@ tr.row-error td {
   text-align: left;
 }
 tr.row-error .row-error-icon { margin-right: 6px; }
+
+/* Control Room: shown when the selected train has no schedule data in the
+   fixed two-train graph scenario (loadNetwork() in app.js). Same visual
+   language as tr.row-error above — an honest limitation, not a data error. */
+.net-no-data-banner {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  color: var(--danger, #E53E3E);
+  background: rgba(229, 62, 62, 0.08);
+  border: 1px solid rgba(229, 62, 62, 0.25);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .junction-row-active td { background: rgba(11,36,71,.04); }
 .jt-train { font-weight: 600; font-size: 13px; white-space: nowrap; color: var(--primary-900); }
 .jt-selected-tag { font-size: 8px; font-weight: 400; color: var(--primary-900); border: 1px solid rgba(11,36,71,.4); padding: 2px 5px; margin-left: 8px; vertical-align: middle; }

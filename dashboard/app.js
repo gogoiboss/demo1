@@ -1443,13 +1443,27 @@ let propagationAnimationTimer = null;
 let propagationStepIndex = 0;
 
 async function loadNetwork() {
+  const selectedTrain = trainId();
   const [graph, stats, prediction] = await Promise.all([
-    api('/graph/demo').catch(() => null),
+    api(`/graph/demo?train_id=${encodeURIComponent(selectedTrain)}`).catch(() => null),
     api('/api/stats').catch(() => null),
-    api(`/predict/${encodeURIComponent(trainId())}`).catch(() => null),
+    api(`/predict/${encodeURIComponent(selectedTrain)}`).catch(() => null),
   ]);
 
   if (prediction) state.lastPrediction = prediction;
+
+  // The underlying timed-event graph only has schedule data for trains
+  // 12301/56789 on the fixed Kanpur->Allahabad corridor (see the STATUS
+  // comment on GraphDemoResponse) — say so honestly instead of silently
+  // showing that fixed scenario as if it reflected the selected train.
+  const noDataBanner = $('net-no-data-banner');
+  if (noDataBanner) {
+    const hasData = graph ? graph.has_network_data_for_requested_train !== false : true;
+    noDataBanner.hidden = hasData;
+    if (!hasData) {
+      noDataBanner.textContent = `⚠ No network topology data for Train ${selectedTrain} — this graph engine only covers Trains 12301/56789 on the Kanpur → Allahabad corridor. Showing that reference scenario below.`;
+    }
+  }
 
   const delayingTrain = graph?.delaying_train || '56789';
   const affectedTrain = graph?.affected_train || '12301';
