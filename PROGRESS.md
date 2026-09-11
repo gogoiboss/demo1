@@ -1,5 +1,10 @@
 # Progress Log
 
+- **2026-09-11 (Overprediction Framing & Limitations Disclosure Session)**:
+  - **TASK 1 — Q46 Sharpened:** Replaced Q46 in `docs/judge_prep/02_JUDGE_QA.md` with the full 45% bucket-scale framing (670 of 1,500 test rows), explaining over-reliance on `prior_leg_delay` as a static value, mitigation via calibrated bounds (Pinball Loss 7.23 vs 8.12 average), and the prioritized fix (explicit in-journey recovery rate feature). Kept Q8, Q11, and Q16 untouched.
+  - **TASK 2 — Formally Disclosed in `docs/LIMITATIONS.md`:** Added Section 9 disclosing the systematic overprediction on recovering trains (~25 min predicted vs ~2 min actual across 45% of test set), the partial compensation by P10-P90 conformal bounds, and the future recovery-rate feature roadmap item.
+  - **TASK 3 — Cross-Check & Verification:** Confirmed consistency across all documents (`docs/RESULTS.md`, `docs/judge_prep/02_JUDGE_QA.md`, `docs/LIMITATIONS.md`). Re-ran full test suite (`pytest -v`): 68/68 passed.
+
 - **2026-09-11 (Evaluation Reconcile & Judge Q&A Session)**:
   - **TASK 1 — Inverted Delay-Magnitude Diagnosis:** Diagnosed counterintuitive 0–15 min MAE (26.78 min) vs 15–60 min MAE (13.63 min). Confirmed empirical cause: regression to the mean in XGBoost (predictions concentrate around 25–38 min near the ~30 min dataset mean). For near-punctual trains (mean actual 2.09 min), predicting ~25 min yields ~23–26 min MAE; for 15–60 min trains (mean actual 36.57 min), predicting ~30 min lands near the actual delay center, yielding a deceptively low 13.63 min MAE. Added a disclosure note to `docs/RESULTS.md`.
   - **TASK 2 — Missing Short-Range Forecast Horizon Bucket:** Confirmed dataset sparsity — all journeys in the dataset have scheduled durations between 5.0 and 48.0 hours; N=0 for `<4h` is expected data sparsity, not a bug. Added an explanatory note to `docs/RESULTS.md`.

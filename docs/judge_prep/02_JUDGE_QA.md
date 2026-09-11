@@ -49,11 +49,8 @@
 ### 🔴 Q46. "Did your baseline comparison surprise you at all? Did the network model actually help?"
 
 **Answer:**
-> "Yes, in two specific ways that reshaped our understanding:
->
-> First, on point-estimate accuracy (MAE), a per-train XGBoost model without cross-journey rake features tied RippleETA (28.15 vs 28.22 minutes). But when evaluating uncertainty bounds via **Pinball Loss**, RippleETA won decisively — cutting loss from 14.08 down to 8.12 (a **42% reduction**). The network signal and MAPIE calibration don't just guess a single number better; they construct calibrated, reliable arrival windows.
->
-> Second, segmenting by delay magnitude revealed a **regression-to-the-mean** pattern: for near-punctual trains (0–15 min actual delay, mean 2.09 min), the model predicted ~25 minutes (MAE 26.78 min), whereas for moderately delayed trains (15–60 min actual delay, mean 36.57 min), predicting ~30 minutes yielded a low 13.63 min MAE. Point predictions tend to pull toward the dataset mean (~30 min), which is precisely why point ETAs in existing systems (like NTES) mislead users and why calibrated P10–P90 intervals are essential."
+> "Yes — and there's a real bias worth naming directly rather than glossing over: the model over-relies on `prior_leg_delay` as a static value, so for trains that actually recover and run close to on-time, we systematically overpredict — averaging roughly 25 minutes predicted against roughly 2 minutes actual for that segment. We're not going to call that a minor footnote: it's our largest single bucket, 670 of 1,500 test rows, about 45% of the entire test set. What limits the real-world damage is that this is exactly the failure mode calibrated intervals exist to handle — the P10 bound on these predictions runs meaningfully lower than the P50 point estimate, and the bucket's Pinball Loss (7.23) stays close to our overall average and far ahead of any point-estimate-only baseline on the same segment. The fix we'd prioritize next isn't a bigger model — it's an explicit recovery feature: something that tells the model when a train has already started closing the gap on its inherited delay, rather than treating prior-leg delay as fixed all the way through the journey."
+
 
 ---
 
