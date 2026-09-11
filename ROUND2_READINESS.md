@@ -54,7 +54,7 @@
 
 ### Government-readiness
 - [x] U. Deployment topology — DOCUMENTED: `docs/ARCHITECTURE_AND_INTELLIGENCE.md` covers on-prem/NIC/MeghRaj, CRIS/RTIS integration path
-- [ ] V. Low-bandwidth mode — NOT yet done, low priority, stretch goal this session
+- [ ] V. Low-bandwidth mode — CHECKED THIS SESSION: confirmed no low-bandwidth/2G fallback exists anywhere in `dashboard/` or `frontend/` (grepped for it directly). Genuinely lowest priority per this session's instructions — documented as an acknowledged, unaddressed gap in `docs/LIMITATIONS.md` rather than spending time building one
 
 ---
 
