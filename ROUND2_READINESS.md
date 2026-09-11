@@ -40,7 +40,7 @@
 ### Automation
 - [~] L. Offline seed — `Makefile` has `make seed` / `make demo` targets and `scripts/seed_db.py` exists; VERIFY it actually loads a real recorded capture, not just a stub
 - [x] M. CI green check — WIDENED this session with pinned ruff + `pyproject.toml` rule selection, covering `src/graph/`, `src/calibration/`, `src/api/`, `src/features/`, `src/pipeline.py`
-- [ ] N. Git history secret scan — NOT yet done, do it this session (see Task 4 below)
+- [x] N. Git history secret scan — DONE THIS SESSION. Scanned `git log -p --all` for key/secret/password/token/bearer patterns and specifically `.env`/`*railradar*`/`*config*` file history. Result: no real third-party credential was ever committed — RailRadar/NTES API key references in history are all clearly-labeled placeholders (`rr_live_YOUR_API_KEY`, `your-ministry-key`) or correctly sourced from environment variables; only `.env.example` (never a real `.env`) was ever tracked. **One real, currently-live weakness found and fixed**: `src/api/auth.py` had a hardcoded fallback JWT signing secret (`'super-secret-rippleeta-key'`) committed to git and used whenever the `JWT_SECRET` env var was unset — anyone with repo access could read it and forge valid session tokens. Fixed to generate a fresh random secret per process start instead when unset (sessions just don't survive a restart, which is safe); `.env.example` now documents setting a real `JWT_SECRET` for production. This was an internal secret with no external provider to rotate — the fix itself is the mitigation.
 
 ### Testing
 - [x] O. Propagation boundary tests — VERIFIED: `pytest tests/test_graph.py tests/test_graph_boundaries.py -v` → 12 passed (8 + 4, including the new incremental-propagation regression test)
