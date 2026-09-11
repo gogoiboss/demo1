@@ -1180,6 +1180,12 @@
               <p class="relief-explanation-msg" id="hoer-status">
                 Evaluating focal train crew constraints...
               </p>
+
+              <!-- Audit follow-up (Task 5): degraded/stale badge — a crew
+                   controller dispatching relief off a degraded or stale
+                   prediction needs to see that before committing.
+                   Hidden until loadCrew() finds one. -->
+              <div id="crew-degraded-stale-badge" class="degraded-stale-badge" hidden></div>
             </div>
 
             <div>

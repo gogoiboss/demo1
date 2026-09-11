@@ -47,6 +47,51 @@ function tableSyncSummary(total, failedCount) {
   return `${total - failedCount}/${total} loaded &mdash; ${failedCount} failed to load`;
 }
 
+// Audit follow-up (Task 5): shap_explanation/shap_text are computed and
+// returned by /predict/{train_id} but were never rendered anywhere in the
+// frontend before this. Shared across Passenger and Station Master.
+function renderShapText(prediction, elementId) {
+  const el = $(elementId);
+  if (!el) return;
+  if (prediction && prediction.shap_text) {
+    el.textContent = `Why this prediction: ${prediction.shap_text}`;
+    el.hidden = false;
+  } else {
+    el.hidden = true;
+  }
+}
+
+// Audit follow-up (Task 5): `degraded` and `stale_since` are computed by
+// the backend's graceful-degradation work (ML-failure persistence
+// fallback, stale-feed interval widening) but were never read by any
+// frontend page — a degraded or stale response looked identical to a
+// normal, fully-confident one. Shared across Passenger, Station Master,
+// Crew Controller (the roles that most need to know the data underneath
+// their decision isn't fully trustworthy right now).
+function renderDegradedStaleBadge(prediction, elementId) {
+  const el = $(elementId);
+  if (!el) return;
+  if (!prediction) {
+    el.hidden = true;
+    return;
+  }
+  if (prediction.degraded) {
+    el.textContent = '⚠ DEGRADED — ML prediction unavailable. Showing a persistence-baseline estimate, not a calibrated forecast.';
+    el.className = 'degraded-stale-badge is-degraded';
+    el.hidden = false;
+  } else if (prediction.stale_since) {
+    let staleStr = prediction.stale_since;
+    try {
+      staleStr = new Date(prediction.stale_since).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }) + ' IST';
+    } catch { /* keep raw string if unparseable */ }
+    el.textContent = `⚠ STALE FEED — live data has been stale since ${staleStr}. Interval widened to reflect reduced confidence.`;
+    el.className = 'degraded-stale-badge is-stale';
+    el.hidden = false;
+  } else {
+    el.hidden = true;
+  }
+}
+
 async function api(path, options = {}) {
   let token = localStorage.getItem('rippleeta_token') || sessionStorage.getItem('rippleeta_token');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
@@ -201,6 +246,8 @@ async function loadPassenger() {
   setText('ticket-window', formatWindow(prediction));
   setText('ticket-p50', prediction.p50_delay_min == null ? 'P50: --' : `P50: ${prediction.p50_delay_min.toFixed(1)} min`);
   setText('ticket-provenance', `${prediction.provenance?.data_source || 'historical snapshot'} · ${prediction.status}`);
+  renderShapText(prediction, 'pax-shap-text');
+  renderDegradedStaleBadge(prediction, 'pax-degraded-stale-badge');
 
   // Anomaly check
   const isSuspended = prediction.anomaly_flag || (prediction.status && prediction.status.includes('SUSPENDED'));
@@ -403,6 +450,8 @@ async function loadStation() {
   setText('sm-status-badge', prediction.status);
   setText('sm-hero-delay', `+${p50.toFixed(1)} MIN DELAY`);
   setText('sm-ingest-time', new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date()) + ' IST');
+  renderShapText(prediction, 'sm-shap-text');
+  renderDegradedStaleBadge(prediction, 'sm-degraded-stale-badge');
 
   // Dominant Decision Card
   setText('triage-decision', decision);
@@ -630,6 +679,7 @@ async function loadCrew() {
   setText('crew-train-title', `TRAIN ${prediction.train_id} • ${trainMeta.name.toUpperCase()}`);
   setText('crew-current-location', trainMeta.location || 'Approaching division outer');
   setText('crew-hero-delay', `+${p50.toFixed(1)} MIN`);
+  renderDegradedStaleBadge(prediction, 'crew-degraded-stale-badge');
 
   // Realistic HOER continuous duty calculations (assumes 9h statutory ceiling)
   // Elapsed duty is derived from running transit progress

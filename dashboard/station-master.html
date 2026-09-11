@@ -1056,6 +1056,15 @@
                 Defer platform commitment until uncertainty narrows.
               </p>
 
+              <!-- Audit follow-up (Task 5): degraded/stale badge — the
+                   Station Master is exactly the role that needs to know
+                   when the data behind a platform decision is degraded or
+                   stale. Hidden until loadStation() finds one. -->
+              <div id="sm-degraded-stale-badge" class="degraded-stale-badge" hidden></div>
+
+              <!-- Audit follow-up (Task 5): SHAP explanation line. -->
+              <p id="sm-shap-text" class="sm-shap-text" hidden></p>
+
               <!-- Quick Decision Breakdown Pills -->
               <div style="display:flex; gap:1.25rem; flex-wrap:wrap; font-family:var(--mono); font-size:0.8rem; color:var(--muted); margin-bottom:1rem;">
                 <span>FOCAL TRAIN: <strong style="color:var(--primary);" id="triage-train">20507</strong></span>

@@ -1924,6 +1924,41 @@ tr.row-error .row-error-icon { margin-right: 6px; }
   font-size: 12px;
   line-height: 1.5;
 }
+
+/* ── SHAP explanation line (shared: Passenger, Station Master) ───────────
+   Audit follow-up Task 5: shap_explanation/shap_text are computed and
+   returned by /predict/{train_id} but were never rendered anywhere in the
+   frontend before this. */
+.pax-shap-text, .sm-shap-text {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  background: rgba(232, 163, 61, 0.08);
+  border-left: 2px solid var(--signal);
+}
+
+/* ── Degraded / stale-feed indicator (shared: Passenger, Station Master, ──
+   Crew Controller) — audit follow-up Task 5: `degraded` and `stale_since`
+   were computed by the graceful-degradation work but never read by any
+   frontend page, so a degraded/stale response looked identical to normal.
+   `.is-degraded` (ML unavailable, persistence baseline) and `.is-stale`
+   (feed stale, interval widened) get the same red treatment; distinct text
+   set in JS explains which one applies. */
+.degraded-stale-badge {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--danger, #E53E3E);
+  background: rgba(229, 62, 62, 0.1);
+  border: 1px solid rgba(229, 62, 62, 0.35);
+  border-radius: 4px;
+}
 .junction-row-active td { background: rgba(11,36,71,.04); }
 .jt-train { font-weight: 600; font-size: 13px; white-space: nowrap; color: var(--primary-900); }
 .jt-selected-tag { font-size: 8px; font-weight: 400; color: var(--primary-900); border: 1px solid rgba(11,36,71,.4); padding: 2px 5px; margin-left: 8px; vertical-align: middle; }

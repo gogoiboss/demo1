@@ -1209,6 +1209,18 @@
                 <p id="ticket-provenance" class="ticket-provenance-text">Source: historical snapshot &bull; PREDICTION ACTIVE</p>
               </div>
 
+              <!-- Audit follow-up (Task 5): SHAP is computed and returned by
+                   /predict/{train_id} but was never rendered anywhere.
+                   Hidden until loadPassenger() finds shap_text in the
+                   response. -->
+              <p id="pax-shap-text" class="pax-shap-text" hidden></p>
+
+              <!-- Audit follow-up (Task 5): degraded/stale_since were
+                   computed by the backend's graceful-degradation work but
+                   never read anywhere in the frontend. Hidden until
+                   loadPassenger() finds degraded=true or stale_since set. -->
+              <div id="pax-degraded-stale-badge" class="degraded-stale-badge" hidden></div>
+
             </div>
           </article>
         </section>
