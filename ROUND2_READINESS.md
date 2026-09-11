@@ -59,6 +59,11 @@
 
 ---
 
-## What to do this session
+## Remaining gaps (as of 2026-09-11, verification-pass session 2)
 
-See the numbered tasks in the accompanying prompt. Update the checkboxes above as you go — do not mark anything `[x]` without having actually run it and seen it pass.
+All genuinely blocked on the missing dataset in this environment, or out of scope for a code-only session — not fabricated, not silently skipped:
+- **Recorded RailRadar/NTES capture** and **Item L (offline seed)** — the same underlying gap. The consuming code (`scripts/seed_db.py`, `railradar_client.py`'s replay loader) is real and correct; nothing exists at `data/replay/` to consume. Requires a live multi-hour data-collection session.
+- **Item D (4-model baseline real numbers)**, **Item E (real per-segment numbers)**, **Item R (backtest harness)**, **Mondrian real per-bucket numbers (Item F)** — all logic is implemented and tested against synthetic data; none has been run against the real dataset because `data/` does not exist anywhere in this environment (confirmed via exhaustive search across four sessions).
+- **One full stakeholder dashboard verified end-to-end with live/replay data** — needs the real dataset plus a live browser session; not attempted.
+
+Maintenance note for future sessions: keep updating the checkboxes above as items are verified — do not mark anything `[x]` without having actually run it and seen it pass.
