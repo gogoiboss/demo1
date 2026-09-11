@@ -1894,6 +1894,21 @@ body::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-i
 .junction-grid th { text-align: left; color: var(--text-muted); letter-spacing: .1em; font-size: 9px; padding: 0 14px 10px 0; border-bottom: 1px solid var(--brass-line); white-space: nowrap; }
 .junction-grid td { padding: 12px 14px 12px 0; border-bottom: 1px solid rgba(176,141,87,.15); vertical-align: middle; color: var(--text); }
 .junction-grid tbody tr:last-child td { border-bottom: none; }
+
+/* ── Multi-train table row-level fetch failure (shared across every ──────
+   dispatch-table / matrix-table / junction-table on the 7 stakeholder
+   pages) — a failed per-train fetch must show as a visible row, never
+   silently vanish from the table. */
+tr.row-error td {
+  padding: 10px 14px;
+  color: var(--danger, #E53E3E);
+  background: rgba(229, 62, 62, 0.08);
+  border-bottom: 1px solid rgba(229, 62, 62, 0.25);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-align: left;
+}
+tr.row-error .row-error-icon { margin-right: 6px; }
 .junction-row-active td { background: rgba(11,36,71,.04); }
 .jt-train { font-weight: 600; font-size: 13px; white-space: nowrap; color: var(--primary-900); }
 .jt-selected-tag { font-size: 8px; font-weight: 400; color: var(--primary-900); border: 1px solid rgba(11,36,71,.4); padding: 2px 5px; margin-left: 8px; vertical-align: middle; }

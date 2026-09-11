@@ -24,6 +24,29 @@ function formatErrorMessage(error) {
   return 'Request failed. Please check connection.';
 }
 
+// Renders a visible error row for a train whose per-row fetch(es) failed, so
+// a multi-train table never silently shrinks — a failed row is shown, not
+// dropped. `colspan` must match the table's real column count.
+function failedRowHtml(tid, colspan) {
+  const meta = TRAIN_NAMES[tid] || { name: 'Unknown train' };
+  return `
+    <tr class="row-error">
+      <td colspan="${colspan}">
+        <span class="row-error-icon" aria-hidden="true">&#9888;</span>
+        Train <strong>${tid}</strong> (${meta.name}) &mdash; failed to load. Retry or refresh.
+      </td>
+    </tr>
+  `;
+}
+
+// Summarizes a multi-train table's fetch results into a short banner line
+// ("7/7 trains loaded" or "5/7 loaded &mdash; 2 failed") instead of leaving
+// failures invisible.
+function tableSyncSummary(total, failedCount) {
+  if (failedCount === 0) return `${total}/${total} trains loaded`;
+  return `${total - failedCount}/${total} loaded &mdash; ${failedCount} failed to load`;
+}
+
 async function api(path, options = {}) {
   let token = localStorage.getItem('rippleeta_token') || sessionStorage.getItem('rippleeta_token');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
@@ -540,11 +563,13 @@ async function loadStation() {
 
   // Populate Multi-Train Junction Triage Matrix Table
   const supportedTrains = ['20507', '12301', '12002', '12004', '12951', '22436', '56789'];
-  Promise.all(supportedTrains.map(tid => api(`/predict/${tid}`).then(p => ({ tid, p })).catch(() => null)))
+  Promise.all(supportedTrains.map(tid => api(`/predict/${tid}`).then(p => ({ tid, p, ok: true })).catch(() => ({ tid, p: null, ok: false }))))
     .then(results => {
       const tbody = $('multi-train-junction-body');
       if (!tbody) return;
-      tbody.innerHTML = results.filter(Boolean).map(({ tid, p }) => {
+      const failedCount = results.filter(r => !r.ok).length;
+      tbody.innerHTML = results.map(({ tid, p, ok }) => {
+        if (!ok) return failedRowHtml(tid, 7);
         const meta = TRAIN_NAMES[tid] || { name: 'Express Train', route: 'Corridor' };
         const tP10 = p.p10_delay_min != null ? p.p10_delay_min : 0;
         const tP50 = p.p50_delay_min != null ? p.p50_delay_min : 20;
@@ -838,8 +863,12 @@ async function loadCrew() {
   )).then(results => {
     const tbody = $('multi-train-crew-body');
     if (!tbody) return;
-    // Filter only on prediction data existing (crew-controller API may fail; we fallback gracefully)
-    tbody.innerHTML = results.filter(r => r.p).map(({ tid, p, c }) => {
+    // A failed crew-controller fetch (c === null) still renders a row with a
+    // graceful fallback deadline below. Only a failed prediction fetch
+    // (p === null) is unrecoverable for this row — show it as a visible
+    // error row rather than silently dropping it.
+    tbody.innerHTML = results.map(({ tid, p, c }) => {
+      if (!p) return failedRowHtml(tid, 8);
       const meta = TRAIN_NAMES[tid] || { name: 'Express Train', route: 'Corridor Transit' };
       const tP10 = p.p10_delay_min != null ? p.p10_delay_min : 0;
       const tP50 = p.p50_delay_min != null ? p.p50_delay_min : 20;
@@ -1098,7 +1127,8 @@ async function loadFeeder() {
   )).then(results => {
     const tbody = $('multi-train-feeder-body');
     if (!tbody) return;
-    tbody.innerHTML = results.filter(r => r.p && r.f).map(({ tid, p, f }) => {
+    tbody.innerHTML = results.map(({ tid, p, f }) => {
+      if (!p || !f) return failedRowHtml(tid, 8);
       const meta = TRAIN_NAMES[tid] || { name: 'Express Train', route: 'Corridor Transit' };
       const tP50 = p.p50_delay_min != null ? p.p50_delay_min : 20;
       const tP90 = p.p90_delay_min != null ? p.p90_delay_min : 50;
@@ -1341,7 +1371,8 @@ async function loadMaintenance() {
   )).then(results => {
     const tbody = $('multi-train-maint-body');
     if (!tbody) return;
-    tbody.innerHTML = results.filter(r => r.m).map(({ tid, p, m }) => {
+    tbody.innerHTML = results.map(({ tid, p, m }) => {
+      if (!m) return failedRowHtml(tid, 8);
       const meta = TRAIN_NAMES[tid] || { name: 'Express Train', route: 'Corridor Transit' };
       const tP50 = p?.p50_delay_min != null ? p.p50_delay_min : 20.0;
       const tP90 = p?.p90_delay_min != null ? p.p90_delay_min : 50.0;
@@ -1585,7 +1616,8 @@ async function loadNetwork() {
   )).then(results => {
     const tbody = $('multi-train-network-body');
     if (!tbody) return;
-    tbody.innerHTML = results.filter(r => r.p).map(({ tid, p }) => {
+    tbody.innerHTML = results.map(({ tid, p }) => {
+      if (!p) return failedRowHtml(tid, 8);
       const meta = TRAIN_NAMES[tid] || { name: 'Express Train', route: 'Corridor Transit' };
       const tP50 = p.p50_delay_min != null ? p.p50_delay_min : 25.0;
       const tP90 = p.p90_delay_min != null ? p.p90_delay_min : 60.0;
