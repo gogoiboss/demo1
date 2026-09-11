@@ -102,3 +102,57 @@ Checked every `.execute(`/`.executemany(` call against `predictions_history.db` 
 **CHECKPOINT COMMIT:** `security: backend dependency, secrets, and injection audit`
 
 ---
+
+## 2. Frontend security findings (Critical / Important / Minor)
+
+Scope: `frontend/` (pre-existing but almost entirely rewritten in commit `998be4b`), `dashboard/` (also pre-existing, also rewritten in that commit), and `eta/` (brand new 3D viewer added in that same commit). Treated as unverified per the audit brief. No `package.json` exists anywhere in the repo — both `frontend/` and `dashboard/` are genuinely zero-dependency vanilla HTML/CSS/JS, so `npm audit` is **not applicable**, not silently skipped.
+
+### Important — logout does not actually end the session
+
+`frontend/js/api.js`'s `RippleETAClient.logout()` calls `POST /api/auth/logout` (`api.js:118`). **This route does not exist in `src/api/app.py`** — grepped the full route table (`@app.get`/`@app.post` decorators), confirmed no `/api/auth/logout` anywhere. The call 404s, is caught (`frontend/js/auth.js:78-86`'s `signOut()` wraps it in `try/catch/finally`), and execution continues: the in-memory user object and `localStorage` auth cache are cleared, giving the UI every visual sign of a successful logout.
+
+**What actually happens server-side: nothing.** `src/api/app.py` never calls `response.delete_cookie(...)` anywhere (confirmed — no such call exists in the file). The httponly `rippleeta_session` cookie set at login (`app.py:366`, `:388`) is a 12-hour JWT and is never invalidated. On a shared or kiosk demo machine, clicking "Sign Out" clears the client-side UI state but leaves a live, valid session cookie in the browser for up to 12 hours — the next person to open the app (or a script with cookie access) is still authenticated as the previous user. This is a real, currently-reachable bug (`signOut()` is wired to the real UI, not dead code), not a hypothetical.
+
+**Not fixed here** — this is a small, well-understood fix (add a `POST /api/auth/logout` route that calls `response.delete_cookie("rippleeta_session")`) but touches the backend's route table, which Part 2's brief scopes as frontend-only; flagged for a follow-up rather than reaching into `src/api/app.py` mid-audit.
+
+### Minor — inconsistent XSS-defensive coding discipline
+
+`grep -rn "innerHTML\|document.write" frontend/ dashboard/ eta/` returns 50+ hits. The large majority are safe (clearing content, or template strings built entirely from static markup/enum values). Two patterns are worth flagging even though neither is demonstrated exploitable today:
+
+- **`dashboard/app.js:294`** (`loadPassenger`'s station timeline) and 5 more `tbody.innerHTML = results.map(...)` sites (`:538, :833, :1092, :1335, :1579`) interpolate API-response fields (`station.station_name`, `station.station_code`, train IDs) directly into template-literal HTML with no escaping. Today these values are all backend-generated from a fixed historical dataset/hardcoded scenario data (see Part 4), so there is no current attacker-controlled path — but the pattern itself does not defend against one.
+- **`frontend/js/dashboard.js`** has ~15 sites of the shape `tableContainer.innerHTML = \`<div>Error loading X: ${err.message}</div>\`` (e.g. lines 607, 693, 750, 827, 897, 982, 1071). Some of these `err` objects are constructed from parsed JSON error response bodies (`throw new Error(errJson.error || ...)`, line 339) — i.e. backend-response text flows unescaped into `innerHTML`. Contrast this with the file's own `showError()` helper (`dashboard.js:94-96`), which correctly uses `textContent` for the same kind of message. The discipline is inconsistent within the same file — one code path is safe, a dozen others are not. No concrete exploit was constructed (would require a backend response echoing attacker-supplied text through an `error`/`detail` field with a rendered HTML payload, which was not found), so this is Minor, not Critical — but it's the kind of gap a security-literate judge would find in under a minute.
+
+`eta/index.html:605/764` also use `innerHTML` with interpolated values, but they're built from a hardcoded local `TRAINS` array — not attacker-reachable.
+
+### Minor — dead client-side Bearer-token auth path
+
+`frontend/js/api.js` and `dashboard/app.js` both implement a `localStorage`-backed Bearer-token auth path (`localStorage.getItem('rippleeta_token')`, sent as `Authorization: Bearer ${token}`) alongside the real cookie-based session. Traced where the token would come from: `dashboard/app.js:55-57` only calls `localStorage.setItem('rippleeta_token', demoData.token)` **if** `demoData.token` is truthy — but `src/api/app.py`'s `/api/auth/demo` and `/api/auth/google` handlers return `{"success": True, "role": role}` only, no `token` field, ever. So this branch is correctly guarded and never fires; no real credential ever lands in `localStorage` in the current system (confirmed — not a live secrets-in-localStorage vulnerability). It is, however, confusing dead code implying a Bearer-token security model that doesn't exist in the current backend contract — flagged for Part 3 cleanup rather than a security fix.
+
+### Minor — vendored 3D-viewer script loaded via `document.write` with no SRI
+
+`eta/index.html:540` loads `GLTFLoader.js` from `cdn.jsdelivr.net` via `document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/...">')`, with no Subresource Integrity hash. `three.min.js` itself and the `.glb`/texture assets are vendored locally (no supply-chain exposure there). Low real risk (jsdelivr, pinned version, `/eta` is a standalone demo page not part of the authenticated app), but a one-line SRI hash would close the gap.
+
+### Clean — no findings
+
+- **Secrets/credentials:** `grep -rniE "(api[_-]?key|secret|client_secret|bearer)\s*[:=]\s*['\"][a-zA-Z0-9_\-]{15,}"` returns only two hits, both in `frontend/js/dashboard.js`'s in-UI help text showing a user how to set their *own* `RAILRADAR_API_KEY`/`NTES_API_KEY` env vars (`export RAILRADAR_API_KEY="your-railradar-api-key"`) — clearly placeholder, not a real credential.
+- **Google Auth:** only the public OAuth `client_id` is used client-side (`frontend/js/auth.js:182-183`, via `window.google.accounts.id.initialize({ client_id: clientId, ... })`), sourced from the backend's `/api/auth/config`, which itself only echoes `GOOGLE_CLIENT_ID` when explicitly configured (`app.py:338-346`). No client secret, service-account key, or other server-side-only credential is present anywhere client-side.
+- **Translate API key:** `dashboard/app.js:2038` reads a Google Translate key from `localStorage.getItem('rippleeta_translate_api_key')` — this is bring-your-own-key, user-supplied, never hardcoded or shipped in source.
+- **Hardcoded environment-specific URLs:** none found. The only `localhost`/`127.0.0.1` references are legitimate local-dev defaults (`dashboard/sandbox.js:14`'s `window.API_BASE_URL || 'http://127.0.0.1:8000'`, `frontend/app.js:322`'s same-origin fallback) — nothing points at a specific teammate's machine or a non-reproducible address.
+- **`console.log`/`console.debug`:** `dashboard/app.js` has zero; `frontend/app.js` has 3, all inert UI-event breadcrumbs (`'[RippleETA] Received ETA complete callback'` etc.) with no tokens, payloads, or PII.
+- **Accessibility:** no `<img>` tags exist anywhere in `dashboard/*.html` or `frontend/index.html` (all visuals are CSS/SVG/3D-canvas/video), so there is no missing-`alt` surface to find. The one input family checked in depth (`#train-id`, repeated across 6 stakeholder pages) has a proper `<label for="train-id">` (e.g. `dashboard/passenger.html:1095`); same for `#leave-deadline-input`. Not exhaustively checked across all 7 pages' every control — spot-checked the highest-traffic ones.
+- **`session cookie` hardening (positive, cross-referenced from Part 1):** `httponly=True, samesite="lax"` on `rippleeta_session` means the XSS gaps above, even if ever made exploitable, could not exfiltrate the session cookie via `document.cookie` — a meaningful mitigating layer.
+
+### Endpoint cross-reference (frontend calls vs. backend routes)
+
+Backend routes (`src/api/app.py`): `/system/mode`, `/system/status`, `/trains`, `/health`, `/graph/demo`, `/graph/sandbox`, `/demo-launcher`, `/api/auth/config`, `/api/auth/google` (POST), `/api/auth/demo` (POST), `/api/stats`, `/api/me`, `/predict/{id}`, `/predict/{id}/passenger`, `/predict/{id}/station-master`, `/predict/{id}/crew-controller`, `/predict/{id}/feeder-transport`, `/predict/{id}/maintenance`.
+
+| Frontend call | Backend route exists? |
+|---|---|
+| `/health`, `/system/mode`, `/api/auth/config`, `/api/auth/google`, `/api/auth/demo`, `/api/me`, `/predict/{id}` (+ all 5 stakeholder sub-routes), `/graph/demo`, `/graph/sandbox`, `/trains`, `/system/status`, `/api/stats` | ✅ all matched |
+| `/api/auth/logout` (`frontend/js/api.js:118`) | ❌ **orphaned frontend call — no matching backend route** (see Important finding above) |
+
+Backend routes never called by any frontend/dashboard JS: `/demo-launcher` (a manual-navigation redirect, not meant to be fetched by JS — not a bug) — no other orphaned backend routes found.
+
+**CHECKPOINT COMMIT:** `security: frontend secrets, XSS, and dependency audit`
+
+---
