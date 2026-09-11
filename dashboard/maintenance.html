@@ -2,85 +2,1546 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Maintenance | RippleETA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maintenance Intelligence Desk | Turnaround Instrument | RippleETA</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ==========================================================================
+       RIPPLEETA — Maintenance View Scoped Styles: Turnaround Instrument
+       Palette: Warm Cream (#0B0F1A), Deep Railway Navy (var(--primary)),
+       Signal Amber (var(--signal)), Signal Green (var(--success)), Terracotta (var(--stamp))
+       Typography: Fraunces display, Inter interface, IBM Plex Mono telemetry
+       ========================================================================== */
+
+    :root {
+      --maint-paper: #FAF6F0;
+      --maint-paper-alt: #F7EFE3;
+      --maint-border: rgba(27, 42, 74, 0.16);
+      --maint-shadow: 0 4px 20px rgba(232, 237, 245, 0.05);
+    }
+
+    .maint-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ── Topbar Pill ── */
+    .view-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(232, 237, 245, 0.08);
+      color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--line);
+    }
+
+    /* ── Editorial Hero Banner ── */
+    .maint-hero {
+      margin: 1.5rem 0 1.5rem;
+      padding: 1.6rem 1.85rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--maint-shadow);
+      position: relative;
+    }
+
+    .maint-hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--signal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .maint-hero-tag::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(232, 163, 61, 0.6);
+    }
+
+    .maint-hero-title {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+      font-weight: 600;
+      color: var(--primary);
+      line-height: 1.15;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.015em;
+    }
+
+    .maint-hero-desc {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 880px;
+      line-height: 1.55;
+      margin: 0 0 1.25rem;
+    }
+
+    /* Operational Identity Strip: Answers First-Viewport Questions */
+    .maint-identity-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.85rem;
+      background: var(--maint-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.85rem 1.25rem;
+    }
+
+    .maint-ident-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .maint-ident-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .maint-ident-val {
+      font-family: var(--mono);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* ── Corridor Quick-Switch Bar ── */
+    .corridor-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.75rem;
+      padding: 0.85rem 1.25rem;
+      background: var(--maint-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .corridor-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .corridor-chips {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .train-chip {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .train-chip:hover {
+      border-color: var(--signal);
+      background: #111827;
+    }
+
+    .train-chip.is-active {
+      background: var(--primary);
+      color: #111827;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Train Input Search */
+    .train-input-group {
+      display: flex;
+      align-items: center;
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      gap: 0.5rem;
+    }
+
+    .train-input-group label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .train-input {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      border: none;
+      background: transparent;
+      color: var(--primary);
+      width: 80px;
+      outline: none;
+      font-weight: 600;
+    }
+
+    .btn-refresh {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      border-radius: 3px;
+      transition: color 0.15s ease;
+    }
+
+    .btn-refresh:hover {
+      color: var(--primary);
+    }
+
+    /* ── MAJOR VISUAL #1: Physical Turnaround Measuring Tape Instrument ── */
+    .measuring-tape-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--maint-shadow);
+      position: relative;
+    }
+
+    .tape-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tape-title {
+      font-family: var(--display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0 0 0.25rem;
+    }
+
+    .tape-sub {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .tape-val-hero {
+      font-family: var(--mono);
+      font-size: clamp(2.4rem, 4vw, 3.2rem);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .tape-val-hero span {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-left: 0.25rem;
+    }
+
+    /* Physical Tape Instrument Graphic */
+    .physical-tape-wrap {
+      background: #F4E8D3;
+      border: 2px solid #C4A47C;
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem 2rem;
+      position: relative;
+      margin: 1.5rem 0 1rem;
+      box-shadow: inset 0 2px 8px rgba(232, 237, 245, 0.08), 0 2px 6px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    /* Brass Rivets on Tape Ends */
+    .physical-tape-wrap::before, .physical-tape-wrap::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #D4AF37 30%, #8A6D1C 90%);
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transform: translateY(-50%);
+    }
+    .physical-tape-wrap::before { left: 8px; }
+    .physical-tape-wrap::after { right: 8px; }
+
+    .tape-ruler-scale {
+      position: relative;
+      width: 100%;
+      height: 60px;
+      display: flex;
+      align-items: flex-end;
+      border-bottom: 2px solid #5A4730;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Minor millimeter-style ticks background */
+    .tape-ruler-ticks-bg {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        #5A4730 0px,
+        #5A4730 1px,
+        transparent 1px,
+        transparent 8px
+      );
+      opacity: 0.35;
+      height: 15px;
+      top: auto;
+      bottom: 0;
+    }
+
+    /* Major Tick Positions (0, 90, 180, 270, 360 min) */
+    .tape-major-tick {
+      position: absolute;
+      bottom: 0;
+      transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #3D2F20;
+      text-align: center;
+    }
+
+    .tape-major-tick::after {
+      content: '';
+      display: block;
+      width: 2px;
+      height: 22px;
+      background: #3D2F20;
+      margin: 3px auto 0;
+    }
+
+    .tape-major-tick.critical-mark {
+      color: var(--stamp);
+    }
+    .tape-major-tick.critical-mark::after {
+      background: var(--stamp);
+      width: 3px;
+    }
+
+    /* Tape Track & Sliding Pointer */
+    .tape-slider-track {
+      position: relative;
+      width: 100%;
+      height: 14px;
+      background: rgba(232, 237, 245, 0.15);
+      border-radius: 7px;
+      overflow: visible;
+    }
+
+    .tape-fill-active {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, var(--stamp) 0%, var(--signal) 30%, var(--success) 60%);
+      border-radius: 7px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Sliding Brass Indicator Pointer */
+    .tape-pointer {
+      position: absolute;
+      top: -12px;
+      width: 18px;
+      height: 38px;
+      transform: translateX(-50%);
+      z-index: 5;
+      pointer-events: none;
+      transition: left 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tape-pointer-needle {
+      width: 4px;
+      height: 24px;
+      background: var(--primary);
+      margin: 0 auto;
+      border-radius: 2px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    }
+
+    .tape-pointer-head {
+      width: 14px;
+      height: 14px;
+      background: var(--primary);
+      transform: rotate(45deg);
+      margin: -6px auto 0;
+      border-radius: 2px;
+    }
+
+    /* 90-min Critical Threshold Zone */
+    .tape-critical-zone {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 25%; /* 90/360 = 25% */
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(161, 61, 46, 0.15),
+        rgba(161, 61, 46, 0.15) 6px,
+        rgba(161, 61, 46, 0.28) 6px,
+        rgba(161, 61, 46, 0.28) 12px
+      );
+      border-right: 2px solid var(--stamp);
+      border-radius: 7px 0 0 7px;
+      pointer-events: none;
+    }
+
+    /* ── MAJOR VISUAL #2: Dominant Maintenance Decision & Workshop Document Stamp ── */
+    .decision-row-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .decision-row-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Dominant Yard Directive Card */
+    .maint-hero-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      box-shadow: var(--maint-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      border-left: 6px solid var(--success);
+      transition: border-color 0.3s ease;
+    }
+
+    .maint-hero-card.is-adequate {
+      border-left-color: var(--success);
+    }
+
+    .maint-hero-card.is-compressed {
+      border-left-color: var(--signal);
+    }
+
+    .maint-hero-card.is-critical {
+      border-left-color: var(--stamp);
+    }
+
+    .maint-hero-card.is-suspended {
+      border-left-color: var(--muted);
+    }
+
+    .decision-kicker-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    .maint-dominant-status {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.05;
+      margin: 0.2rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .maint-dominant-status.adequate {
+      color: var(--success);
+    }
+
+    .maint-dominant-status.compressed {
+      color: var(--signal);
+    }
+
+    .maint-dominant-status.critical {
+      color: var(--stamp);
+    }
+
+    .maint-dominant-status.suspended {
+      color: var(--stamp);
+    }
+
+    .maint-station-sub {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .maint-explanation-msg {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.55;
+      margin: 0 0 1.25rem;
+    }
+
+    .maint-action-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .btn-action {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.6rem 1.15rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      border: 1px solid var(--line);
+      background: #111827;
+      color: var(--primary);
+    }
+
+    .btn-action:hover {
+      background: var(--maint-paper);
+      border-color: var(--primary);
+    }
+
+    .btn-action.confirm {
+      background: var(--success);
+      color: #111827;
+      border-color: var(--success);
+    }
+
+    .btn-action.sweep {
+      background: var(--stamp);
+      color: #111827;
+      border-color: var(--stamp);
+    }
+
+    .btn-action.hold {
+      background: var(--signal);
+      color: #111827;
+      border-color: var(--signal);
+    }
+
+    /* Physical Rubber Stamp Container */
+    .stamp-container-card {
+      background: var(--maint-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      box-shadow: var(--maint-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .rubber-stamp-box {
+      border: 3px solid var(--success);
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      text-align: center;
+      transform: rotate(-3deg);
+      background: rgba(61, 122, 92, 0.05);
+      margin: 1rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .rubber-stamp-box.adequate {
+      border-color: var(--success);
+      color: var(--success);
+      background: rgba(61, 122, 92, 0.06);
+    }
+
+    .rubber-stamp-box.compressed {
+      border-color: var(--signal);
+      color: #a0671c;
+      background: rgba(232, 163, 61, 0.08);
+      transform: rotate(2deg);
+    }
+
+    .rubber-stamp-box.critical {
+      border-color: var(--stamp);
+      color: var(--stamp);
+      background: rgba(229, 62, 62, 0.08);
+      transform: rotate(-4deg);
+    }
+
+    .rubber-stamp-title {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .rubber-stamp-val {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: 0.02em;
+    }
+
+    .rubber-stamp-date {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      margin-top: 0.35rem;
+      opacity: 0.85;
+    }
+
+    /* ── MAJOR VISUAL #3: Arrival → Turnaround → Next Departure Progression ── */
+    .progression-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--maint-shadow);
+    }
+
+    .progression-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .progression-node {
+      background: var(--maint-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .node-kicker {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .node-val {
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0.2rem 0;
+    }
+
+    .node-sub {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── MAJOR VISUAL #4: Calibrated Arrival Window ── */
+    .arrival-window-panel {
+      background: var(--maint-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--maint-shadow);
+    }
+
+    .anchor-grid-maint {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0 1.5rem;
+    }
+
+    .anchor-box {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.15rem;
+    }
+
+    .anchor-box.median {
+      border: 2px solid var(--primary);
+    }
+
+    .anchor-box.p90 {
+      border: 2px solid var(--signal);
+    }
+
+    .anchor-num {
+      font-family: var(--mono);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0.25rem 0;
+    }
+
+    /* Interval Track Bar */
+    .interval-bar-wrap {
+      position: relative;
+      width: 100%;
+      height: 14px;
+      background: rgba(232, 237, 245, 0.08);
+      border-radius: 7px;
+      margin: 0.5rem 0 1rem;
+      overflow: hidden;
+    }
+
+    .interval-bar-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, var(--success), var(--signal));
+      border-radius: 7px;
+      transition: all 0.4s ease;
+    }
+
+    .interval-bar-p50 {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+
+    /* ── MAJOR VISUAL #5: Scheduled ETA vs. RippleETA Comparison ── */
+    .comparison-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--maint-shadow);
+    }
+
+    .story-comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .story-comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .story-col {
+      background: var(--maint-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.35rem;
+    }
+
+    .story-col.traditional {
+      border-left: 4px solid var(--muted);
+    }
+
+    .story-col.rippleeta {
+      border-left: 4px solid var(--signal);
+    }
+
+    .story-head {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ── MAJOR VISUAL #6: Railway Yard & Pit Line Schematic ── */
+    .yard-schematic-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--maint-shadow);
+    }
+
+    .yard-svg-wrap {
+      background: var(--maint-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.5rem 1.25rem;
+      margin-top: 1.25rem;
+      overflow-x: auto;
+    }
+
+    .yard-svg {
+      width: 100%;
+      min-width: 650px;
+      height: 180px;
+      display: block;
+    }
+
+    /* ── MAJOR VISUAL #7: Maintenance Workload Checklist Board ── */
+    .workload-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--maint-shadow);
+    }
+
+    .checklist-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      margin-top: 1rem;
+    }
+
+    .checklist-table th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      background: var(--maint-paper);
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .checklist-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--primary);
+      vertical-align: middle;
+    }
+
+    .stage-pill {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .stage-pill.complete {
+      background: rgba(61, 122, 92, 0.12);
+      color: var(--success);
+    }
+
+    .stage-pill.standby {
+      background: rgba(232, 163, 61, 0.18);
+      color: #9c671b;
+    }
+
+    .stage-pill.pending {
+      background: rgba(232, 237, 245, 0.08);
+      color: var(--muted);
+    }
+
+    /* ── MAJOR VISUAL #8: Multi-Train Maintenance Turnaround Board ── */
+    .dispatch-board-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--maint-shadow);
+      overflow-x: auto;
+    }
+
+    .dispatch-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      margin-top: 1rem;
+    }
+
+    .dispatch-table th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      background: var(--maint-paper);
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .dispatch-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--primary);
+      vertical-align: middle;
+    }
+
+    .dispatch-table tr.is-focal {
+      background: rgba(232, 163, 61, 0.08);
+      font-weight: 700;
+    }
+
+    /* Anomaly Banner */
+    .anomaly-banner {
+      display: none;
+      margin: 1.25rem 0;
+      padding: 1.25rem 1.5rem;
+      background: rgba(229, 62, 62, 0.08);
+      border: 1.5px solid var(--stamp);
+      border-radius: 6px;
+      color: var(--stamp);
+    }
+
+    /* Critical <90m Alert Banner */
+    .critical-alert-banner {
+      display: none;
+      margin: 1.25rem 0;
+      padding: 1.25rem 1.5rem;
+      background: rgba(161, 61, 46, 0.12);
+      border: 2px solid var(--stamp);
+      border-radius: 6px;
+      color: var(--stamp);
+    }
+
+    /* ── Responsive Refinements ── */
+    @media (max-width: 640px) {
+      .maint-container {
+        padding: 0 0.85rem 3rem;
+      }
+      .maint-hero {
+        padding: 1.2rem;
+      }
+      .maint-hero-card {
+        padding: 1.25rem;
+      }
+      .maint-dominant-status {
+        font-size: 2.2rem;
+      }
+      .maint-action-toolbar {
+        flex-direction: column;
+      }
+      .btn-action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tape-fill-active,
+      .tape-pointer,
+      .interval-bar-fill,
+      .interval-bar-p50,
+      .train-chip,
+      .btn-action,
+      .yard-svg * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
 <body class="has-grain" data-view="maintenance">
-  
+
+  <!-- ── Global Command Topbar ── -->
   <div class="topbar">
     <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
-      <a class="brand" href="#" aria-label="RippleETA home">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
+      <a class="brand" href="/eta/index.html" aria-label="RippleETA 3D Experience">
         <span class="brand-mark">R</span>
         <span class="brand-logotype">RippleETA</span>
       </a>
       <div class="divider"></div>
-      <span class="view-title">MAINTENANCE INTELLIGENCE</span>
+      <span class="view-title" data-i18n="role-maint">MAINTENANCE INTELLIGENCE</span>
+      <span class="view-badge-pill">WORKSHOP TURNAROUND DESK &bull; PRYJ</span>
     </div>
-        <div class="topbar-right">
-      <div class="topbar-actions">
-        <div class="lang-selector">
-          <button class="lang-btn active" data-lang="en">EN</button>
-          <button class="lang-btn" data-lang="hi">HI</button>
-        </div>
-        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
-          <span style="font-weight:bold;">?</span>
-          <span data-i18n="helpFaq">FAQ</span>
-        </button>
-      </div>
+    <div class="topbar-right">
+      <a href="/eta/index.html" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Launch 3D Train Simulation">🎬 <span data-i18n="btn-3d-view">3D Train</span></a>
+      <select id="lang-select" class="lang-select" aria-label="Select Language" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; border-radius:4px; padding:0.2rem 0.4rem; font-size:0.75rem; font-family:var(--mono); cursor:pointer;">
+        <option value="en">EN</option>
+        <option value="hi">HI (हिंदी)</option>
+        <option value="mr">MR (मराठी)</option>
+      </select>
+      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Mode">A11Y</button>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:-- IST</div>
+      <div class="clock" id="clock">--:--:-- IST</div>
     </div>
   </div>
 
   <div class="app-layout">
     <main class="main-content">
-      
-      <header class="view-header">
-        <div class="header-left">
-          <h1 class="view-headline" data-i18n="maintTitle">Turnaround Budget</h1>
-          <p class="view-subhead" data-i18n="maintSubhead">Available turnaround derived from the predicted arrival bound.</p>
-        </div>
-        <div class="header-right">
-          <div class="train-input-group">
-            <label for="train-id" data-i18n="focalTrain">FOCAL TRAIN</label>
-            <input type="text" id="train-id" class="train-input" value="20507">
-            <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
-            </button>
+      <div class="maint-container">
+
+        <!-- ── Editorial Hero Banner ── -->
+        <section class="maint-hero">
+          <div class="maint-hero-tag">RAKE TURNAROUND PROTOCOL &bull; PIT LINE &amp; WASHING APRON</div>
+          <h1 class="maint-hero-title">RAKE TURNAROUND DESK</h1>
+
+          <!-- Operational Identity Strip -->
+          <div class="maint-identity-strip">
+            <div class="maint-ident-item">
+              <span class="maint-ident-label">1. FOCAL TRAIN</span>
+              <span class="maint-ident-val" id="maint-train-title">TRAIN 20507 &bull; TEJAS RAJDHANI</span>
+            </div>
+            <div class="maint-ident-item">
+              <span class="maint-ident-label">2. CURRENT LOCATION</span>
+              <span class="maint-ident-val" id="maint-current-location">Approaching Subedarganj (12 km to PRYJ)</span>
+            </div>
+            <div class="maint-ident-item">
+              <span class="maint-ident-label">3. CURRENT DELAY</span>
+              <span class="maint-ident-val" id="maint-hero-delay" style="color:var(--signal);">+26.4 MIN</span>
+            </div>
+            <div class="maint-ident-item">
+              <span class="maint-ident-label">4. TURNAROUND WINDOW</span>
+              <span class="maint-ident-val" id="maint-ident-window" style="color:var(--success);">300.1 MIN AVAILABLE</span>
+            </div>
+            <div class="maint-ident-item">
+              <span class="maint-ident-label">5. STANDARD BUDGET</span>
+              <span class="maint-ident-val" id="maint-standard-budget">360 MIN STANDARD</span>
+            </div>
+            <div class="maint-ident-item">
+              <span class="maint-ident-label">6. CRITICAL THRESHOLD</span>
+              <span class="maint-ident-val" id="maint-threshold-label" style="color:var(--stamp);">90 MIN MINIMUM</span>
+            </div>
+            <div class="maint-ident-item">
+              <span class="maint-ident-label">7. YARD DIRECTIVE</span>
+              <span class="maint-ident-val" id="maint-ident-directive" style="color:var(--success);">TURNAROUND FEASIBLE</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Train Query & Quick Corridor Switcher ── -->
+        <section class="corridor-bar">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <div class="train-input-group">
+              <label for="train-id">FOCAL TRAIN</label>
+              <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
+              <button id="refresh-button" class="btn-refresh" aria-label="Refresh telemetry">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+              </button>
+            </div>
+            <span class="corridor-label" style="margin-left:0.5rem;">MONITORED CORRIDORS:</span>
+          </div>
+
+          <div class="corridor-chips" id="train-chips-container">
+            <button class="train-chip is-active" data-train="20507">20507 &bull; Tejas Rajdhani</button>
+            <button class="train-chip" data-train="12301">12301 &bull; Howrah Rajdhani</button>
+            <button class="train-chip" data-train="12002">12002 &bull; Bhopal Shatabdi</button>
+            <button class="train-chip" data-train="12004">12004 &bull; Lucknow Shatabdi</button>
+            <button class="train-chip" data-train="12951">12951 &bull; Mumbai Rajdhani</button>
+            <button class="train-chip" data-train="22436">22436 &bull; Vande Bharat</button>
+            <button class="train-chip" data-train="56789">56789 &bull; Special (High Var)</button>
+          </div>
+        </section>
+
+        <!-- Anomaly Gate Suspension Alert -->
+        <div class="anomaly-banner" id="ticket-anomaly-alert" role="alert">
+          <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <span style="font-size:1.5rem; line-height:1;">&#9888;</span>
+            <div>
+              <strong style="font-family:var(--mono); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:0.25rem;">
+                PREDICTION SUSPENDED &mdash; ANOMALY GATE ACTIVE
+              </strong>
+              <p style="font-family:var(--sans); font-size:0.88rem; margin:0; line-height:1.45;">
+                Current operating conditions fall outside the validated prediction distribution. Turnaround window cannot be reliably estimated automatically.
+                <strong>Action: Revert to manual workshop control sheets and pit line supervisor assessment.</strong>
+              </p>
+            </div>
           </div>
         </div>
-      </header>
 
-      <section class="view-panel is-active" id="maintenance-view" data-panel="maintenance">
-        
-        <div class="measuring-tape-container">
-            <div class="tape-header">
-                <div>
-                    <p class="tradeoff-title" data-i18n="maintWindowLabel">Available Turnaround Window</p>
-                    <p style="font-family:var(--sans); color:var(--text);" id="maint-train-lbl">Evaluating train...</p>
-                </div>
-                <div class="tape-val" id="maint-val">--<span>min</span></div>
+        <!-- Critical <90m Alert Banner -->
+        <div class="critical-alert-banner" id="maint-critical-alert" role="alert">
+          <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <span style="font-size:1.6rem; line-height:1;">🚨</span>
+            <div>
+              <strong style="font-family:var(--mono); font-size:0.92rem; text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:0.25rem;">
+                CRITICAL THRESHOLD BREACHED &mdash; RAPID CLEANING REQUIRED
+              </strong>
+              <p style="font-family:var(--sans); font-size:0.88rem; margin:0; line-height:1.45;">
+                Remaining turnaround window is below the <strong>90-minute operational threshold</strong>. Standard 360-minute full cycle cannot be completed.
+                <strong>Action: Prioritize essential safety inspection and activate emergency 45-minute cleaning sweep.</strong>
+              </p>
             </div>
-            
-            <!-- Measuring Tape -->
-            <div class="tape-ruler">
-                <div class="tape-ticks"></div>
-                <div class="tape-ticks-major"></div>
-                <div class="tape-fill" id="maint-fill" style="width: 100%;"></div>
-            </div>
-            
-            <div class="tape-status" id="maint-status">AWAITING DATA</div>
-            
-            <div style="text-align:center; margin-top: 2rem;">
-            </div>
+          </div>
         </div>
-        
-      </section>
 
+        <!-- ── MAJOR VISUAL #1: Physical Workshop Turnaround Measuring Tape ── -->
+        <section class="measuring-tape-card" aria-label="Turnaround Measuring Tape Instrument">
+          <div class="tape-card-header">
+            <div>
+              <h2 class="tape-title">Physical Turnaround Budget Instrument</h2>
+              <span class="tape-sub" id="maint-train-lbl">NORTHERN RAILWAY &bull; PRAYAGRAJ COACHING DEPOT &bull; PIT LINE 01</span>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">AVAILABLE WORKING WINDOW</span>
+              <div class="tape-val-hero" id="maint-val">300<span>min</span></div>
+            </div>
+          </div>
+
+          <!-- Physical Tape Visual -->
+          <div class="physical-tape-wrap">
+            <div class="tape-ruler-scale">
+              <div class="tape-ruler-ticks-bg"></div>
+
+              <!-- Major Scale Ticks -->
+              <div class="tape-major-tick" style="left: 0%;">0m</div>
+              <div class="tape-major-tick critical-mark" style="left: 25%;">90m<br><span style="font-size:0.6rem; font-weight:700;">CRITICAL</span></div>
+              <div class="tape-major-tick" style="left: 50%;">180m<br><span style="font-size:0.6rem;">ADEQUATE</span></div>
+              <div class="tape-major-tick" style="left: 75%;">270m</div>
+              <div class="tape-major-tick" style="left: 100%;">360m<br><span style="font-size:0.6rem;">STANDARD</span></div>
+            </div>
+
+            <!-- Tape Track Bar & Sliding Pointer -->
+            <div class="tape-slider-track">
+              <!-- Critical 90m Cross-Hatched Danger Zone -->
+              <div class="tape-critical-zone"></div>
+
+              <!-- Active Available Window Fill -->
+              <div class="tape-fill-active" id="maint-fill" style="width: 83.3%;"></div>
+
+              <!-- Sliding Pointer Needle -->
+              <div class="tape-pointer" id="maint-pointer" style="left: 83.3%;">
+                <div class="tape-pointer-needle"></div>
+                <div class="tape-pointer-head"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; font-family:var(--mono); font-size:0.8rem; color:var(--muted); padding-top:0.25rem;">
+            <span>STANDARD BUDGET: <strong style="color:var(--primary);">360 min</strong></span>
+            <span>DELAY CONSUMED (P90): <strong style="color:var(--signal);" id="maint-delay-consumed">59.9 min</strong></span>
+            <span>CRITICAL MARGIN: <strong style="color:var(--success);" id="maint-critical-margin">+210.1 min above 90m</strong></span>
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #2: Dominant Decision & Workshop Document Stamp ── -->
+        <div class="decision-row-grid">
+          
+          <!-- Dominant Yard Directive Card -->
+          <article class="maint-hero-card is-adequate" id="triage-card">
+            <div>
+              <span class="decision-kicker-tag">YARD DISPATCH DIRECTIVE &bull; DEPOT INVENTORY</span>
+              <div class="maint-dominant-status adequate" id="maint-status">TURNAROUND FEASIBLE</div>
+              <div class="maint-station-sub" id="maint-sub-depot">
+                DEPOT: PRAYAGRAJ JUNCTION (PRYJ) &bull; PIT LINE 01
+              </div>
+              <p class="maint-explanation-msg" id="maint-directive-msg">
+                Standard turnaround window remains available. Proceed with regular cleaning and mechanical inspection slate.
+              </p>
+            </div>
+
+            <div>
+              <div style="display:flex; gap:1.25rem; flex-wrap:wrap; font-family:var(--mono); font-size:0.8rem; color:var(--muted); margin-bottom:1rem;">
+                <span>FOCAL: <strong style="color:var(--primary);" id="triage-train">20507</strong></span>
+                <span>AVAILABLE: <strong style="color:var(--primary);" id="triage-avail">300.1 min</strong></span>
+                <span>STATUS: <strong style="color:var(--success);" id="triage-adequate-status">ADEQUATE</strong></span>
+              </div>
+
+              <!-- Operational Action Toolbar -->
+              <div class="maint-action-toolbar">
+                <button class="btn-action confirm" id="btn-action-confirm" type="button">
+                  &#10003; CONFIRM STANDARD SLATE
+                </button>
+                <button class="btn-action sweep" id="btn-action-sweep" type="button">
+                  🚨 RAPID 45M SWEEP
+                </button>
+                <button class="btn-action hold" id="btn-action-hold" type="button">
+                  &#9888; HOLD RAKE IN YARD
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Physical Rubber Stamp Container -->
+          <div class="stamp-container-card">
+            <div>
+              <span class="decision-kicker-tag">OFFICIAL YARD CERTIFICATION</span>
+              
+              <!-- Physical Rubber Ink Stamp -->
+              <div class="rubber-stamp-box adequate" id="rubber-stamp">
+                <div class="rubber-stamp-title">NORTHERN RAILWAY &bull; PRYJ DEPOT</div>
+                <div class="rubber-stamp-val" id="stamp-decision-text">TURNAROUND FEASIBLE</div>
+                <div class="rubber-stamp-date" id="stamp-clock">STAMPED: --:--:-- IST</div>
+              </div>
+            </div>
+
+            <div>
+              <p style="font-family:var(--sans); font-size:0.82rem; color:var(--muted); margin:0 0 0.75rem; line-height:1.45;">
+                Turnaround feasibility is evaluated against the <strong>P90 conservative arrival bound</strong>, preventing surprise section delays from forcing departure holds.
+              </p>
+              <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted); border-top:1px solid var(--line); padding-top:0.75rem;">
+                OPERATING RULE: <strong>Window &ge; 180m FEASIBLE &bull; &lt; 90m CRITICAL</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── MAJOR VISUAL #3: Arrival → Turnaround → Next Departure Progression ── -->
+        <section class="progression-panel">
+          <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Rake Progression &amp; Working Buffer</h2>
+          <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+            Timeline tracking from physical arrival through workshop servicing to scheduled next departure.
+          </p>
+
+          <div class="progression-grid">
+            
+            <div class="progression-node">
+              <div>
+                <span class="node-kicker">STEP 01 &bull; INCOMING DELAY</span>
+                <div class="node-val" id="node-delay">+26.4 min</div>
+              </div>
+              <span class="node-sub">Current delay at Subedarganj approach block.</span>
+            </div>
+
+            <div class="progression-node">
+              <div>
+                <span class="node-kicker">STEP 02 &bull; YARD INTAKE (P50)</span>
+                <div class="node-val" id="node-arrival-clock">15:26 IST</div>
+              </div>
+              <span class="node-sub">Berthing at Prayagraj Pit Line 01.</span>
+            </div>
+
+            <div class="progression-node" style="border-left:3px solid var(--success);">
+              <div>
+                <span class="node-kicker">STEP 03 &bull; WORK WINDOW</span>
+                <div class="node-val" style="color:var(--success);" id="node-window-val">300.1 min</div>
+              </div>
+              <span class="node-sub">Cleaning, watering, and safety inspection.</span>
+            </div>
+
+            <div class="progression-node">
+              <div>
+                <span class="node-kicker">STEP 04 &bull; NEXT DEPARTURE</span>
+                <div class="node-val" id="node-departure-clock">21:26 IST</div>
+              </div>
+              <span class="node-sub">Outbound service slot on UP Mainline.</span>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #4: Calibrated Arrival Window ── -->
+        <section class="arrival-window-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Calibrated Intake Window</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Arrival uncertainty quantiles directly determine how much of the 360-minute standard budget is consumed.
+              </p>
+            </div>
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+              Interval Spread: <strong style="color:var(--primary);" id="maint-interval-span">59.9 min</strong>
+            </div>
+          </div>
+
+          <!-- 3 Anchor Blocks -->
+          <div class="anchor-grid-maint">
+            <div class="anchor-box">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); text-transform:uppercase; font-weight:600;">EARLIEST INTAKE (P10)</span>
+              <div class="anchor-num" style="color:var(--success);" id="maint-p10-display">0.0 min</div>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Clear run ahead. Leaves maximum 360m turnaround budget.</span>
+            </div>
+            <div class="anchor-box median">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:700;">MEDIAN INTAKE (P50)</span>
+              <div class="anchor-num" id="maint-p50-display">26.4 min</div>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Most probable arrival time under current corridor pacing.</span>
+            </div>
+            <div class="anchor-box p90">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--signal); text-transform:uppercase; font-weight:700;">CONSERVATIVE INTAKE (P90)</span>
+              <div class="anchor-num" style="color:var(--signal);" id="maint-p90-display">59.9 min</div>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Conservative planning bound. Consumes 59.9m of working budget.</span>
+            </div>
+          </div>
+
+          <!-- Interval Track Bar -->
+          <div class="interval-bar-wrap" title="Calibrated arrival interval">
+            <div class="interval-bar-fill" id="pax-bar-fill" style="left:5%; width:60%;"></div>
+            <div class="interval-bar-p50" id="pax-bar-p50" style="left:30%;" title="P50 Expected Median"></div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
+            <span>P10: BEST-CASE INTAKE</span>
+            <span>P50: MEDIAN INTAKE</span>
+            <span>P90: PLANNING CEILING</span>
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #5: Scheduled ETA vs. RippleETA Storytelling ── -->
+        <section class="comparison-panel">
+          <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Scheduled Timetable vs. Predictive Turnaround</h2>
+          <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+            Why rigid timetable assumptions create unexpected turnaround failures &mdash; and how RippleETA prevents them.
+          </p>
+
+          <div class="story-comparison-grid">
+            
+            <div class="story-col traditional">
+              <div class="story-head">
+                <span>TRADITIONAL WORKSHOP PLANNING</span>
+                <span style="color:var(--stamp);">&#10007; RIGID</span>
+              </div>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); line-height:1.5; margin:0 0 0.75rem;">
+                Assumes on-time arrival $	o$ Assigns fixed 360-min cleaning slate $	o$ Delay occurs in transit $	o$ Rake arrives late unexpectedly $	o$ Cleaners scramble under compressed window $	o$ Outbound train departs late.
+              </p>
+              <div style="font-family:var(--mono); font-size:0.78rem; color:var(--stamp);">
+                CONSEQUENCE: <strong>Cascading Outbound Delays</strong>
+              </div>
+            </div>
+
+            <div class="story-col rippleeta">
+              <div class="story-head">
+                <span style="color:var(--primary);">RIPPLEETA ADAPTIVE PLANNING</span>
+                <span style="color:var(--success); font-weight:700;">&#10003; CALIBRATED</span>
+              </div>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); line-height:1.5; margin:0 0 0.75rem;">
+                Tracks live train telemetry $	o$ Fits calibrated P10&ndash;P90 distribution $	o$ Subtracts conservative P90 bound from standard window $	o$ Pre-alerts yard 2 hours in advance $	o$ Outbound slot protected.
+              </p>
+              <div style="font-family:var(--mono); font-size:0.78rem; color:var(--success);">
+                ADVANTAGE: <strong>Proactive Resource Optimization</strong>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #6: Railway Yard & Pit Line 01 Schematic ── -->
+        <section class="yard-schematic-panel">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Railway Yard &amp; Pit Line Schematic</h2>
+              <span style="font-family:var(--mono); font-size:0.78rem; color:var(--muted);">PRAYAGRAJ COACHING YARD &bull; BERTH ALLOCATION &bull; UP MAIN SHUNT</span>
+            </div>
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+              YARD STATUS: <strong style="color:var(--success);" id="yard-shunting-status">PIT LINE 01 CLEARED FOR INTAKE</strong>
+            </div>
+          </div>
+
+          <div class="yard-svg-wrap">
+            <svg class="yard-svg" viewBox="0 0 800 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grid lines -->
+              <line x1="0" y1="30" x2="800" y2="30" stroke="rgba(27,42,74,0.06)" stroke-dasharray="4 4" />
+              <line x1="0" y1="150" x2="800" y2="150" stroke="rgba(27,42,74,0.06)" stroke-dasharray="4 4" />
+
+              <!-- Main Inbound Line -->
+              <line x1="30" y1="50" x2="220" y2="50" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" />
+              <!-- Inbound sleepers -->
+              <path d="M 50 44 L 50 56 M 90 44 L 90 56 M 130 44 L 130 56 M 170 44 L 170 56 M 210 44 L 210 56" stroke="rgba(27,42,74,0.3)" stroke-width="2" />
+
+              <!-- Turnout to Pit Line 01 -->
+              <path d="M 220 50 Q 270 50 310 90 L 520 90" stroke="var(--primary)" stroke-width="3" fill="none" />
+              <!-- Washing Apron Spur -->
+              <path d="M 310 90 Q 350 130 400 130 L 520 130" stroke="var(--muted)" stroke-width="2" stroke-dasharray="4 4" fill="none" />
+
+              <!-- Pit Line 01 Service Bay Box -->
+              <rect x="520" y="65" width="160" height="50" rx="4" fill="#111827" stroke="var(--success)" stroke-width="2" />
+              <text x="600" y="86" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="700" fill="var(--primary)" text-anchor="middle">PIT LINE 01</text>
+              <text x="600" y="102" font-family="'Inter', sans-serif" font-size="8" fill="var(--success)" text-anchor="middle">&#10003; C&amp;W INSPECTION READY</text>
+
+              <!-- Washing Apron Box -->
+              <rect x="520" y="120" width="160" height="40" rx="4" fill="#111827" stroke="var(--muted)" stroke-width="1.5" />
+              <text x="600" y="136" font-family="'IBM Plex Mono', monospace" font-size="9" fill="var(--primary)" text-anchor="middle">WASHING APRON</text>
+              <text x="600" y="149" font-family="'Inter', sans-serif" font-size="7.5" fill="var(--muted)" text-anchor="middle">HIGH-PRESSURE JET SWEEP</text>
+
+              <!-- Outbound Release Track -->
+              <line x1="680" y1="90" x2="770" y2="90" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" />
+              <text x="760" y="80" font-family="'IBM Plex Mono', monospace" font-size="8" fill="var(--muted)" text-anchor="end">TO PLATFORM &rarr;</text>
+
+              <!-- Animated Train Token -->
+              <g id="yard-train-token" transform="translate(100, 38)">
+                <rect x="0" y="0" width="75" height="24" rx="4" fill="var(--primary)" />
+                <rect x="6" y="4" width="12" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <rect x="22" y="4" width="12" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <rect x="38" y="4" width="12" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <text x="70" y="16" font-family="'IBM Plex Mono', monospace" font-size="8.5" font-weight="700" fill="var(--signal)" text-anchor="end">🚆 20507</text>
+              </g>
+
+              <text x="50" y="25" font-family="'IBM Plex Mono', monospace" font-size="9" fill="var(--muted)">INCOMING RECEPTION LINE</text>
+            </svg>
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #7: Maintenance Workload Checklist Board ── -->
+        <section class="workload-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Workshop Operations Checklist</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Standard 360-minute turnaround workload tasks allocated across depot shifts.
+              </p>
+            </div>
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+              STANDARD BUDGET: <strong>360 MIN</strong>
+            </div>
+          </div>
+
+          <table class="checklist-table" aria-label="Turnaround Task Checklist">
+            <thead>
+              <tr>
+                <th>STAGE</th>
+                <th>TASK DESCRIPTION</th>
+                <th>ALLOCATED TIME</th>
+                <th>OPERATIONAL STATUS</th>
+                <th>SAFETY CRITICALITY</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>STAGE 01</strong></td>
+                <td>Rake Berthing &amp; Rolling-In Examination</td>
+                <td>30 min</td>
+                <td><span class="stage-pill complete">&#10003; CREW POSITIONED</span></td>
+                <td>Mandatory Track Safety</td>
+              </tr>
+              <tr>
+                <td><strong>STAGE 02</strong></td>
+                <td>Undergear, Bogie &amp; Air Brake Rigging Inspection</td>
+                <td>75 min</td>
+                <td><span class="stage-pill standby">&#9888; ON STANDBY</span></td>
+                <td>High (Non-Compressible)</td>
+              </tr>
+              <tr>
+                <td><strong>STAGE 03</strong></td>
+                <td>Bio-Toilet Evacuation &amp; High-Pressure Water Tank Filling</td>
+                <td>45 min</td>
+                <td><span class="stage-pill standby">&#9888; HOSE RIGGED</span></td>
+                <td>Passenger Hygiene</td>
+              </tr>
+              <tr>
+                <td><strong>STAGE 04</strong></td>
+                <td>Internal Coach Deep Clean, Linen Restock &amp; Sanitization</td>
+                <td>90 min</td>
+                <td><span class="stage-pill pending">&#9675; PENDING ARRIVAL</span></td>
+                <td>Compressible if &lt; 90m</td>
+              </tr>
+              <tr>
+                <td><strong>STAGE 05</strong></td>
+                <td>Electrical, Air-Conditioning &amp; Safety Release Certificate</td>
+                <td>60 min</td>
+                <td><span class="stage-pill pending">&#9675; PENDING ARRIVAL</span></td>
+                <td>Mandatory BPC Clearance</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- ── MAJOR VISUAL #8: Multi-Train Maintenance Turnaround Board ── -->
+        <section class="dispatch-board-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Multi-Train Coaching Depot Board</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Turnaround window availability across monitored trains docking at Prayagraj Coaching Depot.
+              </p>
+            </div>
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+              UPDATED: <strong style="color:var(--primary);" id="board-sync-clock">LIVE SYNC</strong>
+            </div>
+          </div>
+
+          <table class="dispatch-table" aria-label="Multi-Train Maintenance Matrix">
+            <thead>
+              <tr>
+                <th>TRAIN</th>
+                <th>CORRIDOR ROUTE</th>
+                <th>P50 DELAY</th>
+                <th>P90 BOUND</th>
+                <th>AVAILABLE WINDOW</th>
+                <th>YARD DIRECTIVE</th>
+                <th>DEPOT STATUS</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="multi-train-maint-body">
+              <tr>
+                <td colspan="8" style="text-align:center; padding:1.5rem; color:var(--muted);">Loading depot train schedules...</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <footer style="margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--line); font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <span>RippleETA &bull; Maintenance Intelligence &bull; PRYJ &bull; SIH 2026</span>
+            <div style="display:flex; gap:1rem;">
+              <a href="index.html" style="color:var(--primary); text-decoration:none;">Portal Home</a>
+              <a href="passenger.html" style="color:var(--primary); text-decoration:none;">Passenger View</a>
+              <a href="station-master.html" style="color:var(--primary); text-decoration:none;">Station Master</a>
+              <a href="crew.html" style="color:var(--primary); text-decoration:none;">Crew Controller</a>
+              <a href="feeder.html" style="color:var(--primary); text-decoration:none;">Feeder Transport</a>
+            </div>
+          </div>
+        </footer>
+
+      </div>
     </main>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>

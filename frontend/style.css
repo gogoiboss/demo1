@@ -3975,3 +3975,38 @@ select:focus-visible {
   }
 
 }
+
+/* ==========================================================================
+   GLOBAL DARK DROPDOWN & CONTRAST ACCESSIBILITY STYLES
+   Fixes browser-default white option dropdowns & invisible text bugs
+   ========================================================================== */
+
+select,
+.lang-select,
+.form-select,
+.input-select {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-family: inherit !important;
+  font-size: 0.875rem !important;
+  outline: none !important;
+  cursor: pointer !important;
+}
+
+select option,
+.lang-select option,
+.form-select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  padding: 8px 12px !important;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}

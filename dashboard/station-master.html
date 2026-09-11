@@ -2,98 +2,1420 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Station Master | RippleETA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Station Master Intelligence | Platform Operations Desk | RippleETA</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ==========================================================================
+       RIPPLEETA — Station Master Scoped Styles: Platform Operations Desk
+       Palette: Warm Cream (#0B0F1A), Deep Navy (var(--primary)), Marigold Amber (var(--signal)),
+       Deep Signal Green (var(--success)), Terracotta (var(--stamp))
+       Typography: Fraunces display, Inter interface, IBM Plex Mono telemetry
+       ========================================================================== */
+
+    :root {
+      --sm-border: rgba(27, 42, 74, 0.16);
+      --sm-card-bg: #111827;
+      --sm-paper-alt: #FAF6F0;
+    }
+
+    .sm-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+      box-sizing: border-box;
+    }
+
+    /* ── Top Bar Pill ── */
+    .view-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(232, 237, 245, 0.08);
+      color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--line);
+    }
+
+    /* ── Editorial Hero Banner ── */
+    .sm-hero {
+      margin: 1.5rem 0 1.75rem;
+      padding: 1.6rem 1.85rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(232, 237, 245, 0.05);
+      position: relative;
+    }
+
+    .sm-hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--signal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .sm-hero-tag::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(232, 163, 61, 0.6);
+    }
+
+    .sm-hero-title {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.15;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.015em;
+    }
+
+    .sm-hero-desc {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 880px;
+      line-height: 1.55;
+      margin: 0 0 1.25rem;
+    }
+
+    /* Operational Identity Block */
+    .sm-identity-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.85rem;
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.85rem 1.25rem;
+    }
+
+    .sm-ident-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .sm-ident-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .sm-ident-val {
+      font-family: var(--mono);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* ── Corridor Quick-Switch Bar ── */
+    .corridor-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.75rem;
+      padding: 0.85rem 1.25rem;
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .corridor-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .corridor-chips {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .train-chip {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .train-chip:hover {
+      background: rgba(232, 163, 61, 0.1);
+      border-color: var(--signal);
+      color: var(--primary);
+    }
+
+    .train-chip.is-active {
+      background: var(--primary);
+      color: var(--text-inv);
+      border-color: var(--primary);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(27, 42, 74, 0.2);
+    }
+
+    /* ── MAJOR VISUAL #1: Platform Approach Scene ── */
+    .approach-scene-card {
+      background: var(--surface-dark);
+      color: var(--text-inv);
+      border-radius: 8px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--signal);
+      box-shadow: 0 4px 20px rgba(232, 237, 245, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .approach-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .approach-title {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      color: #111827;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .approach-sub {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: rgba(243, 237, 227, 0.75);
+    }
+
+    .approach-svg-container {
+      width: 100%;
+      height: auto;
+      max-height: 180px;
+      overflow: visible;
+    }
+
+    @keyframes train-creep {
+      0% { transform: translate(220px, 50px); }
+      50% { transform: translate(245px, 50px); }
+      100% { transform: translate(220px, 50px); }
+    }
+    #sm-approach-train {
+      animation: train-creep 5s ease-in-out infinite;
+    }
+
+    /* ── MAJOR VISUAL #3: Dominant COMMIT / DEFER Decision ── */
+    .decision-matrix-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .decision-matrix-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .decision-hero-card {
+      background: #111827;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 6px 24px rgba(27, 42, 74, 0.07);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .decision-hero-card.is-commit {
+      border-color: var(--success);
+      border-top-width: 6px;
+    }
+
+    .decision-hero-card.is-defer {
+      border-color: var(--signal);
+      border-top-width: 6px;
+    }
+
+    .decision-hero-card.is-suspended {
+      border-color: var(--stamp);
+      border-top-width: 6px;
+    }
+
+    .decision-top-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .decision-kicker-tag {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .decision-urgency-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(232, 163, 61, 0.15);
+      color: #9c671b;
+      border: 1px solid var(--signal);
+    }
+
+    .decision-dominant-status {
+      font-family: var(--display);
+      font-size: clamp(3.2rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1;
+      margin: 0.25rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .decision-dominant-status.commit {
+      color: var(--success);
+    }
+
+    .decision-dominant-status.defer {
+      color: var(--signal);
+    }
+
+    .decision-dominant-status.suspended {
+      color: var(--stamp);
+    }
+
+    .decision-target-resource {
+      font-family: var(--mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .decision-explanation-msg {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0 0 1.5rem;
+    }
+
+    .decision-action-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      padding-top: 1.25rem;
+      border-top: 1px dashed var(--line);
+    }
+
+    .btn-action {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-action.commit {
+      background: rgba(61, 122, 92, 0.12);
+      border: 1.5px solid var(--success);
+      color: var(--success);
+    }
+
+    .btn-action.defer {
+      background: rgba(232, 163, 61, 0.15);
+      border: 1.5px solid var(--signal);
+      color: #9c671b;
+      font-weight: 700;
+    }
+
+    .btn-action.defer.is-active {
+      background: var(--signal);
+      color: #111827;
+      border-color: var(--signal);
+      box-shadow: 0 2px 8px rgba(232, 163, 61, 0.35);
+    }
+
+    .btn-action.commit.is-active {
+      background: var(--success);
+      color: #111827;
+      border-color: var(--success);
+      box-shadow: 0 2px 8px rgba(61, 122, 92, 0.35);
+    }
+
+    .btn-action.override {
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── MAJOR VISUAL #4 & #9: Deadline & VHF Side Column ── */
+    .decision-side-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .deadline-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(232, 237, 245, 0.05);
+    }
+
+    .deadline-num {
+      font-family: var(--display);
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+      margin: 0.25rem 0;
+    }
+
+    .vhf-card {
+      background: var(--primary);
+      color: var(--text-inv);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(27, 42, 74, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+    }
+
+    .vhf-terminal-box {
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(243, 237, 227, 0.12);
+      border-radius: 4px;
+      padding: 1rem;
+      margin: 0.85rem 0 1.25rem;
+    }
+
+    .vhf-pre {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      color: #111827;
+      line-height: 1.6;
+      margin: 0;
+      white-space: pre-wrap;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-copy-vhf {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #111827;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      align-self: flex-end;
+    }
+
+    .btn-copy-vhf:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ── MAJOR VISUAL #2: Calibrated Arrival Window ── */
+    .arrival-window-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 10px rgba(232, 237, 245, 0.05);
+    }
+
+    .anchor-grid-sm {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 1rem;
+      margin: 1.25rem 0 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .anchor-grid-sm {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .anchor-box {
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.15rem;
+      text-align: center;
+    }
+
+    .anchor-box.median {
+      background: #111827;
+      border: 2px solid var(--primary);
+    }
+
+    .anchor-num {
+      font-family: var(--mono);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0.2rem 0;
+    }
+
+    .interval-bar-wrap {
+      position: relative;
+      height: 28px;
+      background: rgba(27, 42, 74, 0.06);
+      border-radius: 14px;
+      overflow: visible;
+      border: 1px solid rgba(232, 237, 245, 0.15);
+      margin: 1rem 0 1.25rem;
+    }
+
+    .interval-bar-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, rgba(61, 122, 92, 0.5) 0%, rgba(232, 163, 61, 0.7) 100%);
+      border-left: 2px solid var(--success);
+      border-right: 2px solid var(--signal);
+      border-radius: 12px;
+      transition: all 0.4s ease;
+    }
+
+    .interval-bar-p50 {
+      position: absolute;
+      top: -4px;
+      bottom: -4px;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      box-shadow: 0 0 4px rgba(27, 42, 74, 0.4);
+      z-index: 2;
+      transition: left 0.4s ease;
+    }
+
+    /* ── MAJOR VISUAL #5: Asymmetric Operational Risk 4.2x ── */
+    .risk-panel {
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .risk-ratio-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--primary);
+      color: var(--signal);
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    .risk-comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .risk-comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .risk-bar-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+
+    .risk-bar-card.heavy {
+      border-left: 4px solid var(--signal);
+    }
+
+    .risk-bar-track {
+      height: 14px;
+      background: rgba(232, 237, 245, 0.08);
+      border-radius: 7px;
+      overflow: hidden;
+      margin: 0.75rem 0 0.5rem;
+    }
+
+    .risk-bar-fill-fn {
+      height: 100%;
+      width: 84%;
+      background: var(--signal);
+      border-radius: 7px;
+    }
+
+    .risk-bar-fill-fp {
+      height: 100%;
+      width: 20%;
+      background: var(--primary);
+      border-radius: 7px;
+    }
+
+    /* ── MAJOR VISUAL #6: Why This Decision? Matrix (4-Step Progression) ── */
+    .evidence-steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .evidence-step {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.15rem 1.35rem;
+    }
+
+    .evidence-step-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .evidence-step-tag {
+      background: rgba(232, 237, 245, 0.08);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .why-matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.75rem;
+    }
+
+    .why-item {
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.85rem 1rem;
+    }
+
+    /* ── MAJOR VISUAL #8 & #10: Ripple & Financial Metrics ── */
+    .metrics-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .metrics-two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .metric-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      box-shadow: 0 2px 10px rgba(232, 237, 245, 0.05);
+    }
+
+    .ripple-gauge-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+    }
+
+    /* ── MAJOR VISUAL #11: Platform Resource Board ── */
+    .platform-board {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .platform-cell {
+      background: var(--sm-paper-alt);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .platform-cell.target-candidate {
+      border: 2px solid var(--signal);
+      background: rgba(232, 163, 61, 0.08);
+    }
+
+    .platform-cell.target-committed {
+      border: 2px solid var(--success);
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    .platform-num {
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .platform-status-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    .platform-status-tag.occupied {
+      background: rgba(161, 61, 46, 0.12);
+      color: var(--stamp);
+    }
+
+    .platform-status-tag.available {
+      background: rgba(61, 122, 92, 0.12);
+      color: var(--success);
+    }
+
+    .platform-status-tag.deferred {
+      background: rgba(232, 163, 61, 0.18);
+      color: #9c671b;
+    }
+
+    /* ── Multi-Train Junction Triage Matrix Table ── */
+    .junction-table-wrap {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+
+    .junction-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      margin-top: 1rem;
+    }
+
+    .junction-table th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      background: var(--sm-paper-alt);
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .junction-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--primary);
+      vertical-align: middle;
+    }
+
+    .junction-table tr.is-focal {
+      background: rgba(232, 163, 61, 0.08);
+      font-weight: 700;
+    }
+
+    /* Anomaly Banner */
+    .anomaly-banner {
+      display: none;
+      margin: 1.25rem 0;
+      padding: 1.25rem 1.5rem;
+      background: rgba(229, 62, 62, 0.08);
+      border: 1.5px solid var(--stamp);
+      border-radius: 6px;
+      color: var(--stamp);
+    }
+
+    /* ── Responsive Refinements ── */
+    @media (max-width: 640px) {
+      .sm-container {
+        padding: 0 0.85rem 3rem;
+      }
+      .sm-hero {
+        padding: 1.2rem;
+      }
+      .decision-hero-card {
+        padding: 1.25rem;
+      }
+      .decision-dominant-status {
+        font-size: 3rem;
+      }
+      .decision-action-toolbar {
+        flex-direction: column;
+      }
+      .btn-action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .interval-bar-fill,
+      .interval-bar-p50,
+      .train-chip,
+      .btn-action,
+      #sm-approach-train {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
 <body class="has-grain" data-view="station">
-  
+
+  <!-- ── Global Railway Command Topbar ── -->
   <div class="topbar">
     <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
-      <a class="brand" href="#" aria-label="RippleETA home">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
+      <a class="brand" href="/eta/index.html" aria-label="RippleETA 3D Experience">
         <span class="brand-mark">R</span>
         <span class="brand-logotype">RippleETA</span>
       </a>
       <div class="divider"></div>
-      <span class="view-title">STATION INTELLIGENCE</span>
+      <span class="view-title" data-i18n="role-station">STATION MASTER INTELLIGENCE</span>
+      <span class="view-badge-pill">OPERATIONAL DESK &bull; PRYJ</span>
     </div>
-        <div class="topbar-right">
-      <div class="topbar-actions">
-        <div class="lang-selector">
-          <button class="lang-btn active" data-lang="en">EN</button>
-          <button class="lang-btn" data-lang="hi">HI</button>
-        </div>
-        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
-          <span style="font-weight:bold;">?</span>
-          <span data-i18n="helpFaq">FAQ</span>
-        </button>
-      </div>
+    <div class="topbar-right">
+      <a href="/eta/index.html" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Launch 3D Train Simulation">🎬 <span data-i18n="btn-3d-view">3D Train</span></a>
+      <select id="lang-select" class="lang-select" aria-label="Select Language" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; border-radius:4px; padding:0.2rem 0.4rem; font-size:0.75rem; font-family:var(--mono); cursor:pointer;">
+        <option value="en">EN</option>
+        <option value="hi">HI (हिंदी)</option>
+        <option value="mr">MR (मराठी)</option>
+      </select>
+      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Mode">A11Y</button>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:-- IST</div>
+      <div class="clock" id="clock">--:--:-- IST</div>
     </div>
   </div>
 
   <div class="app-layout">
     <main class="main-content">
-      
-      <!-- Top controls -->
-      <header class="view-header">
-        <div class="header-left">
-          <h1 class="view-headline" data-i18n="smTitle">Platform Triage</h1>
-          <p class="view-subhead" data-i18n="smSubhead">Commit platform decisions against the calibrated arrival interval.</p>
+      <div class="sm-container">
+
+        <!-- ── Operational Status Banner ── -->
+        <section class="sm-hero">
+          <div class="sm-hero-tag">PLATFORM TRIAGE &bull; PRAYAGRAJ JUNCTION (PRYJ)</div>
+          <h1 class="sm-hero-title">PLATFORM OPERATIONS DESK</h1>
+
+          <!-- Operational Identity Strip: Answers all 5 First-Viewport Questions -->
+          <div class="sm-identity-strip">
+            <div class="sm-ident-item">
+              <span class="sm-ident-label">1. FOCAL TRAIN</span>
+              <span class="sm-ident-val" id="sm-train-title">TRAIN 20507 &bull; TEJAS RAJDHANI EXPRESS</span>
+            </div>
+            <div class="sm-ident-item">
+              <span class="sm-ident-label">2. CURRENT LOCATION</span>
+              <span class="sm-ident-val" id="sm-current-location">Approaching Subedarganj (12 km to PRYJ)</span>
+            </div>
+            <div class="sm-ident-item">
+              <span class="sm-ident-label">3. CURRENT DELAY</span>
+              <span class="sm-ident-val" id="sm-hero-delay" style="color:var(--signal);">+26.4 MIN DELAY</span>
+            </div>
+            <div class="sm-ident-item">
+              <span class="sm-ident-label">4. TARGET BERTH</span>
+              <span class="sm-ident-val" id="sm-target-berth" style="color:var(--signal);">Platform 04 &bull; Prayagraj Jn</span>
+            </div>
+            <div class="sm-ident-item">
+              <span class="sm-ident-label">5. CORRIDOR ROUTE</span>
+              <span class="sm-ident-val" id="sm-route-path">NDLS &rarr; CNB &rarr; PRYJ</span>
+            </div>
+            <div class="sm-ident-item">
+              <span class="sm-ident-label">ENGINE STATUS</span>
+              <span class="sm-ident-val" id="sm-status-badge" style="color:var(--success);">PREDICTION ACTIVE</span>
+            </div>
+            <div class="sm-ident-item">
+              <span class="sm-ident-label">TELEMETRY INGEST</span>
+              <span class="sm-ident-val" id="sm-ingest-time">14:40 IST</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Train Query & Quick Corridor Switcher ── -->
+        <section class="corridor-bar">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <div class="train-input-group">
+              <label for="train-id">FOCAL TRAIN</label>
+              <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
+              <button id="refresh-button" class="btn-refresh" aria-label="Refresh telemetry">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+              </button>
+            </div>
+            <span class="corridor-label" style="margin-left:0.5rem;">MONITORED CORRIDORS:</span>
+          </div>
+
+          <div class="corridor-chips" id="train-chips-container">
+            <button class="train-chip is-active" data-train="20507">20507 &bull; Tejas Rajdhani</button>
+            <button class="train-chip" data-train="12301">12301 &bull; Howrah Rajdhani</button>
+            <button class="train-chip" data-train="12002">12002 &bull; Bhopal Shatabdi</button>
+            <button class="train-chip" data-train="12004">12004 &bull; Lucknow Shatabdi</button>
+            <button class="train-chip" data-train="12951">12951 &bull; Mumbai Rajdhani</button>
+            <button class="train-chip" data-train="22436">22436 &bull; Vande Bharat</button>
+            <button class="train-chip" data-train="56789">56789 &bull; Special (High Var)</button>
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #1: Platform Approach Scene ── -->
+        <section class="approach-scene-card" aria-label="Platform Approach Schematic">
+          <div class="approach-header">
+            <div>
+              <h2 class="approach-title">Platform Approach &amp; Interlocking Geometry</h2>
+              <span class="approach-sub">NORTHERN RAILWAY &bull; PRAYAGRAJ JUNCTION (PRYJ) &bull; UP MAIN LINE</span>
+            </div>
+            <div id="sm-approach-badge" style="font-family:var(--mono); font-size:0.75rem; padding:0.25rem 0.65rem; border-radius:4px; background:rgba(232,163,61,0.2); border:1px solid var(--signal); color:var(--signal); font-weight:700;">
+              HOLD SIGNAL AT OUTER &bull; PF 04 DEFERRED
+            </div>
+          </div>
+
+          <!-- Dynamic Railway SVG -->
+          <svg class="approach-svg-container" viewBox="0 0 900 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Railway track approach diagram">
+            <!-- Track Lines -->
+            <line x1="20" y1="65" x2="680" y2="65" stroke="rgba(243,237,227,0.3)" stroke-width="3" />
+            <line x1="20" y1="73" x2="680" y2="73" stroke="rgba(243,237,227,0.3)" stroke-width="3" />
+            
+            <!-- Sleepers -->
+            <g stroke="rgba(243,237,227,0.2)" stroke-width="2">
+              <line x1="60" y1="58" x2="60" y2="80" />
+              <line x1="120" y1="58" x2="120" y2="80" />
+              <line x1="180" y1="58" x2="180" y2="80" />
+              <line x1="240" y1="58" x2="240" y2="80" />
+              <line x1="300" y1="58" x2="300" y2="80" />
+              <line x1="360" y1="58" x2="360" y2="80" />
+              <line x1="420" y1="58" x2="420" y2="80" />
+              <line x1="480" y1="58" x2="480" y2="80" />
+              <line x1="540" y1="58" x2="540" y2="80" />
+              <line x1="600" y1="58" x2="600" y2="80" />
+              <line x1="660" y1="58" x2="660" y2="80" />
+            </g>
+
+            <!-- Crossover Turnout to Platform 04 -->
+            <path d="M 520,65 Q 580,65 620,35 L 750,35" fill="none" stroke="rgba(232,163,61,0.6)" stroke-width="2" stroke-dasharray="4,4" id="sm-turnout-path" />
+
+            <!-- Train Token on Track (Animated Crawl) -->
+            <g transform="translate(240, 50)" id="sm-approach-train">
+              <rect x="0" y="0" width="85" height="24" rx="4" fill="var(--primary)" stroke="var(--signal)" stroke-width="2" />
+              <text x="42" y="16" fill="#0B0F1A" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="700" text-anchor="middle">TRAIN 20507</text>
+              <!-- Headlight -->
+              <circle cx="83" cy="12" r="3" fill="#FFE082" />
+            </g>
+
+            <!-- 4-Aspect Signal Post -->
+            <g transform="translate(480, 20)">
+              <line x1="10" y1="10" x2="10" y2="45" stroke="#0B0F1A" stroke-width="3" />
+              <rect x="3" y="2" width="14" height="34" rx="3" fill="#000000" stroke="#0B0F1A" stroke-width="1" />
+              <!-- Green Lens -->
+              <circle cx="10" cy="8" r="3" fill="#1B3D2B" id="sm-sig-green" />
+              <!-- Amber 1 Lens -->
+              <circle cx="10" cy="16" r="3" fill="var(--signal)" id="sm-sig-amber1" />
+              <!-- Amber 2 Lens -->
+              <circle cx="10" cy="24" r="3" fill="#423014" id="sm-sig-amber2" />
+              <!-- Red Lens -->
+              <circle cx="10" cy="32" r="3" fill="#3D1B1B" id="sm-sig-red" />
+              <text x="10" y="52" fill="rgba(243,237,227,0.7)" font-family="'IBM Plex Mono', monospace" font-size="8" text-anchor="middle">HOME S-14</text>
+            </g>
+
+            <!-- Distance Marks -->
+            <text x="60" y="96" fill="rgba(243,237,227,0.5)" font-family="'IBM Plex Mono', monospace" font-size="9">KANPUR (194 km)</text>
+            <text x="300" y="96" fill="rgba(243,237,227,0.5)" font-family="'IBM Plex Mono', monospace" font-size="9">SIRATHU (45 km)</text>
+            <text x="480" y="96" fill="rgba(232,163,61,0.8)" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="600">SUBEDARGANJ (12 km)</text>
+
+            <!-- Platform 04 Terminal Berth -->
+            <g transform="translate(730, 15)">
+              <rect x="0" y="0" width="150" height="55" rx="4" fill="#0E182A" stroke="var(--signal)" stroke-width="1.5" />
+              <text x="75" y="22" fill="var(--signal)" font-family="'IBM Plex Mono', monospace" font-size="12" font-weight="700" text-anchor="middle">PLATFORM 04</text>
+              <text x="75" y="38" fill="rgba(243,237,227,0.7)" font-family="'Inter', sans-serif" font-size="9" text-anchor="middle">24-Coach Rake Capacity</text>
+              <rect x="15" y="44" width="120" height="4" rx="2" fill="rgba(232,163,61,0.3)" />
+            </g>
+          </svg>
+        </section>
+
+        <!-- Anomaly Banner (Shown if anomaly_flag is true) -->
+        <div id="ticket-anomaly-alert" class="anomaly-banner">
+          <div style="font-family:var(--mono); font-weight:700; font-size:1rem; margin-bottom:0.4rem; display:flex; align-items:center; gap:0.5rem;">
+            <span>&#9888;</span> PREDICTION SUSPENDED: ANOMALOUS RUNNING CONDITIONS DETECTED
+          </div>
+          <p style="font-family:var(--sans); font-size:0.88rem; color:var(--text); line-height:1.5; margin:0;">
+            Operating conditions on this corridor fall outside the calibrated historical distribution. Automated platform recommendation is paused to prevent unsafe premature commitment. Station Controller must revert to VHF and block instrument manual triage.
+          </p>
         </div>
-        <div class="header-right">
-          <div class="train-input-group">
-            <label for="train-id" data-i18n="focalTrain">FOCAL TRAIN</label>
-            <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
-            <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
-            </button>
+
+        <!-- ── MAJOR VISUAL #3, #4, #9: Dominant Decision + Deadline + VHF ── -->
+        <div class="decision-matrix-grid">
+          
+          <!-- DOMINANT DECISION HERO CARD -->
+          <article class="decision-hero-card is-defer" id="triage-card" role="region" aria-label="Platform allocation decision">
+            <div>
+              <div class="decision-top-meta">
+                <span class="decision-kicker-tag">OPERATIONAL PLATFORM RECOMMENDATION</span>
+                <span class="decision-urgency-badge" id="sm-urgency-badge">URGENCY: HIGH</span>
+              </div>
+
+              <!-- Main Readout -->
+              <div class="decision-dominant-status defer" id="triage-decision">DEFER</div>
+
+              <!-- Target Platform -->
+              <div class="decision-target-resource">
+                TARGET: <span style="color:var(--signal);">PLATFORM 04</span> &bull; PRAYAGRAJ JN (PRYJ)
+              </div>
+
+              <p class="decision-explanation-msg" id="triage-msg">
+                Defer platform commitment until uncertainty narrows.
+              </p>
+
+              <!-- Quick Decision Breakdown Pills -->
+              <div style="display:flex; gap:1.25rem; flex-wrap:wrap; font-family:var(--mono); font-size:0.8rem; color:var(--muted); margin-bottom:1rem;">
+                <span>FOCAL TRAIN: <strong style="color:var(--primary);" id="triage-train">20507</strong></span>
+                <span>P50 DELAY: <strong style="color:var(--primary);"><span id="triage-p50">26.4</span> min</strong></span>
+                <span>CALIBRATED INTERVAL: <strong style="color:var(--primary);"><span id="triage-p10">0.0</span> &mdash; <span id="triage-p90">59.9</span> min</strong></span>
+              </div>
+            </div>
+
+            <!-- Operational Action Toolbar -->
+            <div class="decision-action-toolbar">
+              <button class="btn-action commit" id="btn-action-commit" type="button" title="Commit Platform 4 for arrival">
+                <span>&#10003;</span> COMMIT PLATFORM
+              </button>
+              <button class="btn-action defer is-active" id="btn-action-defer" type="button" title="Hold platform commitment">
+                <span>!</span> DEFER ALLOCATION
+              </button>
+              <button class="btn-action override" id="btn-action-override" type="button" title="Log manual supervisor override">
+                MANUAL OVERRIDE
+              </button>
+            </div>
+          </article>
+
+          <!-- SIDE COLUMN: Decision Deadline & VHF Synthesis -->
+          <div class="decision-side-col">
+            
+            <!-- MAJOR VISUAL #4: Decision Deadline -->
+            <div class="deadline-card">
+              <span class="decision-kicker-tag">DECISION WINDOW &bull; INTERLOCKING CUTOFF</span>
+              <div class="deadline-num" id="triage-deadline">30.1 min</div>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:0.75rem; color:var(--muted); margin-top:0.35rem;">
+                <span>ACTION DEADLINE:</span>
+                <strong style="color:var(--primary);" id="sm-deadline-clock">15:05 IST</strong>
+              </div>
+              <div style="width:100%; height:6px; background:rgba(232, 237, 245, 0.08); border-radius:3px; margin:0.75rem 0 0.4rem; overflow:hidden;">
+                <div style="height:100%; width:65%; background:var(--signal); border-radius:3px;"></div>
+              </div>
+              <p style="font-family:var(--sans); font-size:0.78rem; color:var(--muted); margin:0; line-height:1.4;">
+                Time remaining before platform occupancy cannot be deferred without triggering cascading interlocking holds for follow-on trains.
+              </p>
+            </div>
+
+            <!-- MAJOR VISUAL #9: VHF Radio Synthesis -->
+            <div class="vhf-card">
+              <div>
+                <span class="decision-kicker-tag" style="color:rgba(243,237,227,0.7);">VHF SYNTHESIS &bull; 10-WORD PROTOCOL</span>
+                <div class="vhf-terminal-box">
+                  <pre class="vhf-pre" id="triage-vhf">Station Master, Train 20507 estimated 26 minutes late. DEFER platform. Over.</pre>
+                </div>
+              </div>
+              <button id="btn-copy-vhf" class="btn-copy-vhf" type="button">COPY VHF DISPATCH</button>
+            </div>
+
           </div>
         </div>
-      </header>
 
-      <section class="view-panel is-active" id="station-view" data-panel="station">
-        
-        <div class="triage-matrix">
-            <div class="decision-card" id="triage-card">
-                <span class="decision-kicker" data-i18n="smKicker">PLATFORM ALLOCATION</span>
-                <h2 class="decision-status" id="triage-decision">--</h2>
-                <div class="decision-details" id="triage-details">
-                    Train: <span id="triage-train">--</span><br>
-                    P50 ETA: <span id="triage-p50">--</span> min<br>
-                    P10 / P90: <span id="triage-p10">--</span> / <span id="triage-p90">--</span> min<br>
-                    Deadline: <span id="triage-deadline">--</span> min<br>
-                    <br>
-                    <span id="triage-msg">Loading data...</span>
-                </div>
+        <!-- ── MAJOR VISUAL #2: Calibrated Arrival Window ── -->
+        <section class="arrival-window-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Calibrated Arrival Distribution</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                The arrival is represented as a calibrated quantile range (P10 to P90), not a single guaranteed minute.
+              </p>
             </div>
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+              Interval Spread: <strong style="color:var(--primary);" id="sm-interval-span">59.9 min</strong>
+            </div>
+          </div>
+
+          <!-- 3 Anchor Blocks -->
+          <div class="anchor-grid-sm">
+            <div class="anchor-box">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); text-transform:uppercase; font-weight:600;">EARLIEST BOUND (P10)</span>
+              <div class="anchor-num" style="color:var(--success);" id="sm-p10-display">0.0 min</div>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Clear section ahead. 10% chance of arriving sooner.</span>
+            </div>
+            <div class="anchor-box median">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:700;">MEDIAN ESTIMATE (P50)</span>
+              <div class="anchor-num" id="sm-p50-display">26.4 min</div>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Most probable arrival under current corridor pacing.</span>
+            </div>
+            <div class="anchor-box" style="border-left:3px solid var(--signal);">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--signal); text-transform:uppercase; font-weight:600;">UPPER BOUND (P90)</span>
+              <div class="anchor-num" style="color:var(--signal);" id="sm-p90-display">59.9 min</div>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Downside risk bound. 90% chance of arriving by this time.</span>
+            </div>
+          </div>
+
+          <!-- Interval Track Bar -->
+          <div class="interval-bar-wrap" title="Calibrated arrival interval">
+            <div class="interval-bar-fill" id="pax-bar-fill" style="left:5%; width:60%;"></div>
+            <div class="interval-bar-p50" id="pax-bar-p50" style="left:30%;" title="P50 Expected Median"></div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
+            <span>P10 (Earliest Cutoff)</span>
+            <span style="font-weight:700; color:var(--primary);">P50 Median Center</span>
+            <span>P90 (Conservative Hold Bound)</span>
+          </div>
+        </section>
+
+        <!-- ── Asymmetric Risk Metrics ── -->
+        <section class="risk-panel">
+          <div class="risk-ratio-badge">ASYMMETRIC LOSS POLICY &bull; 4.2&times; SKEW</div>
+          <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 1rem;">Risk Policy Summary</h2>
+
+          <div class="risk-comparison-grid">
+            <div class="risk-bar-card heavy">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-family:var(--mono); font-size:0.75rem; color:var(--signal); text-transform:uppercase;">PREMATURE COMMIT</strong>
+                <span style="font-family:var(--mono); font-size:1.1rem; font-weight:700; color:var(--signal);">4.2&times;</span>
+              </div>
+              <div class="risk-bar-track">
+                <div class="risk-bar-fill-fn"></div>
+              </div>
+            </div>
+
+            <div class="risk-bar-card">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-family:var(--mono); font-size:0.75rem; color:var(--primary); text-transform:uppercase;">CAUTIOUS HOLD</strong>
+                <span style="font-family:var(--mono); font-size:1.1rem; font-weight:700; color:var(--primary);">1.0&times;</span>
+              </div>
+              <div class="risk-bar-track">
+                <div class="risk-bar-fill-fp"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Decision Evidence Chain ── -->
+        <section style="background:#111827; border:1px solid var(--line); border-radius:8px; padding:1.75rem; margin-bottom:2rem;">
+          <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 1rem;">Decision Evidence Chain</h2>
+
+          <div class="evidence-steps-container">
             
-            <div class="decision-card" style="background:var(--primary); border:none;">
-                <span class="decision-kicker" style="color:rgba(243,237,227,0.5);" data-i18n="smVhfKicker">VHF SYNTHESIS</span>
-                <pre id="triage-vhf" style="font-family:var(--mono); font-size:1.1rem; color:var(--surface); line-height:1.6; margin:0;">
-AWAITING DATA...
-                </pre>
+            <!-- Step 1: Observation -->
+            <div class="evidence-step">
+              <div class="evidence-step-header">
+                <span class="evidence-step-tag">STEP 01</span>
+                <span>OBSERVATION &bull; SENSOR TELEMETRY</span>
+              </div>
+              <div class="why-matrix-grid">
+                <div class="why-item">
+                  <span style="font-family:var(--mono); font-size:0.68rem; color:var(--muted); text-transform:uppercase;">CURRENT OBSERVED DELAY</span>
+                  <div style="font-family:var(--mono); font-size:1.15rem; font-weight:700; color:var(--primary); margin:0.2rem 0;" id="sm-factor-cur-delay">+26.4 min</div>
+                  <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Sensor recorded at Kanpur Central</span>
+                </div>
+                <div class="why-item">
+                  <span style="font-family:var(--mono); font-size:0.68rem; color:var(--muted); text-transform:uppercase;">P90 DOWNSIDE BOUND</span>
+                  <div style="font-family:var(--mono); font-size:1.15rem; font-weight:700; color:var(--signal); margin:0.2rem 0;" id="sm-factor-p90">+59.9 min</div>
+                  <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">90th percentile arrival horizon</span>
+                </div>
+              </div>
             </div>
+
+            <!-- Step 2: Network Evidence -->
+            <div class="evidence-step">
+              <div class="evidence-step-header">
+                <span class="evidence-step-tag">STEP 02</span>
+                <span>EVIDENCE &bull; DOWNSTREAM CORRIDOR FRICTION</span>
+              </div>
+              <div class="why-matrix-grid">
+                <div class="why-item">
+                  <span style="font-family:var(--mono); font-size:0.68rem; color:var(--muted); text-transform:uppercase;">DOWNSTREAM CONGESTION</span>
+                  <div style="font-family:var(--mono); font-size:1.15rem; font-weight:700; color:var(--primary); margin:0.2rem 0;" id="sm-factor-congestion">0.00 / 1.00</div>
+                  <span style="font-family:var(--sans); font-size:0.75rem; color:var(--success); font-weight:600;">OPTIMAL HEADWAY</span>
+                </div>
+                <div class="why-item">
+                  <span style="font-family:var(--mono); font-size:0.68rem; color:var(--muted); text-transform:uppercase;">SIGNAL ASPECT RESTRICTION</span>
+                  <div style="font-family:var(--mono); font-size:1.15rem; font-weight:700; color:var(--primary); margin:0.2rem 0;" id="sm-factor-signal">4-ASPECT CLEAR</div>
+                  <span style="font-family:var(--sans); font-size:0.75rem; color:var(--success); font-weight:600;">LINE SPEED PERMITTED</span>
+                </div>
+                <div class="why-item">
+                  <span style="font-family:var(--mono); font-size:0.68rem; color:var(--muted); text-transform:uppercase;">GOVERDE CONFLICT OFFSET</span>
+                  <div style="font-family:var(--mono); font-size:1.15rem; font-weight:700; color:var(--primary); margin:0.2rem 0;" id="sm-factor-conflict">+0.0 min</div>
+                  <span style="font-family:var(--sans); font-size:0.75rem; color:var(--success); font-weight:600;">NO CROSSOVER CONFLICT</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Operational Inference -->
+            <div class="evidence-step">
+              <div class="evidence-step-header">
+                <span class="evidence-step-tag">STEP 03</span>
+                <span>OPERATIONAL INFERENCE &bull; UNCERTAINTY BOUNDS</span>
+              </div>
+              <div style="font-family:var(--mono); font-size:0.85rem; color:var(--primary); line-height:1.5;">
+                INTERVAL SPREAD: <strong style="color:var(--signal);" id="sm-factor-spread">59.9 min</strong> &bull; COMMIT THRESHOLD: <strong style="color:var(--primary);">30.0 min</strong>
+              </div>
+            </div>
+
+            <!-- Step 4: Decision -->
+            <div class="evidence-step" style="border-left:4px solid var(--signal); background:rgba(232,163,61,0.05);">
+              <div class="evidence-step-header">
+                <span class="evidence-step-tag" style="background:var(--signal); color:#111827;">STEP 04</span>
+                <span style="color:var(--signal);">DECISION &bull; RISK-WEIGHTED ACTION</span>
+              </div>
+              <div style="font-family:var(--mono); font-size:0.9rem; color:var(--primary); font-weight:700;">
+                INTERVAL &gt; 30 MIN THRESHOLD &rarr; <span style="background:var(--signal); color:#111827; padding:2px 8px; border-radius:3px; font-size:0.8rem;" id="triage-decision-step4">RECOMMENDATION: DEFER PLATFORM ALLOCATION</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #8 & #10: Ripple Score + Financial Impact ── -->
+        <div class="metrics-two-col">
+          
+          <!-- Ripple Score -->
+          <div class="metric-panel">
+            <span class="decision-kicker-tag">NETWORK RIPPLE SPREAD</span>
+            <div class="ripple-gauge-wrap">
+              <!-- SVG Gauge -->
+              <svg width="80" height="80" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(27,42,74,0.1)" stroke-width="10" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--signal)" stroke-width="10" stroke-dasharray="264" stroke-dashoffset="118" stroke-linecap="round" transform="rotate(-90 50 50)" id="sm-ripple-circle" />
+                <text x="50" y="58" font-family="'Fraunces', serif" font-size="28" font-weight="700" fill="var(--primary)" text-anchor="middle" id="triage-ripple">55</text>
+              </svg>
+              <div>
+                <div style="font-family:var(--mono); font-size:1.1rem; font-weight:700; color:var(--primary);" id="sm-ripple-rating">MODERATE RISK (55/100)</div>
+                <p style="font-family:var(--sans); font-size:0.8rem; color:var(--muted); margin:0.25rem 0 0; line-height:1.4;">
+                  Quantifies the likelihood that delaying Platform 4 allocation triggers secondary headway friction across adjoining station sections.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projected Financial Impact -->
+          <div class="metric-panel">
+            <span class="decision-kicker-tag">PROJECTED OPERATIONAL EXPOSURE</span>
+            <div style="font-family:var(--display); font-size:2.6rem; font-weight:700; color:var(--primary); margin:0.25rem 0;" id="triage-impact">
+              ₹31,680
+            </div>
+            <span style="font-family:var(--mono); font-size:0.75rem; color:var(--muted); display:block; margin-bottom:0.75rem;">
+              Estimated Indian Railways operating ratio exposure
+            </span>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; font-family:var(--mono); font-size:0.72rem; color:var(--muted); border-top:1px dashed var(--line); padding-top:0.75rem;">
+              <div>CREW: <strong style="color:var(--primary);">₹12.6k</strong></div>
+              <div>DWELL: <strong style="color:var(--primary);">₹11.1k</strong></div>
+              <div>NETWORK: <strong style="color:var(--primary);">₹7.9k</strong></div>
+            </div>
+          </div>
+
         </div>
 
-        <p id="data-source" class="data-provenance">Source status: --</p>
-        <a class="back-link role-link" data-role="sandbox" href="sandbox.html">Open replay sandbox</a>
-
-        <h3 class="timeline-title" style="max-width:900px; margin: 0 auto -2rem auto; position:relative; z-index:10;" data-i18n="smIncomingTitle">Incoming Sequence</h3>
-        <div class="incoming-strip" id="incoming-sequence">
-            <div class="incoming-train">
-                <p class="inc-train-id">AWAITING</p>
+        <!-- ── MAJOR VISUAL #11: Platform Resource Board ── -->
+        <section class="platform-board">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Prayagraj Junction (PRYJ) Platform Berth Status</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Interlocking resource allocation matrix. Platform 04 is currently designated for Train 20507.
+              </p>
             </div>
-        </div>
+            <span style="font-family:var(--mono); font-size:0.72rem; color:var(--muted); background:rgba(232, 237, 245, 0.08); padding:3px 8px; border-radius:4px;">REPLAY / SIMULATION SNAPSHOT &bull; PRYJ INTERLOCKING CABIN</span>
+          </div>
 
-        <!-- Route/Corridor Map with Train Type Differentiation -->
-        <div id="route-map-mount"></div>
-      </section>
+          <div class="platform-grid">
+            <div class="platform-cell">
+              <span class="platform-num">PF 01</span>
+              <span class="platform-status-tag occupied">OCCUPIED</span>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">12428 Rewa SF</span>
+            </div>
+            <div class="platform-cell">
+              <span class="platform-num">PF 02</span>
+              <span class="platform-status-tag available">AVAILABLE</span>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Clear &bull; 24-Coach</span>
+            </div>
+            <div class="platform-cell">
+              <span class="platform-num">PF 03</span>
+              <span class="platform-status-tag deferred">HOLD AT LOOP</span>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">12302 Rajdhani</span>
+            </div>
+            <div class="platform-cell target-candidate" id="sm-pf4-cell">
+              <span class="platform-num" style="color:var(--signal);">PF 04</span>
+              <span class="platform-status-tag deferred" id="sm-pf4-tag">DEFERRED</span>
+              <span style="font-family:var(--sans); font-size:0.75rem; font-weight:600; color:var(--primary);">20507 (TARGET)</span>
+            </div>
+            <div class="platform-cell">
+              <span class="platform-num">PF 05</span>
+              <span class="platform-status-tag available">AVAILABLE</span>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">Clear &bull; 16-Coach Bay</span>
+            </div>
+            <div class="platform-cell">
+              <span class="platform-num">PF 06</span>
+              <span class="platform-status-tag occupied">MAINTENANCE</span>
+              <span style="font-family:var(--sans); font-size:0.75rem; color:var(--muted);">OHE Wire Inspection</span>
+            </div>
+          </div>
+        </section>
 
+        <!-- ── MULTI-TRAIN JUNCTION TRIAGE MATRIX TABLE ── -->
+        <section class="junction-table-wrap">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Multi-Train Junction Triage Matrix</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Cross-corridor comparison of incoming trains converging on Prayagraj Junction within the current operations shift.
+              </p>
+            </div>
+            <div class="incoming-strip" id="incoming-sequence" style="display:none;"></div>
+          </div>
+
+          <table class="junction-table">
+            <thead>
+              <tr>
+                <th>TRAIN</th>
+                <th>CORRIDOR ROUTE</th>
+                <th>P50 DELAY</th>
+                <th>P10 &mdash; P90 WINDOW</th>
+                <th>DECISION</th>
+                <th>DEADLINE</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="multi-train-junction-body">
+              <tr class="is-focal">
+                <td><strong>20507</strong> &bull; Tejas Rajdhani</td>
+                <td>NDLS &rarr; CNB &rarr; PRYJ</td>
+                <td>+26.4m</td>
+                <td>0.0 &mdash; 59.9m</td>
+                <td><span class="platform-status-tag deferred">DEFER</span></td>
+                <td>30.1 min</td>
+                <td><strong style="color:var(--signal);">FOCAL VIEW</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- ── Network Ahead Schematic ── -->
+        <section style="background:var(--surface-dark); color:var(--text-inv); border-radius:8px; padding:1.5rem 1.75rem; margin-bottom:2rem; border-left:4px solid var(--signal);">
+          <h3 style="font-family:var(--display); font-size:1.25rem; color:#111827; margin:0 0 0.75rem;">Network Ahead &bull; Approach Block Section</h3>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; background:rgba(0,0,0,0.2); padding:0.85rem 1.25rem; border-radius:6px; border:1px solid rgba(243,237,227,0.1); font-family:var(--mono); font-size:0.75rem;">
+            <div style="color:var(--signal); font-weight:700;">&#128646; TRAIN 20507</div>
+            <span style="color:rgba(243,237,227,0.4);">&rarr;</span>
+            <div>BLOCK 402 (CLEAR &bull; 2km)</div>
+            <span style="color:rgba(243,237,227,0.4);">&rarr;</span>
+            <div>SUBEDARGANJ INTERLOCKING</div>
+            <span style="color:rgba(243,237,227,0.4);">&rarr;</span>
+            <div style="color:var(--signal);">PLATFORM 04 (PRYJ)</div>
+          </div>
+        </section>
+
+        <!-- ── FOOTER & AUDIT PROVENANCE ── -->
+        <footer style="border-top:1px solid var(--line); padding-top:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+          <div>
+            <strong>RippleETA Station Controller</strong> &bull; Goverde Max-Plus Engine &bull; Indian Railways SIH 2026
+          </div>
+          <div style="display:flex; gap:1rem;">
+            <a href="index.html" style="color:var(--primary); text-decoration:none; font-weight:600;">&larr; Roles Gateway</a>
+            <a href="passenger.html" style="color:var(--primary); text-decoration:none; font-weight:600;">Passenger View</a>
+            <a href="sandbox.html" style="color:var(--primary); text-decoration:none; font-weight:600;">Replay Sandbox</a>
+            <a href="/" style="color:var(--primary); text-decoration:none; font-weight:600;">3D Landing &nearr;</a>
+          </div>
+        </footer>
+
+      </div>
     </main>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>

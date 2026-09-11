@@ -2,90 +2,1351 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Feeder Transport | RippleETA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feeder Transport Intelligence Desk | Rail → Road Transfer | RippleETA</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ==========================================================================
+       RIPPLEETA — Feeder Transport View Scoped Styles: Transfer Intelligence Desk
+       Palette: Warm Cream (#0B0F1A), Deep Railway Navy (var(--primary)),
+       Signal Amber (var(--signal)), Signal Green (var(--success)), Terracotta (var(--stamp))
+       Typography: Fraunces display, Inter interface, IBM Plex Mono telemetry
+       ========================================================================== */
+
+    :root {
+      --feeder-paper: #FAF6F0;
+      --feeder-paper-alt: #F7EFE3;
+      --feeder-border: rgba(27, 42, 74, 0.16);
+      --feeder-shadow: 0 4px 20px rgba(232, 237, 245, 0.05);
+    }
+
+    .feeder-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ── Topbar Pill ── */
+    .view-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(232, 237, 245, 0.08);
+      color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--line);
+    }
+
+    /* ── Editorial Hero Banner ── */
+    .feeder-hero {
+      margin: 1.5rem 0 1.5rem;
+      padding: 1.6rem 1.85rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--feeder-shadow);
+      position: relative;
+    }
+
+    .feeder-hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--signal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .feeder-hero-tag::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(232, 163, 61, 0.6);
+    }
+
+    .feeder-hero-title {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+      font-weight: 600;
+      color: var(--primary);
+      line-height: 1.15;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.015em;
+    }
+
+    .feeder-hero-desc {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 880px;
+      line-height: 1.55;
+      margin: 0 0 1.25rem;
+    }
+
+    /* Operational Identity Block */
+    .feeder-identity-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.85rem;
+      background: var(--feeder-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.85rem 1.25rem;
+    }
+
+    .feeder-ident-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .feeder-ident-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .feeder-ident-val {
+      font-family: var(--mono);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* ── Corridor Quick-Switch Bar ── */
+    .corridor-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.75rem;
+      padding: 0.85rem 1.25rem;
+      background: var(--feeder-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .corridor-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .corridor-chips {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .train-chip {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .train-chip:hover {
+      border-color: var(--signal);
+      background: #111827;
+    }
+
+    .train-chip.is-active {
+      background: var(--primary);
+      color: #111827;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Train Input Search */
+    .train-input-group {
+      display: flex;
+      align-items: center;
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      gap: 0.5rem;
+    }
+
+    .train-input-group label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .train-input {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      border: none;
+      background: transparent;
+      color: var(--primary);
+      width: 80px;
+      outline: none;
+      font-weight: 600;
+    }
+
+    .btn-refresh {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      border-radius: 3px;
+      transition: color 0.15s ease;
+    }
+
+    .btn-refresh:hover {
+      color: var(--primary);
+    }
+
+    /* ── MAJOR VISUAL #1: Rail → Road Transfer Schematic ── */
+    .schematic-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--feeder-shadow);
+      position: relative;
+    }
+
+    .schematic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .schematic-title {
+      font-family: var(--display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0 0 0.25rem;
+    }
+
+    .schematic-sub {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .schematic-svg-wrap {
+      background: var(--feeder-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.5rem 1.25rem;
+      margin-bottom: 1.25rem;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .schematic-svg {
+      width: 100%;
+      min-width: 650px;
+      height: 200px;
+      display: block;
+    }
+
+    /* ── MAJOR VISUAL #2: Dominant Decision & Cutoff Control Grid ── */
+    .decision-row-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .decision-row-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Dominant Decision Card */
+    .feeder-hero-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      box-shadow: var(--feeder-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      border-left: 6px solid var(--success);
+      transition: border-color 0.3s ease;
+    }
+
+    .feeder-hero-card.is-wait {
+      border-left-color: var(--success);
+    }
+
+    .feeder-hero-card.is-depart {
+      border-left-color: var(--stamp);
+    }
+
+    .feeder-hero-card.is-judgment {
+      border-left-color: var(--signal);
+    }
+
+    .feeder-hero-card.is-suspended {
+      border-left-color: var(--muted);
+    }
+
+    .decision-kicker-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+
+    .feeder-dominant-status {
+      font-family: var(--display);
+      font-size: clamp(2.4rem, 4.2vw, 3.4rem);
+      font-weight: 700;
+      line-height: 1.05;
+      margin: 0.2rem 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .feeder-dominant-status.wait {
+      color: var(--success);
+    }
+
+    .feeder-dominant-status.depart {
+      color: var(--stamp);
+    }
+
+    .feeder-dominant-status.judgment {
+      color: var(--signal);
+    }
+
+    .feeder-dominant-status.suspended {
+      color: var(--stamp);
+    }
+
+    .feeder-station-sub {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .feeder-explanation-msg {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.55;
+      margin: 0 0 1.25rem;
+    }
+
+    .feeder-action-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .btn-action {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.6rem 1.15rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      border: 1px solid var(--line);
+      background: #111827;
+      color: var(--primary);
+    }
+
+    .btn-action:hover {
+      background: var(--feeder-paper);
+      border-color: var(--primary);
+    }
+
+    .btn-action.hold {
+      background: var(--success);
+      color: #111827;
+      border-color: var(--success);
+    }
+
+    .btn-action.hold:hover {
+      background: #2b5741;
+    }
+
+    .btn-action.depart {
+      background: var(--stamp);
+      color: #111827;
+      border-color: var(--stamp);
+    }
+
+    .btn-action.depart:hover {
+      background: #872e21;
+    }
+
+    .btn-action.review {
+      background: var(--signal);
+      color: #111827;
+      border-color: var(--signal);
+    }
+
+    /* Cutoff Control Instrument */
+    .cutoff-card {
+      background: var(--feeder-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      box-shadow: var(--feeder-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cutoff-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.5rem 0 1rem;
+    }
+
+    .cutoff-time-input {
+      font-family: var(--mono);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: #111827;
+      border: 1.5px solid var(--line);
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      outline: none;
+      width: 170px;
+    }
+
+    .cutoff-time-input:focus {
+      border-color: var(--signal);
+    }
+
+    .preset-pills {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-preset {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border: 1px solid var(--line);
+      background: #111827;
+      color: var(--primary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-preset:hover {
+      border-color: var(--signal);
+      background: var(--feeder-paper-alt);
+    }
+
+    /* ── MAJOR VISUAL #3: Calibrated Transfer Distribution ── */
+    .distribution-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--feeder-shadow);
+    }
+
+    .prob-metric-row {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin: 0.5rem 0 1.25rem;
+    }
+
+    .prob-hero-val {
+      font-family: var(--mono);
+      font-size: clamp(2.8rem, 5vw, 4rem);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .prob-hero-val span {
+      font-size: 1.8rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .distribution-curve-wrap {
+      position: relative;
+      background: var(--feeder-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.25rem 1.25rem 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .distribution-svg {
+      width: 100%;
+      height: 120px;
+      display: block;
+    }
+
+    /* ── MAJOR VISUAL #4: Asymmetric Cost Trade-Off Matrix ── */
+    .cost-tradeoff-panel {
+      background: var(--feeder-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--feeder-shadow);
+    }
+
+    .tradeoff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .tradeoff-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tradeoff-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+
+    .tradeoff-card.wait-card {
+      border-top: 4px solid var(--success);
+    }
+
+    .tradeoff-card.depart-card {
+      border-top: 4px solid var(--stamp);
+    }
+
+    .tradeoff-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .tradeoff-title {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tradeoff-cost-chip {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .tradeoff-cost-chip.recommended {
+      background: rgba(61, 122, 92, 0.12);
+      color: var(--success);
+    }
+
+    .tradeoff-cost-chip.penalty {
+      background: rgba(161, 61, 46, 0.12);
+      color: var(--stamp);
+    }
+
+    /* ── MAJOR VISUAL #5: "How Much Time Do We Really Have?" ── */
+    .timing-scale-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--feeder-shadow);
+    }
+
+    .timing-timeline-bar {
+      position: relative;
+      width: 100%;
+      height: 38px;
+      background: rgba(27, 42, 74, 0.06);
+      border-radius: 6px;
+      margin: 1.5rem 0 1rem;
+      border: 1px solid var(--line);
+    }
+
+    .timing-fill-span {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      background: rgba(232, 163, 61, 0.35);
+      border: 1.5px dashed var(--signal);
+      border-radius: 4px;
+      z-index: 2;
+      transition: all 0.4s ease;
+    }
+
+    .timing-pin {
+      position: absolute;
+      top: -16px;
+      bottom: -16px;
+      width: 2px;
+      transform: translateX(-50%);
+      z-index: 3;
+    }
+
+    .timing-pin.now {
+      background: var(--primary);
+    }
+
+    .timing-pin.now::before {
+      content: 'NOW';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: #111827;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 1px 4px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    .timing-pin.p50 {
+      background: var(--primary);
+      width: 3px;
+    }
+
+    .timing-pin.p50::after {
+      content: 'P50 ARRIVAL';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: #111827;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 1px 4px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    .timing-pin.cutoff {
+      background: var(--stamp);
+      width: 3px;
+    }
+
+    .timing-pin.cutoff::before {
+      content: 'FEEDER CUTOFF';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--stamp);
+      color: #111827;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      padding: 1px 4px;
+      border-radius: 2px;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    /* ── MAJOR VISUAL #6: Why This Decision? Telemetry Trace ── */
+    .why-decision-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--feeder-shadow);
+    }
+
+    .why-step-flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .why-step-item {
+      background: var(--feeder-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1rem 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .why-step-num {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .why-step-val {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0.25rem 0;
+    }
+
+    .why-step-sub {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── MAJOR VISUAL #7: Multi-Train Feeder Board ── */
+    .dispatch-board-panel {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--feeder-shadow);
+      overflow-x: auto;
+    }
+
+    .dispatch-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      margin-top: 1rem;
+    }
+
+    .dispatch-table th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      background: var(--feeder-paper);
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .dispatch-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--primary);
+      vertical-align: middle;
+    }
+
+    .dispatch-table tr.is-focal {
+      background: rgba(232, 163, 61, 0.08);
+      font-weight: 700;
+    }
+
+    .status-badge-chip {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .status-badge-chip.wait {
+      background: rgba(61, 122, 92, 0.12);
+      color: var(--success);
+    }
+
+    .status-badge-chip.depart {
+      background: rgba(161, 61, 46, 0.12);
+      color: var(--stamp);
+    }
+
+    .status-badge-chip.judgment {
+      background: rgba(232, 163, 61, 0.18);
+      color: #9c671b;
+    }
+
+    /* Anomaly Banner */
+    .anomaly-banner {
+      display: none;
+      margin: 1.25rem 0;
+      padding: 1.25rem 1.5rem;
+      background: rgba(229, 62, 62, 0.08);
+      border: 1.5px solid var(--stamp);
+      border-radius: 6px;
+      color: var(--stamp);
+    }
+
+    /* ── Responsive Refinements ── */
+    @media (max-width: 640px) {
+      .feeder-container {
+        padding: 0 0.85rem 3rem;
+      }
+      .feeder-hero {
+        padding: 1.2rem;
+      }
+      .feeder-hero-card {
+        padding: 1.25rem;
+      }
+      .feeder-dominant-status {
+        font-size: 2.4rem;
+      }
+      .feeder-action-toolbar {
+        flex-direction: column;
+      }
+      .btn-action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .schematic-svg *,
+      .timing-fill-span,
+      .train-chip,
+      .btn-action {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
 <body class="has-grain" data-view="feeder">
-  
+
+  <!-- ── Global Railway Command Topbar ── -->
   <div class="topbar">
     <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
-      <a class="brand" href="#" aria-label="RippleETA home">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
+      <a class="brand" href="/eta/index.html" aria-label="RippleETA 3D Experience">
         <span class="brand-mark">R</span>
         <span class="brand-logotype">RippleETA</span>
       </a>
       <div class="divider"></div>
-      <span class="view-title">FEEDER INTELLIGENCE</span>
+      <span class="view-title" data-i18n="role-feeder">FEEDER TRANSPORT INTELLIGENCE</span>
+      <span class="view-badge-pill">RAIL &rarr; ROAD TRANSFER DESK &bull; PRYJ</span>
     </div>
-        <div class="topbar-right">
-      <div class="topbar-actions">
-        <div class="lang-selector">
-          <button class="lang-btn active" data-lang="en">EN</button>
-          <button class="lang-btn" data-lang="hi">HI</button>
-        </div>
-        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
-          <span style="font-weight:bold;">?</span>
-          <span data-i18n="helpFaq">FAQ</span>
-        </button>
-      </div>
+    <div class="topbar-right">
+      <a href="/eta/index.html" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Launch 3D Train Simulation">🎬 <span data-i18n="btn-3d-view">3D Train</span></a>
+      <select id="lang-select" class="lang-select" aria-label="Select Language" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; border-radius:4px; padding:0.2rem 0.4rem; font-size:0.75rem; font-family:var(--mono); cursor:pointer;">
+        <option value="en">EN</option>
+        <option value="hi">HI (हिंदी)</option>
+        <option value="mr">MR (मराठी)</option>
+      </select>
+      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Mode">A11Y</button>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:-- IST</div>
+      <div class="clock" id="clock">--:--:-- IST</div>
     </div>
   </div>
 
   <div class="app-layout">
     <main class="main-content">
-      
-      <header class="view-header">
-        <div class="header-left">
-          <h1 class="view-headline" data-i18n="feederTitle">Connection Trade-off</h1>
-          <p class="view-subhead" data-i18n="feederSubhead">Probability of arrival before cutoff from the calibrated interval.</p>
-        </div>
-        <div class="header-right">
-          <div class="train-input-group">
-            <label for="train-id" data-i18n="focalTrain">FOCAL TRAIN</label>
-            <input type="text" id="train-id" class="train-input" value="20507">
-            
-            <label for="feeder-cutoff-input" style="margin-left: 1rem;" data-i18n="feederCutoffLabel">CUTOFF TIME</label>
-            <input type="time" id="feeder-cutoff-input" class="train-input" value="14:40">
-            
-            <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
-            </button>
+      <div class="feeder-container">
+
+        <!-- ── Editorial Hero Banner ── -->
+        <section class="feeder-hero">
+          <div class="feeder-hero-tag">INTERMODAL TRANSFER DISPATCH &bull; PRAYAGRAJ JUNCTION (PRYJ)</div>
+          <h1 class="feeder-hero-title">WILL THE FEEDER<br>STILL MAKE THE CONNECTION?</h1>
+          <p class="feeder-hero-desc">
+            RippleETA turns the train's uncertain arrival into a transfer decision &mdash; so feeder transport can decide whether to wait, depart, or use operational judgment.
+          </p>
+
+          <!-- Operational Identity Strip: Answers 6 First-Viewport Questions -->
+          <div class="feeder-identity-strip">
+            <div class="feeder-ident-item">
+              <span class="feeder-ident-label">1. FOCAL TRAIN</span>
+              <span class="feeder-ident-val" id="feeder-train-title">TRAIN 20507 &bull; TEJAS RAJDHANI</span>
+            </div>
+            <div class="feeder-ident-item">
+              <span class="feeder-ident-label">2. TRAIN DELAY</span>
+              <span class="feeder-ident-val" id="feeder-hero-delay" style="color:var(--signal);">+26.4 MIN</span>
+            </div>
+            <div class="feeder-ident-item">
+              <span class="feeder-ident-label">3. CURRENT LOCATION</span>
+              <span class="feeder-ident-val" id="feeder-current-location">Approaching Subedarganj (12 km to PRYJ)</span>
+            </div>
+            <div class="feeder-ident-item">
+              <span class="feeder-ident-label">4. TRANSFER HUB</span>
+              <span class="feeder-ident-val" id="feeder-transfer-hub">Prayagraj Jn (PRYJ) &bull; Civil Lines Bay 2</span>
+            </div>
+            <div class="feeder-ident-item">
+              <span class="feeder-ident-label">5. CONNECTING SERVICE</span>
+              <span class="feeder-ident-val" id="feeder-connecting-service">UPSRTC Route 14A Shuttle</span>
+            </div>
+            <div class="feeder-ident-item">
+              <span class="feeder-ident-label">6. DISPATCH DIRECTIVE</span>
+              <span class="feeder-ident-val" id="feeder-ident-directive" style="color:var(--signal);">USE JUDGMENT</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Train Query & Quick Corridor Switcher ── -->
+        <section class="corridor-bar">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <div class="train-input-group">
+              <label for="train-id">FOCAL TRAIN</label>
+              <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
+              <button id="refresh-button" class="btn-refresh" aria-label="Refresh telemetry">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+              </button>
+            </div>
+            <span class="corridor-label" style="margin-left:0.5rem;">MONITORED CORRIDORS:</span>
+          </div>
+
+          <div class="corridor-chips" id="train-chips-container">
+            <button class="train-chip is-active" data-train="20507">20507 &bull; Tejas Rajdhani</button>
+            <button class="train-chip" data-train="12301">12301 &bull; Howrah Rajdhani</button>
+            <button class="train-chip" data-train="12002">12002 &bull; Bhopal Shatabdi</button>
+            <button class="train-chip" data-train="12004">12004 &bull; Lucknow Shatabdi</button>
+            <button class="train-chip" data-train="12951">12951 &bull; Mumbai Rajdhani</button>
+            <button class="train-chip" data-train="22436">22436 &bull; Vande Bharat</button>
+            <button class="train-chip" data-train="56789">56789 &bull; Special (High Var)</button>
+          </div>
+        </section>
+
+        <!-- Anomaly Gate Suspension Alert -->
+        <div class="anomaly-banner" id="ticket-anomaly-alert" role="alert">
+          <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <span style="font-size:1.5rem; line-height:1;">&#9888;</span>
+            <div>
+              <strong style="font-family:var(--mono); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:0.25rem;">
+                PREDICTION SUSPENDED &mdash; ANOMALY GATE ACTIVE
+              </strong>
+              <p style="font-family:var(--sans); font-size:0.88rem; margin:0; line-height:1.45;">
+                Operating conditions fall outside the validated prediction distribution. Automated transfer probability cannot be served.
+                <strong>Action: Dispatch feeder bus according to standard scheduled timetable.</strong>
+              </p>
+            </div>
           </div>
         </div>
-      </header>
 
-      <section class="view-panel is-active" id="feeder-view" data-panel="feeder">
-        
-        <div class="cost-tradeoff-panel">
-            <div class="cost-tradeoff-left">
-                <p class="tradeoff-title" data-i18n="feederProbLabel">Probability of Arrival Before Cutoff</p>
-                <h2 class="prob-hero-val" id="feeder-prob">--<span>%</span></h2>
-                <p style="font-family:var(--sans); color:var(--text); max-width: 300px;" id="feeder-train-lbl">Evaluating train...</p>
-                
+        <!-- ── MAJOR VISUAL #1: Rail → Road Transfer Schematic ── -->
+        <section class="schematic-card" aria-label="Rail to Road Transfer Schematic">
+          <div class="schematic-header">
+            <div>
+              <h2 class="schematic-title">Rail &rarr; Road Intermodal Transfer Concourse</h2>
+              <span class="schematic-sub">PRAYAGRAJ JUNCTION (PRYJ) &bull; UP MAIN LINE &rarr; CIVIL LINES BUS TERMINUS</span>
             </div>
-            <div class="cost-tradeoff-right">
-                <p class="tradeoff-title" style="color:rgba(255,255,255,0.5);" data-i18n="feederMatrixLabel">Expected Cost Matrix</p>
-                <div class="tradeoff-matrix">
-                    <div class="tradeoff-row">
-                        <span class="tradeoff-label" data-i18n="feederCostWait">Cost of Waiting (if train delays)</span>
-                        <span class="tradeoff-cost" id="cost-wait">--</span>
-                    </div>
-                    <div class="tradeoff-row">
-                        <span class="tradeoff-label" data-i18n="feederCostAbandon">Cost of Abandonment (if train arrives)</span>
-                        <span class="tradeoff-cost" id="cost-abandon">--</span>
-                    </div>
-                </div>
-                <span class="tradeoff-decision" id="feeder-decision">AWAITING DATA</span>
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+              TRANSFER STATUS: <strong style="color:var(--signal);" id="schematic-transfer-status">CONNECTION FEASIBLE</strong>
             </div>
+          </div>
+
+          <div class="schematic-svg-wrap">
+            <svg class="schematic-svg" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grid background lines -->
+              <line x1="0" y1="40" x2="800" y2="40" stroke="rgba(27,42,74,0.06)" stroke-dasharray="4 4" />
+              <line x1="0" y1="160" x2="800" y2="160" stroke="rgba(27,42,74,0.06)" stroke-dasharray="4 4" />
+
+              <!-- Railway Track (Upper Line) -->
+              <line x1="40" y1="60" x2="480" y2="60" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" />
+              <!-- Railway Sleepers -->
+              <path d="M 60 54 L 60 66 M 100 54 L 100 66 M 140 54 L 140 66 M 180 54 L 180 66 M 220 54 L 220 66 M 260 54 L 260 66 M 300 54 L 300 66 M 340 54 L 340 66 M 380 54 L 380 66 M 420 54 L 420 66 M 460 54 L 460 66" stroke="rgba(27,42,74,0.3)" stroke-width="2" />
+              
+              <!-- Roadway Lane (Lower Line) -->
+              <line x1="480" y1="140" x2="760" y2="140" stroke="var(--muted)" stroke-width="4" stroke-linecap="round" />
+              <line x1="480" y1="140" x2="760" y2="140" stroke="#FAF6F0" stroke-width="1.5" stroke-dasharray="8 8" />
+
+              <!-- Transfer Station Hub Node -->
+              <rect x="440" y="35" width="80" height="130" rx="6" fill="#111827" stroke="var(--primary)" stroke-width="2" />
+              <text x="480" y="85" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="700" fill="var(--primary)" text-anchor="middle">PRYJ</text>
+              <text x="480" y="100" font-family="'Inter', sans-serif" font-size="8" fill="var(--muted)" text-anchor="middle">TRANSFER</text>
+              <text x="480" y="112" font-family="'Inter', sans-serif" font-size="8" fill="var(--muted)" text-anchor="middle">CONCOURSE</text>
+              <circle cx="480" cy="132" r="4" fill="var(--success)" id="schematic-station-light" />
+
+              <!-- Incoming Train Token -->
+              <g id="schematic-train-token" transform="translate(240, 48)">
+                <rect x="0" y="0" width="80" height="24" rx="4" fill="var(--primary)" />
+                <rect x="5" y="4" width="14" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <rect x="23" y="4" width="14" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <rect x="41" y="4" width="14" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <text x="74" y="16" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="700" fill="var(--signal)" text-anchor="end">🚆 20507</text>
+              </g>
+
+              <!-- Waiting Feeder Bus Token -->
+              <g id="schematic-bus-token" transform="translate(560, 126)">
+                <rect x="0" y="0" width="70" height="26" rx="4" fill="var(--success)" />
+                <rect x="6" y="5" width="12" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <rect x="22" y="5" width="12" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <rect x="38" y="5" width="12" height="16" rx="2" fill="#FAF6F0" opacity="0.8" />
+                <text x="64" y="18" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="700" fill="#FAF6F0" text-anchor="end">🚌 14A</text>
+              </g>
+
+              <!-- Pedestrian Interchange Corridor (Dashed Vertical Link) -->
+              <line x1="480" y1="60" x2="480" y2="140" stroke="var(--signal)" stroke-width="2" stroke-dasharray="3 3" id="schematic-transfer-link" />
+              
+              <!-- Annotations -->
+              <text x="140" y="30" font-family="'IBM Plex Mono', monospace" font-size="9" fill="var(--muted)">APPROACH TRACK (KANPUR &rarr; ALLAHABAD)</text>
+              <text x="620" y="180" font-family="'IBM Plex Mono', monospace" font-size="9" fill="var(--muted)">FEEDER ROUTE (CIVIL LINES &rarr; HIGH COURT)</text>
+            </svg>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; font-family:var(--mono); font-size:0.8rem; color:var(--muted); padding-top:0.25rem;">
+            <span>TRANSFER WALKWAY: <strong style="color:var(--primary);">Foot Overbridge 02 (4 min walk)</strong></span>
+            <span>TRANSFER BUFFER: <strong style="color:var(--signal);" id="schematic-buffer-display">12 MIN BUFFER</strong></span>
+            <span>FEEDER BAY: <strong style="color:var(--primary);">Platform 01 East Exit &bull; Bay 02</strong></span>
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #2: Dominant Decision & Cutoff Control Grid ── -->
+        <div class="decision-row-grid">
+          
+          <!-- Dominant Feeder Decision Card -->
+          <article class="feeder-hero-card is-judgment" id="triage-card">
+            <div>
+              <span class="decision-kicker-tag">TRANSFER DISPATCH DIRECTIVE</span>
+              <div class="feeder-dominant-status judgment" id="feeder-decision">USE JUDGMENT</div>
+              <div class="feeder-station-sub" id="feeder-train-lbl">
+                Evaluating connection for Train 20507...
+              </div>
+              <p class="feeder-explanation-msg" id="feeder-directive-msg">
+                Use dispatcher judgment with the current interval.
+              </p>
+            </div>
+
+            <div>
+              <div style="display:flex; gap:1.25rem; flex-wrap:wrap; font-family:var(--mono); font-size:0.8rem; color:var(--muted); margin-bottom:1rem;">
+                <span>FOCAL: <strong style="color:var(--primary);" id="triage-train">20507</strong></span>
+                <span>TRANSFER PROBABILITY: <strong style="color:var(--primary);" id="triage-prob">--%</strong></span>
+                <span>CUTOFF: <strong style="color:var(--primary);" id="triage-cutoff">--:-- IST</strong></span>
+              </div>
+
+              <!-- Operational Action Toolbar -->
+              <div class="feeder-action-toolbar">
+                <button class="btn-action hold" id="btn-action-hold" type="button">
+                  &#10003; HOLD FEEDER BUS
+                </button>
+                <button class="btn-action depart" id="btn-action-depart" type="button">
+                  &rarr; DISPATCH ON SCHEDULE
+                </button>
+                <button class="btn-action review" id="btn-action-review" type="button">
+                  &#9888; DISPATCHER JUDGMENT
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Cutoff Time Controller Card -->
+          <div class="cutoff-card">
+            <div>
+              <span class="decision-kicker-tag">FEEDER DEPARTURE CUTOFF</span>
+              <div class="cutoff-picker-row">
+                <input type="time" id="feeder-cutoff-input" class="cutoff-time-input" value="14:40" aria-label="Feeder Departure Cutoff Time">
+                <button id="btn-sync-cutoff" class="btn-action" style="padding:0.5rem 0.85rem;" title="Recalculate transfer probability">
+                  SYNC &rarr;
+                </button>
+              </div>
+
+              <div class="preset-pills">
+                <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); margin-right:0.25rem; align-self:center;">QUICK:</span>
+                <button class="btn-preset" data-add="15">+15m</button>
+                <button class="btn-preset" data-add="30">+30m</button>
+                <button class="btn-preset" data-add="45">+45m</button>
+                <button class="btn-preset" data-add="60">+60m</button>
+              </div>
+            </div>
+
+            <div>
+              <p style="font-family:var(--sans); font-size:0.82rem; color:var(--muted); margin:0 0 0.75rem; line-height:1.45;">
+                Adjusting the feeder departure cutoff time recalculates the <strong>Normal CDF probability</strong> against the calibrated P10&ndash;P90 arrival distribution in real time.
+              </p>
+              <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted); border-top:1px solid var(--line); padding-top:0.75rem;">
+                LOGIC: <strong>&ge; 80% WAIT &bull; &lt; 40% DEPART &bull; ELSE JUDGMENT</strong>
+              </div>
+            </div>
+          </div>
+
         </div>
-        
-      </section>
 
+        <!-- ── MAJOR VISUAL #3: Calibrated Transfer Distribution ── -->
+        <section class="distribution-panel">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Calibrated Transfer Distribution</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Normal approximation CDF fitted over the calibrated P10&ndash;P90 quantile spread.
+              </p>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">CONNECTION PROBABILITY</span>
+              <div class="prob-hero-val" id="feeder-prob">--<span>%</span></div>
+            </div>
+          </div>
+
+          <!-- Conceptual Gaussian Distribution SVG -->
+          <div class="distribution-curve-wrap">
+            <svg class="distribution-svg" viewBox="0 0 700 120" preserveAspectRatio="none">
+              <!-- Shaded cumulative area before cutoff -->
+              <path id="curve-cdf-area" d="M 50 110 C 150 110 220 20 350 20 L 450 20 L 450 110 Z" fill="rgba(61,122,92,0.18)" />
+              
+              <!-- The Gaussian Bell Curve Stroke -->
+              <path d="M 50 110 C 150 110 220 20 350 20 C 480 20 550 110 650 110" stroke="var(--primary)" stroke-width="2.5" fill="none" />
+              <line x1="30" y1="110" x2="670" y2="110" stroke="rgba(27,42,74,0.3)" stroke-width="1.5" />
+
+              <!-- P10, P50, P90 Pins -->
+              <line x1="200" y1="20" x2="200" y2="110" stroke="var(--success)" stroke-width="1.5" stroke-dasharray="3 3" />
+              <text x="200" y="15" font-family="'IBM Plex Mono', monospace" font-size="9" fill="var(--success)" text-anchor="middle">P10</text>
+
+              <line x1="350" y1="10" x2="350" y2="110" stroke="var(--primary)" stroke-width="2" />
+              <text x="350" y="8" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="700" fill="var(--primary)" text-anchor="middle">P50 (MEDIAN)</text>
+
+              <line x1="500" y1="20" x2="500" y2="110" stroke="var(--signal)" stroke-width="1.5" stroke-dasharray="3 3" />
+              <text x="500" y="15" font-family="'IBM Plex Mono', monospace" font-size="9" fill="var(--signal)" text-anchor="middle">P90</text>
+
+              <!-- Cutoff Boundary Marker -->
+              <line x1="450" y1="0" x2="450" y2="115" stroke="var(--stamp)" stroke-width="2.5" id="curve-cutoff-line" />
+              <text x="450" y="-4" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="700" fill="var(--stamp)" text-anchor="middle">CUTOFF</text>
+            </svg>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:0.75rem; color:var(--muted); flex-wrap:wrap; gap:0.5rem;">
+            <span>P10 EARLIEST: <strong style="color:var(--primary);" id="feeder-p10-val">-- min</strong></span>
+            <span>P50 MEDIAN: <strong style="color:var(--primary);" id="feeder-p50-val">-- min</strong></span>
+            <span>P90 CONSERVATIVE: <strong style="color:var(--signal);" id="feeder-p90-val">-- min</strong></span>
+            <span>SIGMA SPREAD: <strong style="color:var(--primary);" id="feeder-sigma-val">-- min</strong></span>
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #4: Asymmetric Cost Trade-Off Matrix ── -->
+        <section class="cost-tradeoff-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Asymmetric Transfer Cost Matrix</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Comparing operational consequences: holding the bus for arriving rail passengers vs departing on time for onboard commuters.
+              </p>
+            </div>
+            <div class="status-badge-chip wait" id="tradeoff-optimal-chip">
+              OPTIMAL ACTION EVALUATION
+            </div>
+          </div>
+
+          <div class="tradeoff-grid">
+            
+            <!-- Cost of Waiting -->
+            <div class="tradeoff-card wait-card">
+              <div class="tradeoff-head">
+                <span class="tradeoff-title">COST OF WAITING (IF TRAIN DELAYED)</span>
+                <span class="tradeoff-cost-chip recommended" id="cost-wait">Recommended</span>
+              </div>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); line-height:1.45; margin:0.5rem 0 0.75rem;">
+                Holding the feeder incurs commuter dwell delay for onboard passengers and risks delaying downstream route cycles.
+              </p>
+              <div style="font-family:var(--mono); font-size:0.78rem; color:var(--primary);">
+                PRIMARY RISK: <strong>Fleet Turnover Delay (&le; 12 min)</strong>
+              </div>
+            </div>
+
+            <!-- Cost of Abandonment -->
+            <div class="tradeoff-card depart-card">
+              <div class="tradeoff-head">
+                <span class="tradeoff-title">COST OF ABANDONMENT (IF TRAIN ARRIVES)</span>
+                <span class="tradeoff-cost-chip penalty" id="cost-abandon">High Penalty</span>
+              </div>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); line-height:1.45; margin:0.5rem 0 0.75rem;">
+                Departing without rail passengers severs the intermodal connection, stranding incoming travellers at Prayagraj Junction concourse.
+              </p>
+              <div style="font-family:var(--mono); font-size:0.78rem; color:var(--stamp);">
+                PRIMARY RISK: <strong>Intermodal Transfer Failure</strong>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #5: "How Much Time Do We Really Have?" ── -->
+        <section class="timing-scale-panel">
+          <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">How Much Time Do We Really Have?</h2>
+          <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+            Timeline projection from current clock to predicted train arrival and feeder departure boundary.
+          </p>
+
+          <div class="timing-timeline-bar">
+            <!-- Calibrated arrival window span -->
+            <div class="timing-fill-span" id="timing-arrival-span" style="left: 35%; width: 30%;"></div>
+            
+            <!-- Pins -->
+            <div class="timing-pin now" style="left: 10%;"></div>
+            <div class="timing-pin p50" id="timing-pin-p50" style="left: 45%;"></div>
+            <div class="timing-pin cutoff" id="timing-pin-cutoff" style="left: 75%;"></div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; font-family:var(--mono); font-size:0.78rem; color:var(--muted); margin-top:1.5rem;">
+            <span>CURRENT TIME: <strong style="color:var(--primary);" id="timing-now-clock">15:00 IST</strong></span>
+            <span>P50 TRAIN ARRIVAL: <strong style="color:var(--primary);" id="timing-p50-clock">--:-- IST</strong></span>
+            <span>FEEDER CUTOFF: <strong style="color:var(--stamp);" id="timing-cutoff-clock">--:-- IST</strong></span>
+            <span>TRANSFER BUFFER: <strong style="color:var(--signal);" id="timing-buffer-val">-- MIN BUFFER</strong></span>
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #6: Why This Decision? Telemetry Trace ── -->
+        <section class="why-decision-panel">
+          <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Why This Decision? Telemetry Trace</h2>
+          <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+            Tracing the step-by-step logic from incoming train delay to intermodal bus dispatch directive.
+          </p>
+
+          <div class="why-step-flow">
+            
+            <div class="why-step-item">
+              <div>
+                <span class="why-step-num">STEP 01 &bull; TRAIN DELAY</span>
+                <div class="why-step-val" id="trace-delay">+26.4 min</div>
+              </div>
+              <span class="why-step-sub">Measured delay at approach block.</span>
+            </div>
+
+            <div class="why-step-item">
+              <div>
+                <span class="why-step-num">STEP 02 &bull; ARRIVAL SPREAD</span>
+                <div class="why-step-val" id="trace-spread">0.0 &mdash; 59.9m</div>
+              </div>
+              <span class="why-step-sub">Calibrated P10&ndash;P90 uncertainty.</span>
+            </div>
+
+            <div class="why-step-item">
+              <div>
+                <span class="why-step-num">STEP 03 &bull; FEEDER CUTOFF</span>
+                <div class="why-step-val" style="color:var(--stamp);" id="trace-cutoff">14:40 IST</div>
+              </div>
+              <span class="why-step-sub">Scheduled bus departure deadline.</span>
+            </div>
+
+            <div class="why-step-item">
+              <div>
+                <span class="why-step-num">STEP 04 &bull; TRANSFER PROB</span>
+                <div class="why-step-val" id="trace-prob">78.7%</div>
+              </div>
+              <span class="why-step-sub">Gaussian CDF probability before cutoff.</span>
+            </div>
+
+            <div class="why-step-item" style="border-left: 3px solid var(--signal);">
+              <div>
+                <span class="why-step-num">STEP 05 &bull; DIRECTIVE</span>
+                <div class="why-step-val" style="color:var(--signal);" id="trace-directive">USE JUDGMENT</div>
+              </div>
+              <span class="why-step-sub">Operational recommendation for staff.</span>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ── MAJOR VISUAL #7: Multi-Train Feeder Board ── -->
+        <section class="dispatch-board-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <h2 style="font-family:var(--display); font-size:1.35rem; font-weight:700; color:var(--primary); margin:0 0 0.25rem;">Multi-Train Feeder Connection Board</h2>
+              <p style="font-family:var(--sans); font-size:0.85rem; color:var(--muted); margin:0;">
+                Intermodal transfer feasibility for connecting trains arriving at Prayagraj Junction division.
+              </p>
+            </div>
+            <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+              UPDATED: <strong style="color:var(--primary);" id="board-sync-clock">LIVE SYNC</strong>
+            </div>
+          </div>
+
+          <table class="dispatch-table" aria-label="Multi-Train Feeder Connection Matrix">
+            <thead>
+              <tr>
+                <th>TRAIN</th>
+                <th>CORRIDOR ROUTE</th>
+                <th>P50 DELAY</th>
+                <th>P90 BOUND</th>
+                <th>PROBABILITY</th>
+                <th>DIRECTIVE</th>
+                <th>CUTOFF</th>
+                <th>ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="multi-train-feeder-body">
+              <tr>
+                <td colspan="8" style="text-align:center; padding:1.5rem; color:var(--muted);">Loading connecting corridor trains...</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <footer style="margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--line); font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <span>RippleETA &bull; Feeder Transport Intelligence &bull; PRYJ &bull; SIH 2026</span>
+            <div style="display:flex; gap:1rem;">
+              <a href="index.html" style="color:var(--primary); text-decoration:none;">Portal Home</a>
+              <a href="passenger.html" style="color:var(--primary); text-decoration:none;">Passenger View</a>
+              <a href="station-master.html" style="color:var(--primary); text-decoration:none;">Station Master</a>
+              <a href="crew.html" style="color:var(--primary); text-decoration:none;">Crew Controller</a>
+            </div>
+          </div>
+        </footer>
+
+      </div>
     </main>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>

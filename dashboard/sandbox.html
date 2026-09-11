@@ -2,115 +2,1774 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sandbox | RippleETA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghost Sandbox | What-If Laboratory &amp; Network Simulation Bench | RippleETA</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ==========================================================================
+       RIPPLEETA — Ghost Sandbox Scoped Styles: Simulation Laboratory
+       Palette: Warm Paper Cream (#F3EDE3), Deep Railway Navy (#1B2A4A),
+       Signal Marigold Amber (#E8A33D), Signal Green (#3D7A5C), Terracotta (#A13D2E)
+       Typography: Fraunces display, Inter interface, IBM Plex Mono telemetry
+       ========================================================================== */
+
+    :root {
+      --sb-paper: #FAF6F0;
+      --sb-paper-alt: #F7EFE3;
+      --sb-border: rgba(27, 42, 74, 0.16);
+      --sb-shadow: 0 4px 20px rgba(27, 42, 74, 0.04);
+      --sb-amber-glow: rgba(232, 163, 61, 0.35);
+      --sb-red-glow: rgba(161, 61, 46, 0.35);
+    }
+
+    .sb-container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    /* ── Topbar Pill ── */
+    .view-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(27, 42, 74, 0.08);
+      color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--line);
+    }
+
+    /* ── Editorial Hero Banner ── */
+    .sb-hero {
+      margin: 1.5rem 0 1.5rem;
+      padding: 1.6rem 1.85rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--sb-shadow);
+      position: relative;
+    }
+
+    .sb-hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--signal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .sb-hero-tag::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(232, 163, 61, 0.6);
+    }
+
+    .sb-hero-title {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 3.2vw, 2.5rem);
+      font-weight: 600;
+      color: var(--primary);
+      line-height: 1.15;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.015em;
+    }
+
+    .sb-hero-desc {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 880px;
+      line-height: 1.55;
+      margin: 0 0 1.25rem;
+    }
+
+    /* Operational Identity Strip */
+    .sb-identity-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.85rem;
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.85rem 1.25rem;
+    }
+
+    .sb-ident-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .sb-ident-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .sb-ident-val {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Anomaly Banner */
+    .anomaly-banner {
+      display: none;
+      margin: 1.25rem 0;
+      padding: 1.25rem 1.5rem;
+      background: rgba(161, 61, 46, 0.12);
+      border: 2px solid var(--stamp);
+      border-radius: 6px;
+      color: var(--stamp);
+    }
+
+    /* ── FIRST VIEWPORT SPLIT: GHOST RAILWAY vs DELAY INJECTION LAB ── */
+    .sandbox-split-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 960px) {
+      .sandbox-split-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Left Panel: Ghost Railway Bench ── */
+    .ghost-railway-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.6rem;
+      box-shadow: var(--sb-shadow);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .panel-title {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0 0 0.25rem;
+    }
+
+    .panel-sub {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .svg-bench-wrap {
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .bench-svg {
+      width: 100%;
+      min-width: 580px;
+      height: 240px;
+      display: block;
+    }
+
+    .train-token {
+      transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .conflict-beam-line {
+      transition: opacity 0.4s ease, stroke-width 0.4s ease;
+    }
+
+    /* ── Right Panel: Delay Injection Lab ── */
+    .injection-lab-panel {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.6rem;
+      box-shadow: var(--sb-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Physical Lever / Slider Container */
+    .timing-lever-wrap {
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .lever-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+    }
+
+    .lever-lbl {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .lever-readout {
+      font-family: var(--mono);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    /* Slider track */
+    .sb-range-input {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(27, 42, 74, 0.12);
+      outline: none;
+      -webkit-appearance: none;
+      margin: 1rem 0 0.5rem;
+      cursor: pointer;
+    }
+
+    .sb-range-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: grab;
+      transition: transform 0.1s ease;
+    }
+
+    .sb-range-input::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+      background: var(--signal);
+    }
+
+    .range-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Quick Preset Chips */
+    .preset-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-preset-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      color: var(--primary);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-preset-chip:hover {
+      background: var(--sb-paper-alt);
+      border-color: var(--primary);
+    }
+
+    .btn-preset-chip.is-active {
+      background: var(--primary);
+      color: #FFFFFF;
+      border-color: var(--primary);
+    }
+
+    /* Physical Stamped Scenario Badge */
+    .scenario-stamp-card {
+      border: 2px dashed rgba(27, 42, 74, 0.2);
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      background: rgba(232, 163, 61, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      transform: rotate(-0.5deg);
+    }
+
+    .stamp-text-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stamp-badge-tag {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #9c671b;
+      letter-spacing: 0.08em;
+    }
+
+    .stamp-badge-status {
+      font-family: var(--display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Primary Action Buttons */
+    .action-btn-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-apply {
+      flex: 1;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(27, 42, 74, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-apply:hover {
+      background: #121c32;
+      transform: translateY(-1px);
+    }
+
+    .btn-reset {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      color: var(--primary);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background: var(--sb-paper);
+      border-color: var(--primary);
+    }
+
+    /* ── TRI-TELEMETRY STRIP (Below First Viewport) ── */
+    .tri-telemetry-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .telemetry-card {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.15rem 1.25rem;
+      box-shadow: var(--sb-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .telem-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.35rem;
+    }
+
+    .telem-val-hero {
+      font-family: var(--mono);
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+      margin: 0.2rem 0 0.4rem;
+    }
+
+    .telem-val-hero span {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 400;
+      margin-left: 0.25rem;
+    }
+
+    .telem-sub {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── HEADWAY SCALE & BEFORE/AFTER GRID ── */
+    .analysis-row-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .analysis-row-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .headway-scale-panel, .causality-panel {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.6rem;
+      box-shadow: var(--sb-shadow);
+    }
+
+    /* Headway Scale Track */
+    .hw-scale-wrap {
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      position: relative;
+    }
+
+    .hw-track-line {
+      position: relative;
+      height: 32px;
+      margin: 0.75rem 0;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .hw-train-pin {
+      position: absolute;
+      top: 4px;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: left 0.4s ease;
+    }
+
+    .hw-pin-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid #FFFFFF;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+    }
+
+    .hw-pin-dot.delaying {
+      background: var(--stamp);
+    }
+
+    .hw-pin-dot.affected {
+      background: var(--signal);
+    }
+
+    .hw-pin-lbl {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 4px;
+    }
+
+    .hw-gap-bracket {
+      position: absolute;
+      top: 10px;
+      height: 14px;
+      border-left: 2px solid var(--signal);
+      border-right: 2px solid var(--signal);
+      border-top: 2px dashed var(--signal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+    }
+
+    .hw-gap-text {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #9c671b;
+      background: #FFFFFF;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-top: -16px;
+    }
+
+    /* Before vs After Scenario Cards */
+    .comp-scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .comp-scenario-card {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1rem;
+      background: var(--sb-paper);
+    }
+
+    .comp-scenario-card.baseline {
+      border-left: 4px solid var(--success);
+    }
+
+    .comp-scenario-card.scenario {
+      border-left: 4px solid var(--signal);
+      background: #FFFFFF;
+    }
+
+    /* ── CAUSAL CHAIN: WHY DID TRAIN 12301 MOVE? ── */
+    .causality-chain-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 1.25rem 0;
+    }
+
+    .causal-node {
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.6rem 0.75rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .causal-node.highlight {
+      border-color: var(--signal);
+      background: rgba(232, 163, 61, 0.1);
+      color: #9c671b;
+      font-weight: 700;
+    }
+
+    .causal-arrow {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    /* ── PROPAGATION TIMELINE TRACE & REPLAY EXPLANATION ── */
+    .trace-replay-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .trace-replay-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .timeline-seq-panel, .math-explain-panel {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.6rem;
+      box-shadow: var(--sb-shadow);
+    }
+
+    .trace-step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .trace-step-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 6px;
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      transition: all 0.3s ease;
+    }
+
+    .trace-step-item.is-active {
+      border-left: 4px solid var(--signal);
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(27, 42, 74, 0.05);
+    }
+
+    .trace-step-badge {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 3px;
+      background: rgba(27, 42, 74, 0.08);
+      color: var(--primary);
+    }
+
+    .trace-step-text {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--primary);
+      flex: 1;
+    }
+
+    .trace-step-val {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--signal);
+    }
+
+    /* Math Formula Box */
+    .formula-display-box {
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .formula-code {
+      font-family: var(--mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .formula-explanation {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Responsive Refinements ── */
+    @media (max-width: 640px) {
+      .sb-container {
+        padding: 0 0.85rem 3rem;
+      }
+      .sb-hero {
+        padding: 1.2rem;
+      }
+      .action-btn-row {
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .train-token,
+      .conflict-beam-line,
+      .bench-svg * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  
+    /* ── Language Selector (Top Command Navigation) ── */
+    .lang-selector-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .lang-selector-wrap:hover,
+    .lang-selector-wrap:focus-within {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--signal);
+    }
+    .lang-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--signal);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      user-select: none;
+    }
+    .lang-select {
+      background: transparent;
+      border: none;
+      color: #FFFFFF;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      padding: 0.1rem 0.2rem;
+    }
+    .lang-select option {
+      background: #1B2A4A;
+      color: #FFFFFF;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+    }
+
+    /* ── FAQ SECTION (Editorial Railway Field Manual Accordion) ── */
+    .sb-faq-section {
+      margin-top: 3.5rem;
+      padding-top: 2.25rem;
+      border-top: 1px solid var(--line);
+    }
+    .faq-header {
+      margin-bottom: 1.75rem;
+    }
+    .faq-kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--signal);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .faq-kicker::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--signal);
+      border-radius: 50%;
+    }
+    .faq-title {
+      font-family: var(--display);
+      font-size: clamp(1.5rem, 2.5vw, 2rem);
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.015em;
+    }
+    .faq-sub {
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      color: var(--muted);
+      max-width: 820px;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .faq-item {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(27, 42, 74, 0.03);
+      transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .faq-item:hover {
+      border-color: rgba(27, 42, 74, 0.3);
+      box-shadow: 0 4px 14px rgba(27, 42, 74, 0.06);
+    }
+    .faq-item.is-open {
+      border-color: var(--signal);
+      background: #FAF8F5;
+    }
+    .faq-trigger {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.15rem 1.4rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--primary);
+      transition: color 0.2s ease;
+    }
+    .faq-trigger:focus-visible {
+      outline: 2px solid var(--signal);
+      outline-offset: -2px;
+    }
+    .faq-trigger-left {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .faq-num {
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--signal);
+      background: rgba(232, 163, 61, 0.12);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+    .faq-icon {
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--primary);
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      transition: transform 0.25s ease, color 0.25s ease;
+      user-select: none;
+    }
+    .faq-item.is-open .faq-icon {
+      transform: rotate(45deg);
+      color: var(--signal);
+    }
+    .faq-content {
+      display: none;
+      padding: 0 1.4rem 1.25rem 2.85rem;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.65;
+      border-top: 1px dashed rgba(27, 42, 74, 0.1);
+      margin-top: 0.25rem;
+      padding-top: 0.85rem;
+    }
+    .faq-item.is-open .faq-content {
+      display: block;
+    }
+
+    /* ── REFERENCES & TECHNICAL PROVENANCE LEDGER ── */
+    .sb-references-section {
+      margin-top: 3.5rem;
+      padding-top: 2.25rem;
+      border-top: 1px solid var(--line);
+    }
+    .references-ledger {
+      background: var(--sb-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.5rem 1.85rem;
+      box-shadow: var(--sb-shadow);
+    }
+    .ref-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .ref-ledger-title {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .ref-ledger-stamp {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    .ref-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .ref-item {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 1.25rem;
+      padding: 1.15rem 0;
+      border-bottom: 1px dashed var(--line);
+    }
+    .ref-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .ref-num {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--signal);
+    }
+    .ref-title {
+      font-family: var(--display);
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0 0 0.35rem;
+    }
+    .ref-purpose {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0 0 0.45rem;
+    }
+    .ref-meta-row {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--primary);
+    }
+    .ref-meta-row a {
+      color: var(--signal);
+      text-decoration: underline;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .faq-item,
+      .faq-icon,
+      .lang-selector-wrap {
+        transition: none !important;
+      }
+    }
+
+  </style>
 </head>
 <body class="has-grain" data-view="sandbox">
-  
+
+  <!-- ── Global Command Topbar ── -->
   <div class="topbar">
     <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
-      <a class="brand" href="#" aria-label="RippleETA home">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
+      <a class="brand" href="/eta/index.html" aria-label="RippleETA 3D Experience">
         <span class="brand-mark">R</span>
         <span class="brand-logotype">RippleETA</span>
       </a>
       <div class="divider"></div>
-      <span class="view-title">GHOST TRAIN SANDBOX</span>
+      <span class="view-title" data-i18n="topbar-title">GHOST SANDBOX</span>
+      <span class="view-badge-pill" data-i18n="topbar-pill">WHAT-IF SIMULATION BENCH</span>
     </div>
-        <div class="topbar-right">
-      <div class="topbar-actions">
-        <div class="lang-selector">
-          <button class="lang-btn active" data-lang="en">EN</button>
-          <button class="lang-btn" data-lang="hi">HI</button>
-        </div>
-        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
-          <span style="font-weight:bold;">?</span>
-          <span data-i18n="helpFaq">FAQ</span>
-        </button>
+    <div class="topbar-right">
+      <a href="/eta/index.html" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Launch 3D Train Simulation">🎬 <span data-i18n="btn-3d-view">3D Train</span></a>
+      <div class="lang-selector-wrap" id="lang-selector-wrap">
+        <label for="lang-select" class="lang-label" id="lang-label-text">LANG</label>
+        <select id="lang-select" class="lang-select" aria-label="Select Interface Language">
+          <option value="en" selected>ENGLISH</option>
+          <option value="hi">हिंदी (Hindi)</option>
+          <option value="mr">मराठी (Marathi)</option>
+        </select>
       </div>
-      <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
+      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Mode">A11Y</button>
+      <div class="ticker-mode is-replay" id="ticker-mode">SCENARIO SIMULATION</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:-- IST</div>
+      <div class="clock" id="clock">--:--:-- IST</div>
     </div>
   </div>
 
   <div class="app-layout">
     <main class="main-content">
-      
-      <header class="view-header">
-        <div class="header-left">
-          <h1 class="view-headline" data-i18n="sandboxTitle">Scenario Injection</h1>
-          <p class="view-subhead" data-i18n="sandboxSubhead">Test conflict propagation and threshold triggering.</p>
-        </div>
-      </header>
+      <div class="sb-container">
 
-      <section class="view-panel is-active" id="sandbox-view" data-panel="sandbox">
-        
-        <div class="sandbox-container">
-            <div class="sandbox-header">
+        <!-- ── Editorial Hero Banner ── -->
+        <section class="sb-hero">
+          <div class="sb-hero-tag" data-i18n="hero-tag">TIMED EVENT GRAPH &bull; WHAT-IF LABORATORY</div>
+          <h1 class="sb-hero-title" data-i18n="hero-title">WHAT IF THE DELAY CHANGES?</h1>
+          <p class="sb-hero-desc" data-i18n="hero-desc">
+            Introduce a hypothetical delay into the preceding service. Watch the shared section headway contract, the automatic block signal transition to caution, and the Goverde Max-Plus constraint propagate onto the following Rajdhani Express.
+          </p>
+
+          <!-- Operational Identity Strip -->
+          <div class="sb-identity-strip">
+            <div class="sb-ident-item">
+              <span class="sb-ident-label" data-i18n="ident-inj-lbl">1. INJECTED TRAIN</span>
+              <span class="sb-ident-val" style="color:var(--stamp);">56789 &bull; SPECIAL EXPRESS</span>
+            </div>
+            <div class="sb-ident-item">
+              <span class="sb-ident-label" data-i18n="ident-aff-lbl">2. AFFECTED TRAIN</span>
+              <span class="sb-ident-val">12301 &bull; HOWRAH RAJDHANI</span>
+            </div>
+            <div class="sb-ident-item">
+              <span class="sb-ident-label" data-i18n="ident-sec-lbl">3. BOTTLENECK SECTION</span>
+              <span class="sb-ident-val">KANPUR &rarr; ALLAHABAD (PRYJ)</span>
+            </div>
+            <div class="sb-ident-item">
+              <span class="sb-ident-label" data-i18n="ident-base-lbl">4. RAJDHANI BASE DELAY</span>
+              <span class="sb-ident-val">+55.0 MIN</span>
+            </div>
+            <div class="sb-ident-item">
+              <span class="sb-ident-label" data-i18n="ident-conf-lbl">5. CONFLICT THRESHOLD</span>
+              <span class="sb-ident-val" style="color:var(--signal);">&gt; 6.0 MIN INJECTION</span>
+            </div>
+            <div class="sb-ident-item">
+              <span class="sb-ident-label" data-i18n="ident-hw-lbl">6. MINIMUM HEADWAY</span>
+              <span class="sb-ident-val">10.0 MIN BUFFER</span>
+            </div>
+            <div class="sb-ident-item">
+              <span class="sb-ident-label" data-i18n="ident-eng-lbl">7. ENGINE MODEL</span>
+              <span class="sb-ident-val" style="color:var(--primary);">GOVERDE MAX-PLUS</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Anomaly Gate Suspension Alert -->
+        <div class="anomaly-banner" id="ticket-anomaly-alert" role="alert">
+          <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <span style="font-size:1.5rem; line-height:1;">&#9888;</span>
+            <div>
+              <strong style="font-family:var(--mono); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:0.25rem;">
+                PREDICTION SUSPENDED &mdash; ANOMALY GATE ACTIVE
+              </strong>
+              <p style="font-family:var(--sans); font-size:0.88rem; margin:0; line-height:1.45;">
+                Current operating conditions fall outside the model's validated prediction range. Automated propagation estimates are withheld.
+                <strong>Action: Manual network control and physical block supervision required.</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── FIRST VIEWPORT SPLIT: GHOST RAILWAY vs DELAY INJECTION LAB ── -->
+        <div class="sandbox-split-grid">
+          
+          <!-- Left Panel: Ghost Railway Bench (Native SVG Isometric Track) -->
+          <article class="ghost-railway-panel" aria-label="Ghost Railway Simulation Bench">
+            <div class="panel-header-row">
+              <div>
+                <h2 class="panel-title">Ghost Railway Simulation Bench</h2>
+                <span class="panel-sub">ISOMETRIC BLOCK DISPATCH &bull; KANPUR CENTRAL (CNB) &rarr; PRAYAGRAJ (PRYJ)</span>
+              </div>
+              <div style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">
+                MODE: <strong style="color:var(--signal);" id="bench-mode-status">REPLAY SIMULATION</strong>
+              </div>
+            </div>
+
+            <div class="svg-bench-wrap">
+              <svg class="bench-svg" viewBox="0 0 620 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background engineering grid -->
+                <line x1="20" y1="50" x2="600" y2="50" stroke="rgba(27,42,74,0.05)" stroke-dasharray="4 4" />
+                <line x1="20" y1="120" x2="600" y2="120" stroke="rgba(27,42,74,0.05)" stroke-dasharray="4 4" />
+                <line x1="20" y1="190" x2="600" y2="190" stroke="rgba(27,42,74,0.05)" stroke-dasharray="4 4" />
+
+                <!-- Upper Mainline Track: Train 56789 Route -->
+                <line x1="40" y1="80" x2="580" y2="80" stroke="#1B2A4A" stroke-width="3" stroke-linecap="round" />
+                <line x1="40" y1="86" x2="580" y2="86" stroke="#1B2A4A" stroke-width="3" stroke-linecap="round" />
+                <!-- Sleepers Upper -->
+                <path d="
+                  M 60 76 L 60 90 M 100 76 L 100 90 M 140 76 L 140 90 M 180 76 L 180 90
+                  M 220 76 L 220 90 M 260 76 L 260 90 M 300 76 L 300 90 M 340 76 L 340 90
+                  M 380 76 L 380 90 M 420 76 L 420 90 M 460 76 L 460 90 M 500 76 L 500 90 M 540 76 L 540 90
+                " stroke="rgba(27,42,74,0.3)" stroke-width="2" />
+
+                <!-- Lower Mainline Track: Train 12301 Route merging into shared section -->
+                <line x1="40" y1="160" x2="580" y2="160" stroke="#1B2A4A" stroke-width="3" stroke-linecap="round" />
+                <line x1="40" y1="166" x2="580" y2="166" stroke="#1B2A4A" stroke-width="3" stroke-linecap="round" />
+                <!-- Sleepers Lower -->
+                <path d="
+                  M 60 156 L 60 170 M 100 156 L 100 170 M 140 156 L 140 170 M 180 156 L 180 170
+                  M 220 156 L 220 170 M 260 156 L 260 170 M 300 156 L 300 170 M 340 156 L 340 170
+                  M 380 156 L 380 170 M 420 156 L 420 170 M 460 156 L 460 170 M 500 156 L 500 170 M 540 156 L 540 170
+                " stroke="rgba(27,42,74,0.3)" stroke-width="2" />
+
+                <!-- Shared Bottleneck Box Overlay (CNB -> PRYJ) -->
+                <rect id="bench-conflict-box" x="220" y="65" width="280" height="115" rx="6" fill="rgba(232, 163, 61, 0.08)" stroke="#E8A33D" stroke-width="1.5" stroke-dasharray="5 5" />
+                <text x="360" y="58" font-family="'IBM Plex Mono', monospace" font-size="8.5" font-weight="700" fill="#9c671b" text-anchor="middle">&bull; SHARED SECTION: KANPUR &rarr; ALLAHABAD (PRYJ) &bull;</text>
+
+                <!-- Station Nodes -->
+                <!-- Station 1: CNB (Kanpur) -->
+                <circle cx="80" cy="83" r="6" fill="#FFFFFF" stroke="#1B2A4A" stroke-width="3" />
+                <circle cx="80" cy="163" r="6" fill="#FFFFFF" stroke="#1B2A4A" stroke-width="3" />
+                <text x="80" y="115" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="700" fill="#1B2A4A" text-anchor="middle">CNB</text>
+                <text x="80" y="127" font-family="'Inter', sans-serif" font-size="7.5" fill="#7A7468" text-anchor="middle">Kanpur</text>
+
+                <!-- Station 2: SFG (Subedarganj Approach) -->
+                <circle cx="340" cy="83" r="5" fill="#FFFFFF" stroke="#1B2A4A" stroke-width="2.5" />
+                <circle cx="340" cy="163" r="5" fill="#FFFFFF" stroke="#1B2A4A" stroke-width="2.5" />
+                <text x="340" y="125" font-family="'IBM Plex Mono', monospace" font-size="8" fill="#7A7468" text-anchor="middle">SFG</text>
+
+                <!-- Station 3: PRYJ (Prayagraj) -->
+                <circle cx="520" cy="83" r="6" fill="#FFFFFF" stroke="#1B2A4A" stroke-width="3" />
+                <circle cx="520" cy="163" r="6" fill="#FFFFFF" stroke="#1B2A4A" stroke-width="3" />
+                <text x="520" y="115" font-family="'IBM Plex Mono', monospace" font-size="9" font-weight="700" fill="#1B2A4A" text-anchor="middle">PRYJ</text>
+                <text x="520" y="127" font-family="'Inter', sans-serif" font-size="7.5" fill="#7A7468" text-anchor="middle">Prayagraj</text>
+
+                <!-- Signal Post on Lower Line (Subedarganj Outer) -->
+                <line x1="330" y1="145" x2="330" y2="160" stroke="#7A7468" stroke-width="2" />
+                <circle id="bench-signal-lamp" cx="330" cy="142" r="5" fill="#3D7A5C" stroke="#1B2A4A" stroke-width="1.5" />
+                <text id="bench-signal-text" x="330" y="132" font-family="'IBM Plex Mono', monospace" font-size="7.5" font-weight="700" fill="#3D7A5C" text-anchor="middle">CLEAR</text>
+
+                <!-- Dynamic Amber Conflict Propagation Beam -->
+                <line id="bench-conflict-beam" x1="280" y1="83" x2="350" y2="163" stroke="#E8A33D" stroke-width="3" stroke-dasharray="6 4" stroke-linecap="round" class="conflict-beam-line" style="opacity: 0;" />
+
+                <!-- Train Token A: 56789 (Injected Delay Source) -->
+                <g id="bench-token-56789" class="train-token" transform="translate(240, 71)">
+                  <rect x="0" y="0" width="56" height="22" rx="3" fill="#A13D2E" stroke="#FFFFFF" stroke-width="1.5" />
+                  <text x="28" y="14" font-family="'IBM Plex Mono', monospace" font-size="8" font-weight="700" fill="#FFFFFF" text-anchor="middle">&#128642; 56789</text>
+                  <!-- Floating Delay Tag -->
+                  <rect x="8" y="-14" width="40" height="12" rx="2" fill="#A13D2E" />
+                  <text id="bench-token-56789-tag" x="28" y="-5" font-family="'IBM Plex Mono', monospace" font-size="7.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">+15m</text>
+                </g>
+
+                <!-- Train Token B: 12301 (Affected Rajdhani Express) -->
+                <g id="bench-token-12301" class="train-token" transform="translate(140, 151)">
+                  <rect x="0" y="0" width="56" height="22" rx="3" fill="#1B2A4A" stroke="#E8A33D" stroke-width="1.5" />
+                  <text x="28" y="14" font-family="'IBM Plex Mono', monospace" font-size="8" font-weight="700" fill="#E8A33D" text-anchor="middle">&#128646; 12301</text>
+                  <!-- Floating Delay Tag -->
+                  <rect x="5" y="26" width="46" height="13" rx="2" fill="#FFFFFF" stroke="#E8A33D" stroke-width="1" />
+                  <text id="bench-token-12301-tag" x="28" y="36" font-family="'IBM Plex Mono', monospace" font-size="7.5" font-weight="700" fill="#1B2A4A" text-anchor="middle">+64.0m</text>
+                </g>
+
+                <!-- Legend -->
+                <g transform="translate(40, 215)">
+                  <circle cx="5" cy="5" r="4" fill="#3D7A5C" />
+                  <text x="14" y="8" font-family="'IBM Plex Mono', monospace" font-size="7.5" fill="#7A7468">CLEAR</text>
+                  <circle cx="65" cy="5" r="4" fill="#E8A33D" />
+                  <text x="74" y="8" font-family="'IBM Plex Mono', monospace" font-size="7.5" fill="#7A7468">CAUTION</text>
+                  <circle cx="130" cy="5" r="4" fill="#A13D2E" />
+                  <text x="139" y="8" font-family="'IBM Plex Mono', monospace" font-size="7.5" fill="#7A7468">HOLD / CONFLICT</text>
+                </g>
+              </svg>
+            </div>
+          </article>
+
+          <!-- Right Panel: Delay Injection Lab Control -->
+          <article class="injection-lab-panel" aria-label="Delay Injection Controls">
+            <div>
+              <div class="panel-header-row" style="margin-bottom:0.75rem;">
                 <div>
-                    <h2 class="sandbox-title" data-i18n="sandboxHeading">Delay Injection Simulator</h2>
-                    <p style="font-family:var(--sans); color:var(--muted);">Inject hypothetical delay into EXPRESS 56789</p>
+                  <h2 class="panel-title">Delay Injection Lab</h2>
+                  <span class="panel-sub">DISPATCH TIMING LEVER &bull; TRAIN 56789</span>
                 </div>
-                <div class="sandbox-badge">[ REPLAY SIMULATION ]</div>
-            </div>
-            
-            <div class="iso-grid" id="sandbox-scene">
-              <div class="iso-plane" style="position:relative; min-height:220px;">
-                <div class="iso-train" id="sandbox-train1" style="position:absolute; left:22%; top:35%;"><span class="train-body"></span><span class="train-delay">+0</span></div>
-                <div class="iso-train" id="sandbox-train2" style="position:absolute; left:30%; top:65%;"><span class="train-body"></span><span class="train-delay">+55</span></div>
-                <div id="sandbox-conflict-beam" style="position:absolute; left:25%; right:55%; top:49%; height:3px; opacity:0; background:var(--warning-500);"></div>
-                <span id="sandbox-conflict-label" style="position:absolute; left:40%; top:42%; font-family:var(--mono);"></span>
-                <span id="sandbox-threshold-line" style="position:absolute; left:20%; top:5%; bottom:5%; border-left:1px dashed var(--warning-500);"></span>
-                <span id="sandbox-threshold-label" style="position:absolute; left:20%; top:0; font-family:var(--mono);">HEADWAY THRESHOLD</span>
+                <div class="stamp-badge-tag">[ HYPOTHETICAL ]</div>
+              </div>
+
+              <!-- Physical Timing Lever Slider -->
+              <div class="timing-lever-wrap">
+                <div class="lever-title-row">
+                  <span class="lever-lbl">INJECT DELAY (0 &ndash; 30 MIN)</span>
+                  <div class="lever-readout" id="sb-slider-val-readout">+15<span>min</span></div>
                 </div>
+
+                <input type="range" id="sandbox-delay-slider" class="sb-range-input" min="0" max="30" step="1" value="15" aria-label="Hypothetical Delay Slider">
+
+                <div class="range-ticks">
+                  <span>0m</span>
+                  <span>5m</span>
+                  <span>10m</span>
+                  <span>15m</span>
+                  <span>20m</span>
+                  <span>25m</span>
+                  <span>30m</span>
+                </div>
+              </div>
+
+              <!-- Quick Presets -->
+              <div style="font-family:var(--mono); font-size:0.7rem; color:var(--muted); text-transform:uppercase; margin-bottom:0.4rem; font-weight:600;">
+                SCENARIO PRESETS:
+              </div>
+              <div class="preset-chips-wrap">
+                <button class="btn-preset-chip" data-min="0">0m (Normal)</button>
+                <button class="btn-preset-chip" data-min="5">5m (Safe Margin)</button>
+                <button class="btn-preset-chip" data-min="10">10m (Threshold Breach)</button>
+                <button class="btn-preset-chip is-active" data-min="15">15m (Worked Example)</button>
+                <button class="btn-preset-chip" data-min="20">20m (High Conflict)</button>
+                <button class="btn-preset-chip" data-min="30">30m (Severe Hold)</button>
+              </div>
+
+              <!-- Physical Stamped Scenario Document Card -->
+              <div class="scenario-stamp-card">
+                <div class="stamp-text-col">
+                  <span class="stamp-badge-tag">OFFICIAL SIMULATION BENCH</span>
+                  <span class="stamp-badge-status" id="stamp-scenario-title">SCENARIO: CONFLICT ACTIVE</span>
+                  <span style="font-family:var(--mono); font-size:0.72rem; color:var(--muted);" id="stamp-scenario-time">STAMPED: --:--:-- IST</span>
+                </div>
+                <div style="text-align:right;">
+                  <span style="font-family:var(--mono); font-size:0.7rem; color:var(--muted);">STATUS</span>
+                  <div style="font-family:var(--mono); font-size:0.95rem; font-weight:700; color:var(--stamp);" id="stamp-severity-text">MEDIUM SEVERITY</div>
+                </div>
+              </div>
             </div>
 
-            <p style="font-family:var(--mono); color:var(--muted);"><span id="sandbox-status-dot" class="status-dot"></span> <span id="sandbox-status-label">CONNECTING TO REPLAY GRAPH ENGINE</span></p>
-            
-            <!-- Delay injection slider -->
-            <div class="sandbox-control">
-              <div class="slider-header" style="display:flex; justify-content:space-between; margin-bottom: 0.5rem;">
-                <span class="card-label" style="font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted);" data-i18n="sandboxInjectLabel">INJECT DELAY ON EXPRESS 56789</span>
-                <strong id="sandbox-slider-value" class="slider-value" style="font-family:var(--mono); color:var(--primary); font-size: 1.2rem;">0 min</strong>
-              </div>
-              <div class="slider-track-container" style="position:relative; margin-bottom: 2rem;">
-                <input type="range" id="sandbox-delay-slider" min="0" max="30" step="1" value="0" class="sandbox-slider" style="width:100%; margin-bottom: 0.5rem;" />
-              </div>
+            <!-- Action Toolbar -->
+            <div class="action-btn-row">
+              <button class="btn-apply" id="btn-apply-scenario" type="button">
+                &#9654; APPLY SCENARIO
+              </button>
+              <button class="btn-reset" id="btn-reset-scenario" type="button">
+                &#8634; RESET
+              </button>
             </div>
+          </article>
 
-            <!-- Result readouts -->
-            <div class="sandbox-results" style="display:flex; gap: 2rem; justify-content:space-between;">
-              <div style="flex:1;">
-                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">CONFLICT PROPAGATION</span>
-                <strong id="sandbox-result-conflict" class="sandbox-big-number" style="font-family:var(--display); font-size:3rem; color:var(--primary);">0</strong>
-                <span class="sandbox-unit" style="font-family:var(--sans); color:var(--muted);">min added</span>
-              </div>
-              <div style="flex:1;">
-                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">RAJDHANI 12301 TOTAL DELAY</span>
-                <strong id="sandbox-result-total" class="sandbox-big-number" style="font-family:var(--display); font-size:3rem; color:var(--primary);">55.0</strong>
-                <span class="sandbox-unit" style="font-family:var(--sans); color:var(--muted);">min (base 55)</span>
-              </div>
-              <div style="flex:1;">
-                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:var(--muted); margin-bottom:0.5rem;">SEVERITY</span>
-                <strong id="sandbox-result-severity" class="sandbox-severity-badge" style="display:block; padding:8px 12px; background:rgba(61,122,92,0.2); color:var(--success); border-radius:4px; font-family:var(--sans); font-weight:bold;">NO CONFLICT</strong>
-              </div>
-            </div>
-            
-            <div style="background:#111; color:var(--text-inv); padding: 1.5rem; border-radius: 8px;">
-                <span class="card-label" style="display:block; font-family:var(--sans); font-weight:bold; font-size:0.85rem; color:rgba(255,255,255,0.5); margin-bottom:0.5rem;">MAX-PLUS PROPAGATION</span>
-                <code id="sandbox-math" class="sandbox-formula" style="font-family:var(--mono); color:var(--signal); display:block; margin-bottom: 0.5rem;">actual = max(1580, 1574) = 1580</code>
-                <p id="sandbox-explanation" class="sandbox-explain" style="font-family:var(--sans); color:rgba(255,255,255,0.7); margin:0;">max(1580, 1574) = 1580 ? conflict adds +0.0 min</p>
-            </div>
-            
-            <div style="text-align:center; margin-top: 1rem;">
-            </div>
         </div>
-        
-      </section>
 
+        <!-- ── TRI-TELEMETRY STRIP ── -->
+        <section class="tri-telemetry-strip" aria-label="Scenario Telemetry Strip">
+          <div class="telemetry-card">
+            <div>
+              <span class="telem-label">1. AVAILABLE BLOCK HEADWAY</span>
+              <div class="telem-val-hero" id="telem-headway-val" style="color:var(--stamp);">6.2<span>min</span></div>
+            </div>
+            <span class="telem-sub" id="telem-headway-sub">Required separation is &ge; 10.0m. Deficit of -3.8m triggers hold.</span>
+          </div>
+
+          <div class="telemetry-card">
+            <div>
+              <span class="telem-label">2. PROPAGATED CONFLICT ADDITION</span>
+              <div class="telem-val-hero" id="telem-conflict-val" style="color:var(--signal);">+9.0<span>min</span></div>
+            </div>
+            <span class="telem-sub" id="telem-conflict-sub">Added to Train 12301 by Goverde Max-Plus block constraint.</span>
+          </div>
+
+          <div class="telemetry-card">
+            <div>
+              <span class="telem-label">3. RAJDHANI 12301 FINAL DELAY</span>
+              <div class="telem-val-hero" id="telem-total-delay-val" style="color:var(--primary);">+64.0<span>min</span></div>
+            </div>
+            <span class="telem-sub" id="telem-total-delay-sub">Base delay (+55.0m) + Injected conflict hold (+9.0m).</span>
+          </div>
+        </section>
+
+        <!-- ── HEADWAY SCALE & BEFORE/AFTER GRID ── -->
+        <div class="analysis-row-grid">
+          
+          <!-- Physical Headway Separation Scale -->
+          <article class="headway-scale-panel" aria-label="Headway Scale Instrument">
+            <h3 class="panel-title">Headway Separation Scale</h3>
+            <p class="panel-sub" style="margin:0 0 1rem;">
+              Watch the physical safety separation gap contract as Train 56789 injection increases.
+            </p>
+
+            <div class="hw-scale-wrap">
+              <div style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:0.75rem; color:var(--muted); margin-bottom:0.5rem;">
+                <span>ENTRY: KANPUR (CNB)</span>
+                <span>MIN REQUIRED: <strong style="color:var(--primary);">10.0 MIN</strong></span>
+                <span>EXIT: PRAYAGRAJ (PRYJ)</span>
+              </div>
+
+              <div class="hw-track-line">
+                <!-- Train 56789 Pin -->
+                <div class="hw-train-pin" id="hw-pin-56789" style="left: 70%;">
+                  <div class="hw-pin-dot delaying"></div>
+                  <span class="hw-pin-lbl" style="color:var(--stamp);">56789</span>
+                </div>
+
+                <!-- Train 12301 Pin -->
+                <div class="hw-train-pin" id="hw-pin-12301" style="left: 45%;">
+                  <div class="hw-pin-dot affected"></div>
+                  <span class="hw-pin-lbl" style="color:var(--primary);">12301</span>
+                </div>
+
+                <!-- Gap Bracket -->
+                <div class="hw-gap-bracket" id="hw-gap-bracket" style="left: 45%; width: 25%;">
+                  <span class="hw-gap-text" id="hw-gap-text">&Delta;t = 6.2 min (DEFICIT)</span>
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:0.75rem; color:var(--muted); margin-top:0.75rem;">
+                <span>SEPARATION: <strong style="color:var(--stamp);" id="hw-sep-val">6.2 MIN</strong></span>
+                <span>CRITICAL THRESHOLD: <strong style="color:var(--primary);">6.0 MIN INJECTION</strong></span>
+                <span>STATUS: <strong style="color:var(--signal);" id="hw-status-val">HOLD ACTIVE</strong></span>
+              </div>
+            </div>
+
+            <div style="font-family:var(--sans); font-size:0.8rem; color:var(--muted); line-height:1.45;">
+              <strong>Mechanical Rule:</strong> Conflict fires precisely when <code>1564 + source_delay + 10 &gt; 1525 + 55</code> (&gt; 6.0 min delay injected).
+            </div>
+          </article>
+
+          <!-- Before vs After Comparison Cards -->
+          <article class="causality-panel" aria-label="Before and After Scenario Comparison">
+            <h3 class="panel-title">Before vs. After Scenario Comparison</h3>
+            <p class="panel-sub" style="margin:0 0 1rem;">
+              Direct mathematical contrast between the unhindered baseline and the simulated network state.
+            </p>
+
+            <div class="comp-scenario-grid">
+              <div class="comp-scenario-card baseline">
+                <div style="font-family:var(--mono); font-size:0.7rem; font-weight:700; color:var(--success); margin-bottom:0.25rem;">
+                  &bull; BASELINE REPLAY
+                </div>
+                <div style="font-family:var(--mono); font-size:1.6rem; font-weight:700; color:var(--primary); margin:0.25rem 0;" id="comp-base-val">
+                  +55.0m
+                </div>
+                <div style="font-family:var(--sans); font-size:0.78rem; color:var(--muted); line-height:1.4;">
+                  Train 12301 operates with natural corridor delay. Headway buffer remains safe (&ge; 10.0m). No section hold.
+                </div>
+              </div>
+
+              <div class="comp-scenario-card scenario">
+                <div style="font-family:var(--mono); font-size:0.7rem; font-weight:700; color:var(--signal); margin-bottom:0.25rem;">
+                  &bull; SIMULATED SCENARIO
+                </div>
+                <div style="font-family:var(--mono); font-size:1.6rem; font-weight:700; color:var(--stamp); margin:0.25rem 0;" id="comp-scen-val">
+                  +64.0m
+                </div>
+                <div style="font-family:var(--sans); font-size:0.78rem; color:var(--primary); line-height:1.4;">
+                  Train 56789 delay occupies shared block. Headway falls to 6.2m. Goverde Max-Plus hold adds +9.0m.
+                </div>
+              </div>
+            </div>
+
+            <!-- Causal statement -->
+            <div style="margin-top:1.25rem; padding:0.75rem; background:var(--sb-paper); border:1px solid var(--line); border-radius:4px; font-family:var(--mono); font-size:0.75rem;">
+              TAKEAWAY: <strong style="color:var(--primary);">ONE DELAY BECAME A NETWORK EVENT.</strong>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ── CAUSAL CHAIN: WHY DID TRAIN 12301 MOVE? ── -->
+        <section style="background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:1.6rem; margin-bottom:2rem; box-shadow:var(--sb-shadow);">
+          <h3 class="panel-title" data-i18n="chain-title">Why Did Train 12301 Move?</h3>
+          <p class="panel-sub" style="margin:0;">
+            Follow the physical and computational domino cascade from hypothetical injection to downstream departure hold.
+          </p>
+
+          <div class="causality-chain-row">
+            <div class="causal-node highlight">1. 56789 DELAY INJECTED (+15m)</div>
+            <div class="causal-arrow">&rarr;</div>
+            <div class="causal-node">2. SECTION OCCUPIED (CNB &rarr; PRYJ)</div>
+            <div class="causal-arrow">&rarr;</div>
+            <div class="causal-node highlight">3. HEADWAY CONTRACTS (6.2m)</div>
+            <div class="causal-arrow">&rarr;</div>
+            <div class="causal-node">4. 10m SAFETY THRESHOLD BREACHED</div>
+            <div class="causal-arrow">&rarr;</div>
+            <div class="causal-node highlight">5. SIGNAL TURNS CAUTION / RED</div>
+            <div class="causal-arrow">&rarr;</div>
+            <div class="causal-node">6. 12301 HELD (+9.0m)</div>
+            <div class="causal-arrow">&rarr;</div>
+            <div class="causal-node highlight" style="border-color:var(--stamp); color:var(--stamp);">7. TOTAL DELAY: +64.0m</div>
+          </div>
+        </section>
+
+        <!-- ── PROPAGATION TIMELINE TRACE & REPLAY EXPLANATION ── -->
+        <div class="trace-replay-grid">
+          
+          <!-- Chronological Simulation Trace List -->
+          <article class="timeline-seq-panel" aria-label="Chronological Simulation Trace">
+            <h3 class="panel-title" data-i18n="trace-title">Simulation Event Timeline</h3>
+            <p class="panel-sub" style="margin:0 0 0.5rem;">
+              Sequential step trace of how the graph resolves the simulated disruption.
+            </p>
+
+            <div class="trace-step-list" id="sandbox-trace-list">
+              <div class="trace-step-item is-active">
+                <span class="trace-step-badge">T+00</span>
+                <span class="trace-step-text">Hypothetical delay injected into Train 56789</span>
+                <span class="trace-step-val" id="trace-inj-val">+15.0m</span>
+              </div>
+              <div class="trace-step-item is-active">
+                <span class="trace-step-badge">T+01</span>
+                <span class="trace-step-text">Scheduled arrival at Allahabad pushed from 1564 to 1579</span>
+                <span class="trace-step-val">1579.0</span>
+              </div>
+              <div class="trace-step-item is-active">
+                <span class="trace-step-badge">T+02</span>
+                <span class="trace-step-text">Headway constraint added (1579 + 10m minimum buffer)</span>
+                <span class="trace-step-val">1589.0</span>
+              </div>
+              <div class="trace-step-item is-active">
+                <span class="trace-step-badge">T+03</span>
+                <span class="trace-step-text">Constraint compared against 12301 unhindered arrival (1580)</span>
+                <span class="trace-step-val" id="trace-conflict-status">BREACHED</span>
+              </div>
+              <div class="trace-step-item is-active">
+                <span class="trace-step-badge">T+04</span>
+                <span class="trace-step-text">Goverde Max-Plus hold injected: max(1580, 1589) = 1589</span>
+                <span class="trace-step-val" id="trace-add-val" style="color:var(--stamp);">+9.0m</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Mathematical Explanation & Governance -->
+          <article class="math-explain-panel" aria-label="Goverde Max-Plus Sandbox Formula">
+            <h3 class="panel-title" data-i18n="math-title">How the Sandbox Computes</h3>
+            <p class="panel-sub" style="margin:0 0 0.5rem;">
+              Deterministic calculation evaluated live by <code>/graph/sandbox</code>.
+            </p>
+
+            <div class="formula-display-box">
+              <span style="font-family:var(--mono); font-size:0.68rem; color:var(--muted); text-transform:uppercase;">MAX-PLUS RECURSION</span>
+              <code class="formula-code" id="sb-formula-code">actual = max(1580, 1589) = 1589.0</code>
+              <p class="formula-explanation" id="sb-formula-explanation">
+                Train 56789 arr ALLAHABAD: 1564 + 15.0 = 1579.0. Headway constraint: 1579.0 + 10 = 1589.0. Train 12301 unhindered arr ALLAHABAD: 1525 + 55.0 = 1580.0. Actual arr: max(1580.0, 1589.0) = 1589.0.
+              </p>
+            </div>
+
+            <div style="margin-top:1.25rem; font-family:var(--sans); font-size:0.8rem; color:var(--muted); line-height:1.5;">
+              <strong>Data Honesty Guarantee:</strong> This simulation runs over the deterministic timed-event graph of the Kanpur&ndash;Allahabad station-pair. Values represent computational network consequences, not fabricated real-time telemetry.
+            </div>
+          </article>
+
+        </div>
+
+        <!-- ── Technical Explainability & Governance ── -->
+        
+        <!-- ── FAQ SECTION (Editorial Railway Field Manual Accordion) ── -->
+        <section class="sb-faq-section" id="sandbox-faq" aria-labelledby="faq-main-heading">
+          <div class="faq-header">
+            <div class="faq-kicker" data-i18n="faq-kicker">OPERATIONAL CLARITY &bull; TECHNICAL FAQ</div>
+            <h2 class="faq-title" id="faq-main-heading" data-i18n="faq-title">FREQUENTLY ASKED QUESTIONS</h2>
+            <p class="faq-sub" data-i18n="faq-sub">
+              Understand how RippleETA turns uncertainty into operational decisions.
+            </p>
+          </div>
+
+          <div class="faq-list">
+            <!-- FAQ Item 01 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-1">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">01</span>
+                  <span class="faq-question" data-i18n="faq-q1">What is RippleETA?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-1" role="region">
+                <p data-i18n="faq-a1">
+                  RippleETA is an uncertainty-aware dynamic ETA forecasting platform for Indian Railways coaching services. It models how delay evolves across corridors using calibrated gradient-boosted trees and Goverde timed event graph algebra, converting statistical predictions into specific operational decisions across platforms, crew relief, feeder connections, maintenance turnarounds, and network dispatch.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 02 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-2">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">02</span>
+                  <span class="faq-question" data-i18n="faq-q2">Why doesn't RippleETA show only one arrival ETA?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-2" role="region">
+                <p data-i18n="faq-a2">
+                  A single point ETA (e.g. "Arriving at 18:47") creates dangerous false certainty in railway operations. On a mixed-traffic corridor with potential signal holds and priority overtakes, a single number forces platform managers and crew controllers into premature commitments. RippleETA outputs calibrated conformal quantile intervals (P10, P50, P90) that honestly quantify uncertainty so controllers can manage operational risk.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 03 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-3">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">03</span>
+                  <span class="faq-question" data-i18n="faq-q3">What do P10, P50, and P90 mean for operational decisions?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-3" role="region">
+                <p data-i18n="faq-a3">
+                  <strong>P10 (Optimistic):</strong> Only a 10% probability the train arrives earlier than this time under optimal green-aspect routing.<br>
+                  <strong>P50 (Median):</strong> The most probable arrival outcome; 50% chance the train arrives earlier or later.<br>
+                  <strong>P90 (Conservative Bound):</strong> 90% confidence the train will arrive before this time. Indian Railways crew controllers rely on P90 to guarantee statutory duty compliance (HOER 9-hour rule), while station masters use it to avoid premature platform lockups.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 04 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-4">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">04</span>
+                  <span class="faq-question" data-i18n="faq-q4">What happens when a delay propagates to another train?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-4" role="region">
+                <p data-i18n="faq-a4">
+                  On shared railway corridors, trains interact through Automatic Block Signaling (ABS) blocks. When a preceding train (e.g. Train 56789) suffers upstream dwell, its block occupancy reduces available safety headway below the mandatory 10-minute threshold. Through Goverde Max-Plus recursion, the succeeding train (Train 12301) cannot enter the block section until the preceding train clears plus the minimum headway buffer: <code>x_i(k+1) = max(x_i(k) + d_run, x_j(k) + h_min)</code>.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 05 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-5">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">05</span>
+                  <span class="faq-question" data-i18n="faq-q5">What is the Ghost Sandbox used for?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-5" role="region">
+                <p data-i18n="faq-a5">
+                  The Ghost Sandbox is a counterfactual what-if simulation laboratory. Dispatchers and controllers can inject hypothetical delays into upstream services to observe how section headways contract, signal aspects shift to caution, and Goverde Max-Plus constraints force holds onto following trains. It allows controllers to explore mitigation options safely without altering live operational data.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 06 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-6">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">06</span>
+                  <span class="faq-question" data-i18n="faq-q6">Does RippleETA always make a prediction, or does it suspend?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-6" role="region">
+                <p data-i18n="faq-a6">
+                  RippleETA features an automated Anomaly Gate. If anomalous conditions are detected—such as sensor drift, sudden catastrophic track closures, or unprecedented weather spikes outside training bounds—the automated prediction is suspended with a prominent warning, advising staff to revert to manual VHF and block working protocols to protect operational trust.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 07 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-7">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">07</span>
+                  <span class="faq-question" data-i18n="faq-q7">Is the predicted arrival time a guaranteed commitment?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-7" role="region">
+                <p data-i18n="faq-a7">
+                  No. Railway networks operate in open physical environments vulnerable to weather, signal failures, and unscheduled events. RippleETA outputs a calibrated probability distribution designed to inform human operational judgment, not replace it.
+                </p>
+              </div>
+            </div>
+
+            <!-- FAQ Item 08 -->
+            <div class="faq-item">
+              <button type="button" class="faq-trigger" aria-expanded="false" aria-controls="faq-ans-8">
+                <span class="faq-trigger-left">
+                  <span class="faq-num">08</span>
+                  <span class="faq-question" data-i18n="faq-q8">What data sources and features does RippleETA use?</span>
+                </span>
+                <span class="faq-icon" aria-hidden="true">+</span>
+              </button>
+              <div class="faq-content" id="faq-ans-8" role="region">
+                <p data-i18n="faq-a8">
+                  RippleETA uses historical train running data, National Train Enquiry System (NTES) timestamps, schedule buffer distributions, junction topology data across Northern and North Central Railway zones, and station-pair headway separation standards. It adheres strictly to data honesty: no fabricated GPS coordinates or fake sensor feeds.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── REFERENCES & TECHNICAL PROVENANCE ── -->
+        <section class="sb-references-section" id="sandbox-references" aria-labelledby="ref-main-heading">
+          <div class="references-ledger">
+            <div class="ref-header-row">
+              <div>
+                <div class="faq-kicker" data-i18n="ref-kicker">GROUND TRUTH &bull; OPERATIONS RESEARCH</div>
+                <h2 class="ref-ledger-title" id="ref-main-heading" data-i18n="ref-title">REFERENCES &amp; TECHNICAL PROVENANCE</h2>
+              </div>
+              <span class="ref-ledger-stamp">LEDGER REF: IR-OR-2026-CAL</span>
+            </div>
+            <p class="faq-sub" style="margin-bottom:1.5rem;" data-i18n="ref-sub">
+              The intelligence shown by RippleETA is grounded in railway operations research, probabilistic forecasting, network delay propagation, and explainable machine learning.
+            </p>
+
+            <div class="ref-list">
+              <!-- Ref 01 -->
+              <div class="ref-item">
+                <span class="ref-num">01</span>
+                <div class="ref-body">
+                  <h3 class="ref-title">Goverde, R. M. P. (2010) &mdash; Timed Event Graph &amp; Max-Plus Algebra</h3>
+                  <p class="ref-purpose" data-i18n="ref-p1">
+                    Theoretical and mathematical foundation for railway network delay propagation, station-pair headway interactions, and max-plus algebraic recursions used in the Ghost Sandbox and Control Room dispatch instruments.
+                  </p>
+                  <div class="ref-meta-row">
+                    <span>SOURCE: <em>Transportation Research Part C: Emerging Technologies</em>, 18(3), 269&ndash;287</span>
+                    <span>DOI: 10.1016/j.trc.2009.08.006</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ref 02 -->
+              <div class="ref-item">
+                <span class="ref-num">02</span>
+                <div class="ref-body">
+                  <h3 class="ref-title">RSTGCN (2025) &mdash; Railway-Centric Spatio-Temporal Graph Network</h3>
+                  <p class="ref-purpose" data-i18n="ref-p2">
+                    State-of-the-art benchmark for network delay modeling on the Indian Railway Network (4,735 stations across 17 zones), establishing the necessity of spatial attention on train frequency corridors.
+                  </p>
+                  <div class="ref-meta-row">
+                    <span>SOURCE: arXiv:2510.01262</span>
+                    <span>VENUE: Published Research Preprint (2025)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ref 03 -->
+              <div class="ref-item">
+                <span class="ref-num">03</span>
+                <div class="ref-body">
+                  <h3 class="ref-title">MAPIE &amp; Conformal Prediction (Taquet et al., 2022; Vovk et al., 2005)</h3>
+                  <p class="ref-purpose" data-i18n="ref-p3">
+                    Model Agnostic Prediction Interval Estimator implementing split conformal quantile regression to guarantee finite-sample distribution-free coverage for P10, P50, and P90 uncertainty bounds.
+                  </p>
+                  <div class="ref-meta-row">
+                    <span>SOURCE: <em>Journal of Machine Learning Research</em> &bull; Springer (2005)</span>
+                    <span>LIBRARY: MAPIE 1.5.0 (Python)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ref 04 -->
+              <div class="ref-item">
+                <span class="ref-num">04</span>
+                <div class="ref-body">
+                  <h3 class="ref-title">Chen &amp; Guestrin (2016) &mdash; XGBoost Gradient Boosted Trees</h3>
+                  <p class="ref-purpose" data-i18n="ref-p4">
+                    Scalable tree boosting system powering RippleETA's primary tabular delay prediction engine across journey stations, schedule buffers, and historical running lags.
+                  </p>
+                  <div class="ref-meta-row">
+                    <span>SOURCE: <em>ACM SIGKDD International Conference</em>, pp. 785&ndash;794</span>
+                    <span>DOI: 10.1145/2939672.2939785</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ref 05 -->
+              <div class="ref-item">
+                <span class="ref-num">05</span>
+                <div class="ref-body">
+                  <h3 class="ref-title">Lundberg &amp; Lee (2017) &mdash; Unified Approach to Model Explainability (SHAP)</h3>
+                  <p class="ref-purpose" data-i18n="ref-p5">
+                    Game-theoretic Shapley Additive Explanations computing exact feature attributions to provide operational transparency on why specific delays occur.
+                  </p>
+                  <div class="ref-meta-row">
+                    <span>SOURCE: <em>Advances in Neural Information Processing Systems (NeurIPS 30)</em></span>
+                    <span>RELEVANCE: Operational Transparency &amp; Human-in-the-Loop Trust</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ref 06 -->
+              <div class="ref-item">
+                <span class="ref-num">06</span>
+                <div class="ref-body">
+                  <h3 class="ref-title">B&uuml;ker &amp; Seybold (2012) &mdash; Delay Propagation &amp; Recovery Buffers</h3>
+                  <p class="ref-purpose" data-i18n="ref-p6">
+                    Mathematical framework for stochastic propagation of primary and secondary delays through scheduled dwell times and terminal approach recovery margins.
+                  </p>
+                  <div class="ref-meta-row">
+                    <span>SOURCE: <em>Journal of Rail Transport Planning &amp; Management</em>, 2(1&ndash;2), 34&ndash;50</span>
+                    <span>DOI: 10.1016/j.jrtpm.2012.10.001</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ref 07 -->
+              <div class="ref-item">
+                <span class="ref-num">07</span>
+                <div class="ref-body">
+                  <h3 class="ref-title">Indian Railways Operational Codes &mdash; HOER &amp; G&amp;SR Standards</h3>
+                  <p class="ref-purpose" data-i18n="ref-p7">
+                    Regulatory constraints governing 9-hour maximum continuous running duty (HOER Rule 9(2)) and 10-minute minimum safety headway buffers under Automatic Block Signaling (G&amp;SR Section 4.08).
+                  </p>
+                  <div class="ref-meta-row">
+                    <span>REGULATORY BODY: Ministry of Railways, Government of India</span>
+                    <span>APPLIED STANDARDS: HOER 2005 / G&amp;SR Northern Railway</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer style="margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--line); font-family:var(--sans); font-size:0.85rem; color:var(--muted); line-height:1.6;">
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:1.5rem; margin-bottom:1.25rem;">
+            <div style="max-width:580px;">
+              <strong style="color:var(--primary); font-family:var(--mono); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:0.35rem;">
+                GHOST SANDBOX WHAT-IF ARCHITECTURE
+              </strong>
+              The Sandbox bench enables dispatchers and regional controllers to perform counterfactual testing on shared corridors. By pinning a hypothetical delay onto an upstream service, the system recalculates all dependent topological edges, providing instant visibility into cascading network bottlenecks before they physically occur on the line.
+            </div>
+            <div style="font-family:var(--mono); font-size:0.78rem;">
+              <div>SIMULATION ENDPOINT: <strong style="color:var(--primary);">GET /graph/sandbox</strong></div>
+              <div>MATHEMATICAL BASE: <strong style="color:var(--primary);">Goverde Max-Plus Algebra</strong></div>
+              <div>DATA STATUS: <strong style="color:var(--signal);">Scenario Simulation (Replay)</strong></div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:0.72rem; color:var(--muted); border-top:1px dashed var(--line); padding-top:0.75rem;">
+            <span>RippleETA &bull; Intelligent Railway Operations &bull; SIH 2026</span>
+            <div style="display:flex; gap:1rem;">
+              <a href="index.html" style="color:var(--primary); text-decoration:none;">Portal Home</a>
+              <a href="passenger.html" style="color:var(--primary); text-decoration:none;">Passenger View</a>
+              <a href="station-master.html" style="color:var(--primary); text-decoration:none;">Station Master</a>
+              <a href="crew.html" style="color:var(--primary); text-decoration:none;">Crew Controller</a>
+              <a href="feeder.html" style="color:var(--primary); text-decoration:none;">Feeder Transport</a>
+              <a href="maintenance.html" style="color:var(--primary); text-decoration:none;">Maintenance</a>
+              <a href="control.html" style="color:var(--primary); text-decoration:none;">Control Room</a>
+            </div>
+          </div>
+        </footer>
+
+      </div>
     </main>
   </div>
-  <script src="sandbox.js"></script>
+
+  <script src="app.js"></script>
 </body>
 </html>

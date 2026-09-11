@@ -2,104 +2,1314 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Passenger | RippleETA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passenger Intelligence | The Honest Ticket | RippleETA</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ==========================================================================
+       RIPPLEETA — Passenger View Scoped Styles: The Honest Ticket
+       Palette: Warm Cream (#0B0F1A), Deep Navy (var(--primary)), Marigold Amber (var(--signal)),
+       Deep Signal Green (var(--success)), Terracotta (var(--stamp))
+       Typography: Fraunces display, Inter interface, IBM Plex Mono telemetry
+       ========================================================================== */
+
+    :root {
+      --ticket-border: rgba(232, 237, 245, 0.15);
+      --ticket-bg: #111827;
+      --ticket-paper: #FAF6F0;
+    }
+
+    .pax-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3.5rem;
+    }
+
+    /* ── Top Bar Adjustments ── */
+    .view-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(232, 237, 245, 0.08);
+      color: var(--primary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border: 1px solid var(--line);
+    }
+
+    /* ── Editorial Hero Banner ── */
+    .pax-hero {
+      margin: 1.5rem 0 1.75rem;
+      padding: 1.5rem 1.75rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(232, 237, 245, 0.05);
+      position: relative;
+    }
+
+    .pax-hero-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--signal);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pax-hero-tag::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--signal);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(232, 163, 61, 0.6);
+    }
+
+    .pax-hero-title {
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+      font-weight: 600;
+      color: var(--primary);
+      line-height: 1.15;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.015em;
+    }
+
+    .pax-hero-desc {
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 860px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ── Corridor Quick-Switch Bar ── */
+    .corridor-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.75rem;
+      padding: 0.85rem 1.25rem;
+      background: var(--ticket-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .corridor-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .corridor-chips {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .train-chip {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .train-chip:hover {
+      background: rgba(232, 163, 61, 0.1);
+      border-color: var(--signal);
+      color: var(--primary);
+    }
+
+    .train-chip.is-active {
+      background: var(--primary);
+      color: var(--text-inv);
+      border-color: var(--primary);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(27, 42, 74, 0.2);
+    }
+
+    /* ── The Honest Ticket Instrument ── */
+    .ticket-wrapper {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .honest-ticket {
+      background: var(--ticket-bg);
+      border: 1px solid var(--ticket-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(232, 237, 245, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Railway docket header bar */
+    .ticket-docket-bar {
+      background: var(--surface-dark);
+      color: var(--text-inv);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      border-bottom: 2px solid var(--signal);
+    }
+
+    .docket-meta {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      color: rgba(243, 237, 227, 0.85);
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .docket-meta strong {
+      color: var(--signal);
+    }
+
+    .docket-stamp {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid rgba(243, 237, 227, 0.3);
+      border-radius: 3px;
+      letter-spacing: 0.1em;
+      color: var(--text-inv);
+    }
+
+    /* Ticket Body */
+    .ticket-inner {
+      padding: 1.75rem;
+    }
+
+    .ticket-route-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .ticket-train-title {
+      font-family: var(--display);
+      font-size: clamp(1.4rem, 2.4vw, 1.85rem);
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .ticket-route-path {
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* 3 Anchor Delay Metrics */
+    .ticket-anchor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 1rem;
+      margin: 1.25rem 0 1.75rem;
+    }
+
+    @media (max-width: 768px) {
+      .ticket-anchor-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .anchor-card {
+      background: var(--ticket-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.15rem 1.25rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .anchor-card:hover {
+      border-color: rgba(27, 42, 74, 0.3);
+    }
+
+    .anchor-card.median-highlight {
+      background: #111827;
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 14px rgba(232, 237, 245, 0.08);
+    }
+
+    .anchor-card.median-highlight::before {
+      content: 'MOST PROBABLE';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: var(--text-inv);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+
+    .anchor-card.upper-bound {
+      border-left: 3px solid var(--signal);
+    }
+
+    .anchor-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .anchor-value {
+      font-family: var(--mono);
+      font-size: clamp(2rem, 3.5vw, 2.75rem);
+      font-weight: 600;
+      line-height: 1.1;
+      margin: 0.25rem 0;
+      color: var(--primary);
+    }
+
+    .anchor-value.green {
+      color: var(--success);
+    }
+
+    .anchor-value.amber {
+      color: var(--signal);
+    }
+
+    .anchor-caption {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin: 0.35rem 0 0;
+    }
+
+    /* Calibrated Visual Interval Bar */
+    .interval-section {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .interval-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .interval-tag-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+
+    .interval-subinfo {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .interval-bar-wrap {
+      position: relative;
+      height: 28px;
+      background: rgba(27, 42, 74, 0.06);
+      border-radius: 14px;
+      overflow: visible;
+      border: 1px solid rgba(232, 237, 245, 0.15);
+      margin: 1rem 0 1.25rem;
+    }
+
+    .interval-bar-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, rgba(61, 122, 92, 0.5) 0%, rgba(232, 163, 61, 0.7) 100%);
+      border-left: 2px solid var(--success);
+      border-right: 2px solid var(--signal);
+      border-radius: 12px;
+      transition: all 0.4s ease;
+    }
+
+    .interval-bar-p50 {
+      position: absolute;
+      top: -4px;
+      bottom: -4px;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+      box-shadow: 0 0 4px rgba(27, 42, 74, 0.4);
+      z-index: 2;
+      transition: left 0.4s ease;
+    }
+
+    .interval-bar-p50::after {
+      content: 'P50';
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .interval-ticks-legend {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 1.25rem;
+      padding: 0 0.5rem;
+    }
+
+    /* Trend & Provenance footer strip inside ticket */
+    .ticket-footer-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-top: 1.25rem;
+      border-top: 1px dashed var(--line);
+      margin-top: 1.25rem;
+    }
+
+    .ticket-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .trend-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .trend-badge.improving {
+      background: rgba(61, 122, 92, 0.12);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .trend-badge.stable {
+      background: rgba(91, 141, 184, 0.12);
+      color: #3b6d94;
+      border: 1px solid #5B8DB8;
+    }
+
+    .trend-badge.worsening {
+      background: rgba(232, 163, 61, 0.15);
+      color: var(--signal);
+      border: 1px solid var(--signal);
+    }
+
+    .ticket-provenance-text {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* Anomaly Gate Alert */
+    .anomaly-banner {
+      display: none;
+      margin: 1.25rem 0;
+      padding: 1.25rem 1.5rem;
+      background: rgba(229, 62, 62, 0.08);
+      border: 1.5px solid var(--stamp);
+      border-radius: 6px;
+      color: var(--stamp);
+    }
+
+    .anomaly-banner-title {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 0.4rem;
+    }
+
+    .anomaly-banner-desc {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ── "Should I Leave Now?" Connection Instrument ── */
+    .leave-calc-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 12px rgba(232, 237, 245, 0.05);
+    }
+
+    .calc-title {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0 0 0.35rem;
+    }
+
+    .calc-subtitle {
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin: 0 0 1.25rem;
+    }
+
+    .calc-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .calc-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--ticket-paper);
+      padding: 0.5rem 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+    }
+
+    .calc-input-wrap label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+
+    .calc-input-num {
+      width: 75px;
+      padding: 0.3rem 0.5rem;
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .quick-preset-btn {
+      background: var(--ticket-paper);
+      border: 1px solid var(--line);
+      color: var(--primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-preset-btn:hover {
+      border-color: var(--primary);
+      background: #111827;
+    }
+
+    .btn-evaluate {
+      background: var(--primary);
+      color: var(--text-inv);
+      border: 1px solid var(--primary);
+      padding: 0.5rem 1.25rem;
+      border-radius: 4px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-evaluate:hover {
+      background: #243761;
+    }
+
+    /* Result Banner */
+    .ticket-flag {
+      padding: 1.15rem 1.35rem;
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .ticket-flag.safe {
+      background: rgba(34, 197, 94, 0.08);
+      border: 1.5px solid var(--success);
+      color: var(--success);
+    }
+
+    .ticket-flag.wait {
+      background: rgba(232, 163, 61, 0.1);
+      border: 1.5px solid var(--signal);
+      color: #9c671b;
+    }
+
+    .flag-status-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .flag-text-content {
+      flex: 1;
+    }
+
+    .flag-badge-text {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .flag-detail-text {
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .calc-breakdown-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px dashed rgba(232, 237, 245, 0.15);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .calc-breakdown-row strong {
+      color: var(--primary);
+    }
+
+    /* ── Current Delay ≠ Predicted Delay Deconstruction ── */
+    .deconstruct-panel {
+      background: var(--ticket-paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .deconstruct-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1.25rem;
+      align-items: center;
+      margin: 1.25rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .deconstruct-grid {
+        grid-template-columns: 1fr;
+      }
+      .deconstruct-math-sym {
+        text-align: center;
+        transform: rotate(90deg);
+      }
+    }
+
+    .deconstruct-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.25rem;
+      box-shadow: 0 2px 6px rgba(27, 42, 74, 0.02);
+    }
+
+    .deconstruct-card-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.35rem;
+    }
+
+    .deconstruct-num {
+      font-family: var(--mono);
+      font-size: 1.85rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0.25rem 0;
+    }
+
+    .deconstruct-num.signal {
+      color: var(--signal);
+    }
+
+    .deconstruct-sub {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin: 0.25rem 0 0;
+    }
+
+    .deconstruct-math-sym {
+      font-family: var(--display);
+      font-size: 2rem;
+      color: var(--muted);
+      font-weight: 700;
+      user-select: none;
+    }
+
+    /* ── Live Factor Decomposition Grid ── */
+    .factors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .factor-item {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1rem 1.15rem;
+    }
+
+    .factor-item-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.35rem;
+    }
+
+    .factor-item-val {
+      font-family: var(--mono);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .factor-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    .factor-badge.safe {
+      background: rgba(61, 122, 92, 0.12);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .factor-badge.warn {
+      background: rgba(232, 163, 61, 0.14);
+      color: var(--signal);
+      border: 1px solid var(--signal);
+    }
+
+    .factor-badge.alert {
+      background: rgba(161, 61, 46, 0.12);
+      color: var(--stamp);
+      border: 1px solid var(--stamp);
+    }
+
+    .factor-explainer {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.35;
+      margin: 0.45rem 0 0;
+    }
+
+    /* ── Historical Timeline ── */
+    .timeline-container {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .timeline-title {
+      font-family: var(--display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0 0 0.35rem;
+    }
+
+    .timeline-desc {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0 0 1.25rem;
+    }
+
+    .timeline-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+
+    .timeline-list::before {
+      content: '';
+      position: absolute;
+      top: 14px;
+      bottom: 20px;
+      left: 14px;
+      width: 2px;
+      background: var(--line);
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--ticket-paper);
+      border: 2px solid var(--muted);
+      margin-top: 5px;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .timeline-item.is-arrived .timeline-dot {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .timeline-item.is-current .timeline-dot {
+      background: var(--signal);
+      border-color: var(--signal);
+      box-shadow: 0 0 0 4px rgba(240, 165, 0, 0.25);
+      animation: live-pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes live-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.15); opacity: 0.7; }
+    }
+
+    .timeline-content {
+      background: var(--ticket-paper);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.85rem 1.15rem;
+      flex: 1;
+    }
+
+    .timeline-item.is-current .timeline-content {
+      background: #111827;
+      border: 1.5px solid var(--signal);
+      box-shadow: 0 2px 8px rgba(232, 163, 61, 0.08);
+    }
+
+    .timeline-station-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-station {
+      font-family: var(--mono);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .timeline-tag {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      letter-spacing: 0.06em;
+    }
+
+    .timeline-tag.departed {
+      background: rgba(61, 122, 92, 0.12);
+      color: var(--success);
+    }
+
+    .timeline-tag.en-route {
+      background: rgba(232, 163, 61, 0.18);
+      color: #9c671b;
+    }
+
+    .timeline-delay {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ── Downstream Network Ahead Concept Card ── */
+    .network-concept-box {
+      background: var(--surface-dark);
+      color: var(--text-inv);
+      border-radius: 8px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--signal);
+    }
+
+    .concept-title {
+      font-family: var(--display);
+      font-size: 1.25rem;
+      color: #111827;
+      margin: 0 0 0.5rem;
+    }
+
+    .concept-text {
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: rgba(243, 237, 227, 0.85);
+      margin: 0 0 1rem;
+    }
+
+    .concept-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.85rem 1.25rem;
+      border-radius: 6px;
+      border: 1px solid rgba(243, 237, 227, 0.1);
+    }
+
+    .concept-node {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-inv);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .concept-node.active {
+      color: var(--signal);
+      font-weight: 600;
+    }
+
+    .concept-arrow {
+      color: rgba(243, 237, 227, 0.4);
+      font-size: 0.85rem;
+    }
+
+    /* ── Footer ── */
+    .pax-footer {
+      border-top: 1px solid var(--line);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .pax-footer-links a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 1rem;
+    }
+
+    .pax-footer-links a:hover {
+      color: var(--signal);
+    }
+
+    /* ── Responsive & Accessibility Refinements ── */
+    @media (max-width: 640px) {
+      .pax-container {
+        padding: 0 0.85rem 2.5rem;
+      }
+      .ticket-inner {
+        padding: 1.15rem;
+      }
+      .corridor-bar {
+        padding: 0.75rem 0.85rem;
+      }
+      .calc-controls-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-evaluate {
+        width: 100%;
+      }
+      .ticket-docket-bar {
+        padding: 0.65rem 1rem;
+      }
+      .ticket-anchor-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .interval-bar-fill,
+      .interval-bar-p50,
+      .train-chip,
+      .quick-preset-btn,
+      .ticket-flag {
+        transition: none !important;
+        animation: none !important;
+      }
+      .timeline-item.is-current .timeline-dot {
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
 <body class="has-grain" data-view="passenger">
-  
+
+  <!-- ── Global Railway Command Topbar ── -->
   <div class="topbar">
     <div class="topbar-left">
-      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;">&larr; Roles</a>
-      <a class="brand" href="#" aria-label="RippleETA home">
+      <a href="index.html" class="back-link" style="color:var(--muted); text-decoration:none; margin-right: 1rem; font-family:var(--sans); font-weight:500;" title="Return to Portal Home">&larr; Roles</a>
+      <a class="brand" href="/eta/index.html" aria-label="RippleETA 3D Experience">
         <span class="brand-mark">R</span>
         <span class="brand-logotype">RippleETA</span>
       </a>
       <div class="divider"></div>
-      <span class="view-title">PASSENGER INTELLIGENCE</span>
+      <span class="view-title" data-i18n="role-passenger">PASSENGER INTELLIGENCE</span>
+      <span class="view-badge-pill">B2C ADVISORY</span>
     </div>
-        <div class="topbar-right">
-      <div class="topbar-actions">
-        <div class="lang-selector">
-          <button class="lang-btn active" data-lang="en">EN</button>
-          <button class="lang-btn" data-lang="hi">HI</button>
-        </div>
-        <button class="btn-faq-trigger" type="button" aria-label="Open FAQ">
-          <span style="font-weight:bold;">?</span>
-          <span data-i18n="helpFaq">FAQ</span>
-        </button>
-      </div>
+    <div class="topbar-right">
+      <a href="/eta/index.html" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono); text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Launch 3D Train Simulation">🎬 <span data-i18n="btn-3d-view">3D Train</span></a>
+      <select id="lang-select" class="lang-select" aria-label="Select Language" style="background:#1e293b; color:#f8fafc; border:1px solid #334155; border-radius:4px; padding:0.2rem 0.4rem; font-size:0.75rem; font-family:var(--mono); cursor:pointer;">
+        <option value="en">EN</option>
+        <option value="hi">HI (हिंदी)</option>
+        <option value="mr">MR (मराठी)</option>
+      </select>
+      <button id="btn-a11y" class="btn-refresh" style="width:auto; padding:0.25rem 0.6rem; font-size:0.75rem; font-family:var(--mono);" title="Toggle Colorblind Safe Mode">A11Y</button>
       <div class="ticker-mode is-replay" id="ticker-mode">REPLAY</div>
       <span class="connection-status"><span class="signal-dot is-online" id="connection-dot"></span><span id="connection-label">API ONLINE</span></span>
-      <div class="clock" id="clock">--:-- IST</div>
+      <div class="clock" id="clock">--:--:-- IST</div>
     </div>
   </div>
 
   <div class="app-layout">
     <main class="main-content">
-      
-      <!-- Top controls -->
-      <header class="view-header">
-        <div class="header-left">
-          <h1 class="view-headline" data-i18n="paxTitle">Arrival Advisory</h1>
-          <p class="view-subhead" data-i18n="paxSubhead">Calibrated delay bounds from the historical prediction snapshot.</p>
-        </div>
-        <div class="header-right">
-          <div class="train-input-group">
-            <label for="train-id" data-i18n="train">TRAIN</label>
-            <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
-            <button id="refresh-button" class="btn-refresh" aria-label="Refresh data">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
-            </button>
+      <div class="pax-container">
+
+        <!-- ── Train Query & Quick Corridor Switcher ── -->
+        <section class="corridor-bar">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <div class="train-input-group">
+              <label for="train-id">TRAIN</label>
+              <input type="text" id="train-id" class="train-input" value="20507" placeholder="e.g. 20507">
+              <button id="refresh-button" class="btn-refresh" aria-label="Refresh telemetry">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
+              </button>
+            </div>
+            <span class="corridor-label" style="margin-left:0.5rem;">QUICK CORRIDORS:</span>
           </div>
-        </div>
-      </header>
 
-      <section class="view-panel is-active" id="passenger-view" data-panel="passenger" data-lang="en">
-        
-        <!-- The Honest Ticket -->
-        <div class="passenger-ticket" role="region" aria-label="Arrival window ticket" aria-live="polite">
-            <div class="ticket-header">
-                <span id="ticket-train">TRAIN --</span>
-                <span id="ticket-date">DATE --</span>
-            </div>
+          <div class="corridor-chips" id="train-chips-container">
+            <button class="train-chip is-active" data-train="20507">20507 &bull; Tejas Rajdhani</button>
+            <button class="train-chip" data-train="12301">12301 &bull; Howrah Rajdhani</button>
+            <button class="train-chip" data-train="12002">12002 &bull; Bhopal Shatabdi</button>
+            <button class="train-chip" data-train="12004">12004 &bull; Lucknow Shatabdi</button>
+            <button class="train-chip" data-train="12951">12951 &bull; Mumbai Rajdhani</button>
+            <button class="train-chip" data-train="22436">22436 &bull; Vande Bharat</button>
+            <button class="train-chip" data-train="56789">56789 &bull; Special (High Var)</button>
+          </div>
+        </section>
+
+        <!-- ── THE HONEST TICKET (Primary Instrument) ── -->
+        <section class="ticket-wrapper" role="region" aria-label="Arrival window ticket" aria-live="polite">
+          <article class="honest-ticket">
             
-            <div class="ticket-window-block">
-                <span class="ticket-window-label" data-i18n="paxWindowLabel">CALIBRATED ARRIVAL WINDOW</span>
-                <div class="ticket-window-value" id="ticket-window">
-                    -- <span>min</span> <span style="color:var(--text);font-size:3rem;margin:0 10px;">/</span> -- <span>min</span>
+            <!-- Operational Header Strip -->
+            <div class="ticket-docket-bar">
+              <div class="docket-meta">
+                <span>SERVICE: <strong id="ticket-service-type">PASSENGER LIVE ADVISORY</strong></span>
+                <span>DATE: <strong id="ticket-date">--</strong></span>
+                <span id="docket-id" style="display:none;"></span>
+              </div>
+              <div class="docket-stamp">NORTHERN RAILWAY &bull; PRAYAGRAJ DIV</div>
+            </div>
+
+            <div class="ticket-inner">
+              
+              <!-- Route & Train Identity -->
+              <div class="ticket-route-heading">
+                <div>
+                  <h2 class="ticket-train-title" id="ticket-train-title">TRAIN 20507 &bull; TEJAS RAJDHANI EXPRESS</h2>
+                  <div class="ticket-route-path" id="ticket-route">New Delhi (NDLS) &rarr; Kanpur Central (CNB) &rarr; Prayagraj Jn (PRYJ)</div>
                 </div>
-                <span class="ticket-window-label" style="margin-top: 0.5rem;" data-i18n="paxEarliestLatest">P10 (Earliest) &nbsp;&mdash;&nbsp; P90 (Latest)</span>
-                <p id="ticket-p50" style="font-family:var(--mono); color:var(--signal); margin:.75rem 0 0;">P50: --</p>
-                <p id="ticket-provenance" style="font-family:var(--mono); color:var(--muted); margin:.5rem 0 0;">Source: --</p>
-            </div>
-            
-            <div style="text-align:center;">
-            </div>
-        </div>
+                <!-- Hidden compatibility anchor for app.js -->
+                <span id="ticket-train" style="display:none;">TRAIN 20507</span>
+              </div>
 
-        <!-- Reflect-style Glassmorphic Timeline -->
-        <div class="reflect-timeline" role="region" aria-label="Journey Delay Trend">
-            <h3 class="timeline-title" data-i18n="paxTimelineTitle">Historical Station Trend</h3>
-            <ul class="timeline-list" id="pax-historical-timeline">
-                <li class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <p class="timeline-station">Awaiting Data...</p>
-                        <p class="timeline-delay">--</p>
-                    </div>
-                </li>
-            </ul>
-        </div>
-        
-        <!-- Hidden legacy IDs for other modules -->
-        <span id="passenger-conflict" style="display:none"></span>
-        <span id="passenger-train" style="display:none">TRAIN 20507</span>
-        <!-- Route/Corridor Map with Train Type Differentiation -->
-        <div id="route-map-mount"></div>
-      </section>
+              <!-- Anomaly Banner (Shown if anomaly_flag is true) -->
+              <div id="ticket-anomaly-alert" class="anomaly-banner">
+                <div class="anomaly-banner-title">
+                  <span>&#9888;</span> PREDICTION SUSPENDED: ANOMALOUS RUNNING CONDITIONS DETECTED
+                </div>
+                <p class="anomaly-banner-desc">
+                  The delay variance on this corridor has exceeded calibrated statistical boundaries. Rather than fabricating a deceptive point estimate that could compromise your travel plans, RippleETA pauses automated forecasting and recommends consulting station announcements.
+                </p>
+              </div>
 
+              <!-- 3 Anchor Prediction Grid -->
+              <div class="ticket-anchor-grid">
+                
+                <!-- P10 Anchor -->
+                <div class="anchor-card">
+                  <div class="anchor-label">P10 &bull; Earliest Window</div>
+                  <div class="anchor-value green" id="ticket-p10-num">0.0 min</div>
+                  <p class="anchor-caption">Best-case open track ahead. 10% empirical probability of arriving sooner than this time.</p>
+                </div>
+
+                <!-- P50 Anchor (Median) -->
+                <div class="anchor-card median-highlight">
+                  <div class="anchor-label">P50 &bull; Expected Median</div>
+                  <div class="anchor-value" id="ticket-p50-num">26.4 min</div>
+                  <p class="anchor-caption">Center of the calibrated distribution. Most probable destination arrival delay.</p>
+                </div>
+
+                <!-- P90 Anchor (Upper Bound) -->
+                <div class="anchor-card upper-bound">
+                  <div class="anchor-label">P90 &bull; Conservative Bound</div>
+                  <div class="anchor-value amber" id="ticket-p90-num">59.9 min</div>
+                  <p class="anchor-caption">Downside risk under section congestion. 90% probability of arriving by this minute.</p>
+                </div>
+
+              </div>
+
+              <!-- Calibrated Interval Track Bar -->
+              <div class="interval-section">
+                <div class="interval-header-row">
+                  <span class="interval-tag-label">CALIBRATED 80% ARRIVAL WINDOW (P10 &mdash; P90)</span>
+                  <span class="interval-subinfo">
+                    Interval Span: <strong id="ticket-span-width" style="color:var(--primary);">59.9 min</strong>
+                    &bull; Readout: <strong id="ticket-window">0 / 60 min</strong>
+                  </span>
+                </div>
+
+                <!-- Horizontal Bar -->
+                <div class="interval-bar-wrap" title="Calibrated P10 to P90 uncertainty interval">
+                  <div class="interval-bar-fill" id="pax-bar-fill" style="left:15%; width:55%;"></div>
+                  <div class="interval-bar-p50" id="pax-bar-p50" style="left:40%;" title="P50 Expected Median"></div>
+                </div>
+
+                <div class="interval-ticks-legend">
+                  <span>P10 (Earliest Bound)</span>
+                  <span style="font-weight:600; color:var(--primary);">P50 (Median Anchor)</span>
+                  <span>P90 (Conservative Planning Bound)</span>
+                </div>
+              </div>
+
+              <!-- Ticket Footer Strip -->
+              <div class="ticket-footer-strip">
+                <div class="ticket-meta-left">
+                  <div id="ticket-trend" class="trend-badge stable">TREND: STABLE</div>
+                  <p id="ticket-p50" style="font-family:var(--mono); font-size:0.75rem; color:var(--primary); margin:0; font-weight:600;">P50: 26.4 min</p>
+                  <span style="font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
+                    Sync Cadence: <strong id="ticket-next-sync" style="color:var(--primary);">Every 30 min</strong>
+                  </span>
+                </div>
+                <p id="ticket-provenance" class="ticket-provenance-text">Source: historical snapshot &bull; PREDICTION ACTIVE</p>
+              </div>
+
+            </div>
+          </article>
+        </section>
+
+        <!-- ── "SHOULD I LEAVE NOW?" DECISION INSTRUMENT ── -->
+        <section class="leave-calc-panel" aria-label="Connection Calculator">
+          <h2 class="calc-title">Should I leave now? &mdash; Connection Advisory</h2>
+          <p class="calc-subtitle">
+            RippleETA evaluates your travel or connection margin strictly against the calibrated <strong>P90 upper bound</strong>, ensuring you never miss a departure due to optimistic speculation.
+          </p>
+
+          <div class="calc-controls-row">
+            <div class="calc-input-wrap">
+              <label for="leave-deadline-input">MY TRAVEL TIME / MARGIN (MIN):</label>
+              <input type="number" id="leave-deadline-input" class="calc-input-num" value="45" min="5" max="300" step="5" aria-label="Travel margin in minutes">
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span style="font-family:var(--mono); font-size:0.72rem; color:var(--muted);">PRESETS:</span>
+              <button type="button" class="quick-preset-btn" data-min="30">30m</button>
+              <button type="button" class="quick-preset-btn" data-min="45">45m</button>
+              <button type="button" class="quick-preset-btn" data-min="60">60m</button>
+              <button type="button" class="quick-preset-btn" data-min="90">90m</button>
+              <button type="button" class="quick-preset-btn" data-min="120">120m</button>
+            </div>
+
+            <button id="leave-calc-btn" class="btn-evaluate" type="button">RE-EVALUATE</button>
+          </div>
+
+          <!-- Dynamic Output Banner -->
+          <div id="leave-now-result" class="ticket-flag safe">
+            <div class="flag-status-icon">&#9679;</div>
+            <div class="flag-text-content">
+              <span id="leave-now-flag" class="flag-badge-text">SAFE TO LEAVE</span>
+              <span id="leave-now-detail" class="flag-detail-text">Worst-case P90 arrival is within your connection window.</span>
+              
+              <div class="calc-breakdown-row">
+                <span>YOUR MARGIN: <strong id="calc-user-margin">45 min</strong></span>
+                <span>P90 WORST-CASE DELAY: <strong id="calc-p90-bound">+59.9 min</strong></span>
+                <span>SAFETY MARGIN / DEFICIT: <strong id="calc-net-margin">+15 min (Protected)</strong></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── STATION PROGRESSION TIMELINE ── -->
+        <section class="timeline-container">
+          <h2 class="timeline-title">Corridor Journey Progression</h2>
+          <p class="timeline-desc">
+            Physical checkpoint progression from origin to destination across the Northern Railway main line.
+          </p>
+
+          <ul class="timeline-list" id="pax-historical-timeline">
+            <li class="timeline-item is-arrived">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-station-header">
+                  <span class="timeline-station">NDLS &mdash; New Delhi</span>
+                  <span class="timeline-tag departed">DEPARTED</span>
+                </div>
+                <p class="timeline-delay">+0.0 min delay &bull; Origin Terminal</p>
+              </div>
+            </li>
+            <li class="timeline-item is-arrived">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-station-header">
+                  <span class="timeline-station">CNB &mdash; Kanpur Central</span>
+                  <span class="timeline-tag departed">DEPARTED</span>
+                </div>
+                <p class="timeline-delay">+10.6 min delay &bull; Checkpoint Recorded</p>
+              </div>
+            </li>
+            <li class="timeline-item is-current">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-station-header">
+                  <span class="timeline-station">PRYJ &mdash; Prayagraj Jn</span>
+                  <span class="timeline-tag en-route">EN ROUTE</span>
+                </div>
+                <p class="timeline-delay">+26.4 min predicted P50 delay &bull; Destination Approach</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <!-- ── FOOTER & AUDIT LEDGER ── -->
+        <footer class="pax-footer">
+          <div>
+            <strong>RippleETA Passenger Portal</strong> &bull; Live Arrival Intelligence &bull; Northern Railway
+          </div>
+          <div class="pax-footer-links">
+            <a href="index.html">&larr; Portal Home</a>
+            <a href="/" target="_blank">3D Rail Experience &nearr;</a>
+          </div>
+        </footer>
+
+      </div>
     </main>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>

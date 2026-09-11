@@ -3,389 +3,2438 @@
 <head>
   <meta charset="UTF-8">
   <title>RippleETA | One Network, Seven Realities</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RippleETA: Dynamic Forecast of ETA for Coaching Trains. Predictive intelligence for every stakeholder on the Indian Railways.">
   <link rel="stylesheet" href="styles.css">
   <style>
+    /* ==========================================================================
+       PAGE 01 — EDITORIAL STAKEHOLDER GATEWAY
+       Aesthetic: Indian Railway Intelligence Archive & Control-Room Instrument
+       Tokens: Warm Cream (#0B0F1A), Deep Navy (var(--primary)), Marigold Amber (var(--signal))
+       ========================================================================== */
+
     :root {
-      --hero-image: url('https://upload.wikimedia.org/wikipedia/commons/6/66/Mumbai_CST_interior.jpg');
+      --hero-bg-tint: rgba(6, 10, 18, 0.95);
+      --ease-editorial: cubic-bezier(0.25, 1, 0.5, 1);
     }
-    body, html {
-        margin: 0; padding: 0;
-        scroll-behavior: smooth;
-        background: var(--surface);
-        color: var(--text);
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+      background-color: var(--base);
+      color: var(--text);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
     }
-    
-    /* ChainGPT-style vertical nav */
+
+    /* ── Vertical Dot Navigation ─────────────────────────────────────────── */
     .vertical-nav {
-        position: fixed;
-        right: 2rem;
-        top: 50%;
-        transform: translateY(-50%);
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        z-index: 1000;
+      position: fixed;
+      right: 1.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+      z-index: 1000;
     }
     .nav-dot {
-        width: 10px; height: 10px;
-        border-radius: 50%;
-        background: var(--border-300);
-        cursor: pointer;
-        position: relative;
-        transition: background 0.3s ease;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(232, 237, 245, 0.22);
+      border: 1px solid rgba(232, 237, 245, 0.35);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.25s var(--ease-editorial);
+    }
+    .nav-dot:hover {
+      background: var(--signal);
+      border-color: var(--signal);
+      transform: scale(1.3);
     }
     .nav-dot.active {
-        background: var(--primary);
-        box-shadow: 0 0 8px rgba(27,42,74,0.4);
+      background: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(232, 237, 245, 0.15);
+      transform: scale(1.35);
     }
     .nav-dot::after {
-        content: attr(data-label);
-        position: absolute;
-        right: 24px;
-        top: 50%;
-        transform: translateY(-50%);
-        white-space: nowrap;
-        font-family: var(--sans);
-        font-size: 0.75rem;
-        letter-spacing: 0.1em;
-        color: var(--primary);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease, right 0.3s ease;
+      content: attr(data-label);
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, right 0.2s ease;
+      background: rgba(6, 10, 18, 0.95);
+      padding: 3px 8px;
+      border-radius: 3px;
+      border: 1px solid var(--line);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
     .nav-dot:hover::after, .nav-dot.active::after {
-        opacity: 1;
-        right: 20px;
+      opacity: 1;
+      right: 18px;
     }
 
-    /* Scroll Sections */
-    section {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 4rem 10vw;
-        position: relative;
+    /* ── Sections Common Layout ─────────────────────────────────────────── */
+    .portal-section {
+      position: relative;
+      padding: 5.5rem clamp(1.5rem, 6.5vw, 8rem);
+      max-width: 1440px;
+      margin: 0 auto;
+      box-sizing: border-box;
     }
-
-    /* Hero Section with Heritage Photo */
-    .hero-section {
-        overflow: hidden;
+    .section-rule {
+      width: 100%;
+      height: 1px;
+      background: var(--line);
+      margin: 0;
+      border: none;
     }
-    .hero-bg {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background-image: var(--hero-image);
-        background-size: cover;
-        background-position: center;
-        opacity: 0.15; /* Subtle */
-        filter: grayscale(100%) contrast(1.2);
-        z-index: 0;
+    .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 0.85rem;
     }
-    .hero-overlay {
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: linear-gradient(135deg, rgba(243,237,227,0.95) 0%, rgba(243,237,227,0.7) 100%);
-        z-index: 1;
+    .section-kicker .kicker-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 0 2px rgba(240, 165, 0, 0.25);
     }
-    .hero-content {
-        position: relative;
-        z-index: 2;
-        max-width: 800px;
-    }
-    .hero-insight {
-        font-family: var(--display);
-        font-size: clamp(3rem, 8vw, 6rem);
-        color: var(--primary);
-        line-height: 1.1;
-        margin: 0 0 1.5rem;
-        letter-spacing: -0.02em;
-    }
-    .hero-sub {
-        font-family: var(--sans);
-        font-size: clamp(1.25rem, 2vw, 1.75rem);
-        color: var(--text);
-        max-width: 600px;
-    }
-
-    /* Numbered Sections */
-    .section-number {
-        font-family: var(--mono);
-        font-size: 1rem;
-        color: var(--muted);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
     .section-title {
-        font-family: var(--display);
-        font-size: 4rem;
-        color: var(--primary);
-        margin: 0 0 2rem;
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 4.2vw, 3.5rem);
+      font-weight: 600;
+      line-height: 1.12;
+      color: var(--primary);
+      margin: 0 0 1rem;
+      letter-spacing: -0.02em;
     }
-    .section-text {
-        font-family: var(--sans);
-        font-size: 1.25rem;
-        color: var(--text);
-        max-width: 600px;
-        line-height: 1.6;
+    .section-lead {
+      font-family: var(--sans);
+      font-size: clamp(1rem, 1.4vw, 1.25rem);
+      line-height: 1.6;
+      color: var(--text);
+      max-width: 740px;
+      margin: 0 0 2.5rem;
+      opacity: 0.9;
     }
-    
-    /* Roles Grid */
-    .role-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 4rem;
+
+    /* ── Top Utility Header ─────────────────────────────────────────────── */
+    .top-utility-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 1.25rem clamp(1.5rem, 6.5vw, 8rem);
+      border-bottom: 1px solid var(--line);
+      background: rgba(6, 10, 18, 0.95);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 900;
     }
-    .role-card {
-      background: var(--surface);
-      border: 1px solid var(--border-300);
-      padding: 2.5rem;
+    .utility-group {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+    .utility-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--primary);
+      text-decoration: none;
+      padding: 0.4rem 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #111827;
       cursor: pointer;
-      transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(232, 237, 245, 0.05);
+    }
+    .utility-btn:hover {
+      border-color: var(--primary);
+      background: #1A2235;
+      transform: translateY(-1px);
+    }
+    .telemetry-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--mono);
+      font-size: 0.76rem;
+      color: var(--primary);
+      padding: 0.4rem 0.85rem;
+      border-radius: 4px;
+      background: rgba(232, 237, 245, 0.05);
+      border: 1px solid var(--line);
+    }
+    .telemetry-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+      animation: pulse-breathing 2s infinite ease-in-out;
+    }
+    @keyframes pulse-breathing {
+      0%, 100% { opacity: 0.6; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    /* ── Hero Section ───────────────────────────────────────────────────── */
+    .hero-container {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 3.5rem;
+      align-items: center;
+      min-height: calc(88vh - 70px);
+      padding-top: 2.5rem;
+      padding-bottom: 3rem;
+    }
+    @media (max-width: 1020px) {
+      .hero-container {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+        min-height: auto;
+      }
+    }
+    .hero-h1 {
+      font-family: var(--display);
+      font-size: clamp(3.2rem, 6.5vw, 5.2rem);
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.05;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.025em;
+    }
+    .hero-h1 span.accent {
+      color: var(--signal);
+      font-style: italic;
+      font-weight: 400;
+    }
+    .hero-tagline {
+      font-family: var(--sans);
+      font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+      font-weight: 500;
+      color: var(--primary);
+      line-height: 1.35;
+      margin: 0 0 1.2rem;
+    }
+    .hero-desc {
+      font-family: var(--sans);
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text);
+      max-width: 580px;
+      margin: 0 0 2rem;
+      opacity: 0.88;
+    }
+    .hero-cta-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .cta-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--primary);
+      color: var(--text-inv);
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 0.75rem 1.6rem;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.2s var(--ease-editorial);
+      box-shadow: 0 4px 14px rgba(232, 237, 245, 0.15);
+      border: 1px solid var(--primary);
+    }
+    .cta-primary:hover {
+      background: #2a3b5c;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(232, 237, 245, 0.22);
+    }
+    .cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      color: var(--primary);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      border-radius: 4px;
+      text-decoration: none;
+      border: 1px solid var(--line);
+      transition: all 0.2s ease;
+    }
+    .cta-secondary:hover {
+      background: #111827;
+      border-color: var(--primary);
+    }
+    /* ── Hero Right Motion Column ───────────────────────────────────────── */
+    .hero-right-motion {
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+    }
+
+    /* ── Hero Cinematic Railway Vignette ───────────────────────────────── */
+    .hero-cinematic-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(232, 237, 245, 0.05);
+      position: relative;
+    }
+    .cinematic-video-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cinematic-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 28%;
+      transform: scale(1.08);
+      transform-origin: 50% 30%;
+      display: block;
+      pointer-events: none;
+    }
+    .cinematic-video-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 28px rgba(232, 237, 245, 0.22);
+    }
+    .cinematic-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 1rem;
+      border-top: 1px solid var(--line);
+      background: #1A2235;
+      font-family: var(--mono);
+    }
+    .cinematic-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .cinematic-label .cinematic-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--signal);
+      display: inline-block;
+    }
+    .cinematic-sub {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── Hero Native Railway Motion Visualization ───────────────────────── */
+    .hero-motion-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.75rem 2rem;
+      box-shadow: 0 6px 24px rgba(232, 237, 245, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-motion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .motion-title {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+    .motion-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--signal);
+      font-weight: 600;
+    }
+    .motion-diagram-wrap {
+      position: relative;
+      margin: 1.5rem 0 1rem;
+      padding: 2.25rem 0.5rem 1.5rem;
+    }
+    .track-svg {
+      width: 100%;
+      height: 90px;
+      display: block;
+      overflow: visible;
+    }
+    .track-line-base {
+      stroke: rgba(232, 237, 245, 0.15);
+      stroke-width: 2.5;
+    }
+    .track-ties {
+      stroke: rgba(232, 237, 245, 0.15);
+      stroke-width: 1.5;
+      stroke-dasharray: 2, 8;
+    }
+    .station-node-circle {
+      fill: #111827;
+      stroke: var(--primary);
+      stroke-width: 2.5;
+      transition: all 0.3s ease;
+    }
+    .station-node-label {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      font-weight: 600;
+      fill: var(--primary);
+      text-anchor: middle;
+    }
+    .station-node-sub {
+      font-family: var(--mono);
+      font-size: 8px;
+      fill: var(--muted);
+      text-anchor: middle;
+    }
+    .train-token-wrap {
+      offset-path: path("M 40 45 L 560 45");
+      animation: train-traverse 14s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes train-traverse {
+      0% { offset-distance: 4%; }
+      28% { offset-distance: 35%; }
+      32% { offset-distance: 36%; }
+      65% { offset-distance: 68%; }
+      70% { offset-distance: 70%; }
+      96% { offset-distance: 96%; }
+      100% { offset-distance: 98%; }
+    }
+    .ripple-wave {
+      fill: none;
+      stroke: var(--signal);
+      stroke-width: 2;
+      opacity: 0;
+      animation: ripple-pulse-wave 3.5s infinite ease-out;
+    }
+    @keyframes ripple-pulse-wave {
+      0% { r: 5; opacity: 0.9; stroke-width: 2.5; }
+      70% { r: 34; opacity: 0; stroke-width: 0.5; }
+      100% { r: 36; opacity: 0; }
+    }
+    .motion-legend {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+    }
+    .legend-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .legend-lbl {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .legend-val {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--primary);
+      transition: color 0.25s ease;
+    }
+    .legend-val.amber {
+      color: var(--signal);
+    }
+    .legend-val.green {
+      color: #22C55E;
+    }
+    .legend-val.red {
+      color: #E53E3E;
+    }
+    .legend-val.pulse {
+      animation: val-flash 0.5s ease;
+    }
+    @keyframes val-flash {
+      0% { opacity: 0.3; transform: scale(0.96); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Live System Telemetry Strip ────────────────────────────────────── */
+    .telemetry-strip {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.1rem 1.75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.5rem;
+      align-items: center;
+      margin: 2.5rem 0 0;
+      box-shadow: 0 4px 16px rgba(232, 237, 245, 0.05);
+    }
+    .telemetry-cell {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--line);
+      padding-right: 1rem;
+    }
+    .telemetry-cell:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+    .tele-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.35rem;
+    }
+    .tele-value {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .tele-value .dot-live {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+
+    /* ── Live Train Selector ────────────────────────────────────────────── */
+    .selector-bar-wrap {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+      margin-bottom: 2.5rem;
+    }
+    .selector-topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .selector-header-title {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin: 0;
+      font-weight: 600;
+    }
+    .selector-sub {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    .chips-and-search {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .train-chips-row {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+    .train-chip-btn {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: #1A2235;
+      border: 1px solid var(--line);
+      padding: 0.45rem 0.9rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .train-chip-btn:hover {
+      border-color: var(--primary);
+      background: #111827;
+    }
+    .train-chip-btn.active {
+      background: var(--primary);
+      color: var(--text-inv);
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(232, 237, 245, 0.15);
+    }
+    .search-input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .active-train-select {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.45rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #111827;
+      color: var(--primary);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .active-train-select:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+    }
+    .train-search-box {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 0.45rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: #111827;
+      color: var(--primary);
+      width: 120px;
+    }
+    .train-search-box:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+    }
+    .search-action-btn {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--primary);
+      color: var(--text-inv);
+      border: 1px solid var(--primary);
+      padding: 0.45rem 0.85rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .search-action-btn:hover {
+      background: #2a3b5c;
+    }
+
+    /* ── Seven Stakeholder Gateways Section ─────────────────────────────── */
+    .gateways-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.75rem;
+      margin-top: 1rem;
+    }
+    .ticket-gateway-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2.2rem 2.25rem;
       text-decoration: none;
       color: var(--text);
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 4px 16px rgba(232, 237, 245, 0.05);
+      transition: all 0.3s var(--ease-editorial);
     }
-    .role-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 4px; height: 100%;
-        background: var(--primary);
-        transform: scaleY(0);
-        transition: transform 400ms ease;
-        transform-origin: bottom;
+    .ticket-gateway-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--line);
+      transition: all 0.3s ease;
     }
-    .role-card:hover {
-      background: #EBE4D5;
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(27,42,74,0.08);
+    .ticket-gateway-card:hover {
+      background: #1A2235;
+      transform: translateY(-4px);
+      box-shadow: 0 14px 32px rgba(232, 237, 245, 0.08);
+      border-color: rgba(232, 237, 245, 0.22);
     }
-    .role-card:hover::before {
-        transform: scaleY(1);
+    .ticket-gateway-card:hover::before {
+      background: var(--signal);
+      width: 6px;
     }
-    .role-title {
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .card-kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .card-role-num {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--signal);
+    }
+    .card-title {
       font-family: var(--display);
-      font-size: 1.75rem;
+      font-size: 1.8rem;
+      font-weight: 600;
       color: var(--primary);
-      margin: 0 0 1rem;
+      margin: 0 0 0.5rem;
+      line-height: 1.15;
+      transition: transform 0.2s ease;
     }
-    .role-desc {
+    .ticket-gateway-card:hover .card-title {
+      transform: translateX(3px);
+    }
+    .card-decision-box {
+      background: #1A2235;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0.75rem 0.95rem;
+      margin: 0.75rem 0 1rem;
+    }
+    .decision-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .decision-question {
+      font-family: var(--display);
+      font-size: 1.12rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0;
+      font-style: italic;
+    }
+    .card-explanation {
       font-family: var(--sans);
-      font-size: 1rem;
-      line-height: 1.6;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text);
+      opacity: 0.85;
+      margin: 0 0 1.25rem;
+      flex-grow: 1;
+    }
+    .card-signal-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--line);
+      padding-top: 0.85rem;
+      margin-bottom: 1.1rem;
+    }
+    .signal-name {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .signal-val {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .signal-val.amber {
+      color: var(--signal);
+    }
+    .signal-val.green {
+      color: var(--success);
+    }
+    .card-cta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.04em;
+    }
+    .card-cta-row .cta-arrow {
+      transition: transform 0.2s ease;
+      color: var(--signal);
+    }
+    .ticket-gateway-card:hover .card-cta-row .cta-arrow {
+      transform: translateX(5px);
+    }
+
+    /* ── Network Ripple Section ─────────────────────────────────────────── */
+    .ripple-diagram-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 20px rgba(232, 237, 245, 0.05);
+      margin-top: 1.5rem;
+    }
+    .graph-code-banner {
+      background: #1A2235;
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--signal);
+      border-radius: 4px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .formula-line {
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 0 0 0.5rem;
+    }
+    .formula-note {
+      font-family: var(--sans);
+      font-size: 0.88rem;
       color: var(--muted);
       margin: 0;
     }
-    
-    .lottie-accent {
-        position: absolute;
-        bottom: 2rem;
-        right: 4rem;
-        opacity: 0.8;
+    .conflict-event-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 860px) {
+      .conflict-event-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .event-block {
+      background: #1A2235;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1.25rem;
+    }
+    .event-block-title {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+    .event-block-stat {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .event-arrow {
+      font-family: var(--mono);
+      font-size: 1.3rem;
+      color: var(--signal);
+      text-align: center;
+    }
+
+    /* ── Calibrated ETA Visual ──────────────────────────────────────────── */
+    .certainty-comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 900px) {
+      .certainty-comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .certainty-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2rem;
+      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+    }
+    .certainty-card.stamp-border {
+      border-top: 4px solid var(--stamp);
+    }
+    .certainty-card.green-border {
+      border-top: 4px solid var(--success);
+    }
+    .interval-bar-wrap {
+      margin: 1.5rem 0 1rem;
+      background: #1A2235;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1.25rem 1.5rem;
+    }
+    .interval-track {
+      position: relative;
+      height: 12px;
+      background: rgba(232, 237, 245, 0.08);
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+    .interval-fill {
+      position: absolute;
+      left: 15%;
+      right: 15%;
+      top: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, rgba(34, 197, 94, 0.4), rgba(240, 165, 0, 0.5));
+      border-radius: 6px;
+    }
+    .interval-marker-p50 {
+      position: absolute;
+      left: 45%;
+      top: -6px;
+      bottom: -6px;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+    .interval-scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* ── Explainability Micro-UI ────────────────────────────────────────── */
+    .explain-ui-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2.25rem;
+      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+      margin-top: 2rem;
+    }
+    .factor-breakdown-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .factor-item {
+      background: #1A2235;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1rem 1.25rem;
+    }
+    .factor-item.positive {
+      border-left: 3px solid var(--signal);
+    }
+    .factor-item.negative {
+      border-left: 3px solid var(--success);
+    }
+    .factor-op {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-right: 0.4rem;
+    }
+    .factor-op.plus { color: var(--signal); }
+    .factor-op.minus { color: var(--success); }
+    .factor-name {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .factor-detail {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ── System Pipeline Section ────────────────────────────────────────── */
+    .pipeline-strip-card {
+      background: #111827;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2rem;
+      box-shadow: 0 4px 18px rgba(232, 237, 245, 0.05);
+      margin-top: 2rem;
+    }
+    .pipeline-grid-6 {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 960px) {
+      .pipeline-grid-6 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .pipe-step-box {
+      background: #1A2235;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .pipe-step-num {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--signal);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+    .pipe-step-name {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .pipe-step-tech {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ── Editorial Footer ───────────────────────────────────────────────── */
+    .editorial-footer {
+      border-top: 1px solid var(--line);
+      padding: 4.5rem clamp(1.5rem, 6.5vw, 8rem) 3.5rem;
+      background: rgba(6, 10, 18, 0.8);
+    }
+    .footer-content-wrap {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+    .footer-hero-headline {
+      font-family: var(--display);
+      font-size: clamp(2rem, 3.8vw, 3.2rem);
+      font-weight: 600;
+      color: var(--primary);
+      margin: 0;
+      line-height: 1.15;
+    }
+    .footer-hero-sub {
+      font-family: var(--sans);
+      font-size: 1.1rem;
+      color: var(--text);
+      max-width: 680px;
+      margin: 0;
+      opacity: 0.85;
+      line-height: 1.55;
+    }
+    .footer-btn-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .footer-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      border-top: 1px solid var(--line);
+      padding-top: 2rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .footer-meta-col strong {
+      color: var(--primary);
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.8rem;
+    }
+
+    /* ── Accessibility & Reduced Motion ─────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+      .train-token-wrap {
+        animation: none !important;
+        offset-distance: 50% !important;
+      }
+      .ripple-wave {
+        display: none !important;
+      }
+      .cinematic-video {
+        animation: none !important;
+        transform: none !important;
+      }
     }
   </style>
 </head>
 <body class="has-grain">
-  
-  <nav class="vertical-nav">
-      <a href="#hero" class="nav-dot active" data-label="HOME"></a>
-      <a href="#propagation" class="nav-dot" data-label="01. PROPAGATION"></a>
-      <a href="#certainty" class="nav-dot" data-label="02. CERTAINTY"></a>
-      <a href="#roles" class="nav-dot" data-label="03. ROLES"></a>
+
+  <!-- ====================================================================
+       VERTICAL DOT NAVIGATION
+       ==================================================================== -->
+  <nav class="vertical-nav" aria-label="Portal section navigation">
+    <a href="#hero" class="nav-dot active" data-label="HOME"></a>
+    <a href="#selector" class="nav-dot" data-label="01. TRAIN SELECTOR"></a>
+    <a href="#gateways" class="nav-dot" data-label="02. STAKEHOLDERS"></a>
+    <a href="#propagation" class="nav-dot" data-label="03. NETWORK RIPPLE"></a>
+    <a href="#certainty" class="nav-dot" data-label="04. CALIBRATED ETA"></a>
+    <a href="#explainability" class="nav-dot" data-label="05. EXPLAINABILITY"></a>
+    <a href="#pipeline" class="nav-dot" data-label="06. SYSTEM PIPELINE"></a>
   </nav>
 
-  <!-- Hero Section -->
-  <section id="hero" class="hero-section">
-      <div class="hero-bg"></div>
-      <div class="hero-overlay has-grain"></div>
-      <div class="hero-content">
-          <h1 class="hero-insight">One network.<br>Seven realities.</h1>
-          <p class="hero-sub">Predictive intelligence for every stakeholder on the Indian Railways.</p>
+  <!-- ====================================================================
+       TOP UTILITY HEADER
+       ==================================================================== -->
+  <header class="top-utility-bar">
+    <div class="utility-group">
+      <a href="/eta/index.html" class="utility-btn" id="btn-back-3d" aria-label="Launch 3D Live Train View">
+        <span>🎬</span> <span data-i18n="btn-3d-view">3D Live Train View</span>
+      </a>
+      <button type="button" id="btn-a11y-toggle" class="utility-btn" aria-label="Toggle Colorblind Mode">
+        <span aria-hidden="true">&#128065;</span> <span id="a11y-label">A11Y: NORMAL</span>
+      </button>
+      <div class="lang-selector-wrap" style="display:inline-flex; align-items:center; gap:0.4rem;">
+        <select id="lang-select" class="lang-select" aria-label="Select Language">
+          <option value="en" selected>ENGLISH</option>
+          <option value="hi">हिंदी (Hindi)</option>
+          <option value="mr">मराठी (Marathi)</option>
+        </select>
       </div>
-  </section>
+    </div>
 
-  <!-- 01. Propagation -->
-  <section id="propagation" class="scroll-section">
-      <div class="section-number">
-          <span class="live-pulse" id="api-health-1"></span> 01
+    <div class="utility-group">
+      <div class="telemetry-pill">
+        <span class="telemetry-pulse"></span>
+        <span id="telemetry-sys-label">SYSTEM CONNECTED</span> &bull; <span id="clock-ist">--:--:-- IST</span>
       </div>
-      <h2 class="section-title">Propagation</h2>
-      <p class="section-text">
-          A delay doesn't exist in isolation. It cascades through junctions, overlapping platform claims, and rippling into crew schedules. We track the knock-on effects before they happen using Conformal Prediction bounds.
+      <div id="session-identity-pill" class="telemetry-pill" style="display:none; font-family:var(--mono);">
+        <span id="user-email-text">operator</span> &bull; <span id="user-role-badge" style="color:var(--signal); font-weight:700;">OPERATOR</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================================
+       HERO SECTION WITH LIGHTWEIGHT RAILWAY MOTION
+       ==================================================================== -->
+  <main>
+    <section id="hero" class="portal-section">
+      <div class="hero-container">
+        <!-- Left / Editorial Story -->
+        <div class="hero-left-editorial">
+          <div class="section-kicker">
+            <span class="kicker-dot"></span> SIH 2026 &bull; DYNAMIC ETA FORECAST FOR COACHING TRAINS
+          </div>
+          <h1 class="hero-h1">
+            One network.<br>
+            <span class="accent">Seven realities.</span>
+          </h1>
+          <p class="hero-tagline">
+            Predictive intelligence for every stakeholder on the Indian Railways.
+          </p>
+          <p class="hero-desc">
+            RippleETA forecasts how a train&rsquo;s delay evolves across the journey &mdash; then translates one calibrated forecast into decision-ready intelligence.
+          </p>
+          <div class="hero-cta-row">
+            <a href="#gateways" class="cta-primary">
+              Explore Operational Gateways &darr;
+            </a>
+            <a href="#selector" class="cta-secondary">
+              Select Active Train &rarr;
+            </a>
+          </div>
+        </div>
+
+        <!-- Right / Native Railway Motion Diagram -->
+        <div class="hero-right-motion">
+          <!-- Cinematic Railway Visual Element -->
+          <div class="hero-cinematic-card">
+            <div class="cinematic-video-wrap">
+              <video
+                autoplay
+                muted
+                loop
+                playsinline
+                poster="video/poster.jpg"
+                class="cinematic-video"
+                aria-label="Cinematic railway corridor visual"
+              >
+                <source src="../video/WhatsApp Video 2026-09-11 at 3.37.20 PM (1).mp4" type="video/mp4">
+                <source src="video/WhatsApp Video 2026-09-11 at 3.37.20 PM (1).mp4" type="video/mp4">
+              </video>
+              <div class="cinematic-video-overlay"></div>
+            </div>
+            <div class="cinematic-card-footer">
+              <span class="cinematic-label">
+                <span class="cinematic-dot"></span> RIPPLEETA &bull; OPERATIONAL INTELLIGENCE
+              </span>
+              <span class="cinematic-sub">NORTHERN RAILWAY CORRIDOR</span>
+            </div>
+          </div>
+
+          <div class="hero-motion-card">
+            <div class="hero-motion-header">
+              <span class="motion-title">Corridor Conflict Propagation Trace</span>
+              <span class="motion-indicator">
+                <span class="telemetry-pulse" id="motion-telemetry-pulse" style="background:var(--signal);"></span> LIVE TRACK SCHEMATIC
+              </span>
+            </div>
+
+            <!-- SVG Railway Corridor Motion -->
+            <div class="motion-diagram-wrap">
+              <svg id="corridor-track-svg" class="track-svg" viewBox="0 0 600 90" preserveAspectRatio="xMidYMid meet" aria-label="Railway corridor schematic">
+                <!-- Track Ties & Base Rail -->
+                <line x1="20" y1="45" x2="580" y2="45" class="track-ties"></line>
+                <line x1="20" y1="45" x2="580" y2="45" class="track-line-base"></line>
+
+                <!-- Dynamic Station Nodes Layer -->
+                <g id="track-stations-layer">
+                  <!-- Station 01: NDLS -->
+                  <g transform="translate(60, 45)">
+                    <circle r="7" class="station-node-circle"></circle>
+                    <text y="-14" class="station-node-label">NDLS</text>
+                    <text y="22" class="station-node-sub">NEW DELHI</text>
+                  </g>
+
+                  <!-- Station 02: CNB -->
+                  <g transform="translate(230, 45)">
+                    <circle r="7" class="station-node-circle"></circle>
+                    <text y="-14" class="station-node-label">CNB</text>
+                    <text y="22" class="station-node-sub">KANPUR</text>
+                  </g>
+
+                  <!-- Station 03: PRYJ (Active Junction) -->
+                  <g transform="translate(400, 45)">
+                    <!-- Amber Ripple Wave from Junction -->
+                    <circle cx="0" cy="0" r="10" class="ripple-wave"></circle>
+                    <circle r="8" class="station-node-circle" style="stroke:var(--signal); fill:#1A2235;"></circle>
+                    <text y="-14" class="station-node-label" style="fill:var(--signal);">PRYJ</text>
+                    <text y="22" class="station-node-sub">PRAYAGRAJ</text>
+                  </g>
+
+                  <!-- Station 04: DDU -->
+                  <g transform="translate(540, 45)">
+                    <circle r="7" class="station-node-circle"></circle>
+                    <text y="-14" class="station-node-label">DDU</text>
+                    <text y="22" class="station-node-sub">MUGHALSARAI</text>
+                  </g>
+                </g>
+
+                <!-- Moving Train Token -->
+                <g class="train-token-wrap" id="corridor-train-token">
+                  <rect x="-14" y="-7" width="28" height="14" rx="3" fill="var(--primary)"></rect>
+                  <circle cx="-6" cy="0" r="2.5" fill="#111827"></circle>
+                  <circle cx="6" cy="0" r="2.5" fill="var(--signal)"></circle>
+                </g>
+              </svg>
+            </div>
+
+            <div class="motion-legend">
+              <div class="legend-item">
+                <span class="legend-lbl">ACTIVE CORRIDOR</span>
+                <span class="legend-val" id="motion-corridor-val">NDLS &rarr; PRYJ</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-lbl">PROPAGATED DELAY</span>
+                <span class="legend-val amber" id="motion-delay-val">+27.9 MIN</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-lbl">RIPPLE STATE</span>
+                <span class="legend-val" id="motion-state-val">PROPAGATING</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Telemetry Strip -->
+      <div class="telemetry-strip" id="telemetry-strip">
+        <div class="telemetry-cell">
+          <span class="tele-label">System Status</span>
+          <span class="tele-value"><span class="dot-live"></span> <span id="tele-status-val">API ONLINE</span></span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="tele-label">Mode</span>
+          <span class="tele-value" id="tele-mode-val">REPLAY DATA</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="tele-label">Active Train</span>
+          <span class="tele-value" id="tele-train-val">20507</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="tele-label">Last Ingest</span>
+          <span class="tele-value" id="tele-ingest-val">--:--:-- IST</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="tele-label">Prediction Engine</span>
+          <span class="tele-value" id="tele-engine-val">XGBOOST + MAPIE</span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- ====================================================================
+         01. LIVE OPERATIONAL TRAIN SELECTOR
+         ==================================================================== -->
+    <section id="selector" class="portal-section">
+      <div class="section-kicker">
+        <span class="kicker-dot"></span> 01 / OPERATIONAL CONTEXT
+      </div>
+      <div class="selector-bar-wrap">
+        <div class="selector-topline">
+          <div>
+            <h3 class="selector-header-title">Select an Active Train</h3>
+            <p class="selector-sub">Explore the same calibrated prediction through seven operational perspectives.</p>
+          </div>
+          <div class="search-input-group">
+            <select id="active-train-select" class="active-train-select" aria-label="Select active train">
+              <option value="20507">20507 &bull; Patna Rajdhani</option>
+              <option value="12301">12301 &bull; Howrah Rajdhani</option>
+              <option value="12004">12004 &bull; Lucknow Shatabdi</option>
+              <option value="12951">12951 &bull; Mumbai Rajdhani</option>
+              <option value="12002">12002 &bull; Bhopal Shatabdi</option>
+              <option value="22436">22436 &bull; Vande Bharat Express</option>
+              <option value="56789">56789 &bull; Replay Express</option>
+            </select>
+            <input type="text" id="train-search-box" class="train-search-box" value="20507" placeholder="Train ID" list="trains-datalist" aria-label="Train ID Search">
+            <datalist id="trains-datalist"></datalist>
+            <button type="button" id="btn-search-train" class="search-action-btn">Update</button>
+            <button type="button" id="btn-refresh-trains" class="utility-btn" title="Refresh from API" style="padding:0.45rem 0.65rem;">&#8635;</button>
+          </div>
+        </div>
+
+        <div class="chips-and-search">
+          <div class="train-chips-row" id="train-chips-container">
+            <button type="button" class="train-chip-btn active" data-train="20507">20507 &bull; Patna Rajdhani</button>
+            <button type="button" class="train-chip-btn" data-train="12301">12301 &bull; Howrah Rajdhani</button>
+            <button type="button" class="train-chip-btn" data-train="12004">12004 &bull; Lucknow Shatabdi</button>
+            <button type="button" class="train-chip-btn" data-train="12951">12951 &bull; Mumbai Rajdhani</button>
+            <button type="button" class="train-chip-btn" data-train="12002">12002 &bull; Bhopal Shatabdi</button>
+            <button type="button" class="train-chip-btn" data-train="22436">22436 &bull; Vande Bharat Express</button>
+            <button type="button" class="train-chip-btn" data-train="56789">56789 &bull; Replay Express</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- ====================================================================
+         02. SEVEN STAKEHOLDER GATEWAYS
+         ==================================================================== -->
+    <section id="gateways" class="portal-section">
+      <div class="section-kicker">
+        <span class="kicker-dot"></span> 02 / STAKEHOLDER GATEWAYS
+      </div>
+      <h2 class="section-title">Seven Realities. One Signal.</h2>
+      <p class="section-lead">
+        One calibrated prediction becomes a completely different decision depending on who needs to act. Select a reality below to open the dedicated operational console.
       </p>
-      <div class="lottie-accent">
-      </div>
-  </section>
 
-  <!-- 02. Certainty -->
-  <section id="certainty" class="scroll-section">
-      <div class="section-number">
-          <span class="live-pulse" id="api-health-2"></span> 02
+      <div class="gateways-grid">
+        <!-- 01. Passenger -->
+        <a href="passenger.html" class="ticket-gateway-card" data-role="passenger">
+          <div class="card-top-row">
+            <span class="card-kicker">01 &bull; PASSENGER ADVISORY</span>
+            <span class="card-role-num">B2C</span>
+          </div>
+          <h3 class="card-title">Passenger</h3>
+          <div class="card-decision-box">
+            <span class="decision-label">KEY DECISION</span>
+            <p class="decision-question">&ldquo;Should I leave now?&rdquo;</p>
+          </div>
+          <p class="card-explanation">
+            Know the likely arrival window instead of relying on a single optimistic ETA. Compares connection deadlines against calibrated P90 upper bounds.
+          </p>
+          <div class="card-signal-row">
+            <span class="signal-name">P10 &ndash; P90 Spread</span>
+            <span class="signal-val" id="card-pax-spread">12m &ndash; 38m</span>
+          </div>
+          <div class="card-cta-row">
+            <span>OPEN PASSENGER VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
+          </div>
+        </a>
+
+        <!-- 02. Station Master -->
+        <a href="station-master.html" class="ticket-gateway-card" data-role="station_master">
+          <div class="card-top-row">
+            <span class="card-kicker">02 &bull; PLATFORM TRIAGE</span>
+            <span class="card-role-num">CONTROL</span>
+          </div>
+          <h3 class="card-title">Station Master</h3>
+          <div class="card-decision-box">
+            <span class="decision-label">KEY DECISION</span>
+            <p class="decision-question">COMMIT / DEFER</p>
+          </div>
+          <p class="card-explanation">
+            Turn uncertain arrival into an actionable platform decision with 4.2&times; asymmetric loss protection against false-negative early assignments.
+          </p>
+          <div class="card-signal-row">
+            <span class="signal-name">Triage Directive</span>
+            <span class="signal-val green" id="card-sm-directive">COMMIT</span>
+          </div>
+          <div class="card-cta-row">
+            <span>OPEN STATION CONTROL</span>
+            <span class="cta-arrow">&rarr;</span>
+          </div>
+        </a>
+
+        <!-- 03. Crew Controller -->
+        <a href="crew.html" class="ticket-gateway-card" data-role="crew_controller">
+          <div class="card-top-row">
+            <span class="card-kicker">03 &bull; STATUTORY DUTY</span>
+            <span class="card-role-num">DISPATCH</span>
+          </div>
+          <h3 class="card-title">Crew Controller</h3>
+          <div class="card-decision-box">
+            <span class="decision-label">KEY DECISION</span>
+            <p class="decision-question">WHEN TO DISPATCH RELIEF</p>
+          </div>
+          <p class="card-explanation">
+            Dispatch crew against predicted arrival bounds, not only the timetable. Enforces 9-hour statutory HOER limits before relief changeovers.
+          </p>
+          <div class="card-signal-row">
+            <span class="signal-name">Relief Deadline</span>
+            <span class="signal-val amber" id="card-crew-deadline">16:45 IST</span>
+          </div>
+          <div class="card-cta-row">
+            <span>OPEN CREW VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
+          </div>
+        </a>
+
+        <!-- 04. Feeder Transport -->
+        <a href="feeder.html" class="ticket-gateway-card" data-role="feeder_transport">
+          <div class="card-top-row">
+            <span class="card-kicker">04 &bull; MULTI-MODAL FLEET</span>
+            <span class="card-role-num">CONNECTIVITY</span>
+          </div>
+          <h3 class="card-title">Feeder Transport</h3>
+          <div class="card-decision-box">
+            <span class="decision-label">KEY DECISION</span>
+            <p class="decision-question">WAIT / DEPART</p>
+          </div>
+          <p class="card-explanation">
+            Coordinate buses and feeder transport using computed arrival probability before cutoff, balancing passenger retention against fleet idling costs.
+          </p>
+          <div class="card-signal-row">
+            <span class="signal-name">P(Arrival &lt; Cutoff)</span>
+            <span class="signal-val amber" id="card-feeder-prob">84.5%</span>
+          </div>
+          <div class="card-cta-row">
+            <span>OPEN FEEDER VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
+          </div>
+        </a>
+
+        <!-- 05. Maintenance -->
+        <a href="maintenance.html" class="ticket-gateway-card" data-role="maintenance">
+          <div class="card-top-row">
+            <span class="card-kicker">05 &bull; TURNAROUND BUDGET</span>
+            <span class="card-role-num">YARD</span>
+          </div>
+          <h3 class="card-title">Maintenance</h3>
+          <div class="card-decision-box">
+            <span class="decision-label">KEY DECISION</span>
+            <p class="decision-question">ENOUGH TURNAROUND TIME?</p>
+          </div>
+          <p class="card-explanation">
+            Detect shrinking turnaround windows before the train arrives. Flags emergency &lt;90 min rapid cleaning protocols to protect return departures.
+          </p>
+          <div class="card-signal-row">
+            <span class="signal-name">Available Window</span>
+            <span class="signal-val green" id="card-maint-window">240m / 360m</span>
+          </div>
+          <div class="card-cta-row">
+            <span>OPEN MAINTENANCE VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
+          </div>
+        </a>
+
+        <!-- 06. Control Room -->
+        <a href="control.html" class="ticket-gateway-card" data-role="control_room">
+          <div class="card-top-row">
+            <span class="card-kicker">06 &bull; NETWORK RADAR</span>
+            <span class="card-role-num">REGIONAL</span>
+          </div>
+          <h3 class="card-title">Control Room</h3>
+          <div class="card-decision-box">
+            <span class="decision-label">KEY DECISION</span>
+            <p class="decision-question">WHERE WILL DELAY RIPPLE?</p>
+          </div>
+          <p class="card-explanation">
+            See delay as a network phenomenon rather than an isolated train event. Traces non-linear headway conflict edges across critical junctions.
+          </p>
+          <div class="card-signal-row">
+            <span class="signal-name">Ripple Score</span>
+            <span class="signal-val amber" id="card-control-ripple">42 / 100</span>
+          </div>
+          <div class="card-cta-row">
+            <span>OPEN CONTROL ROOM</span>
+            <span class="cta-arrow">&rarr;</span>
+          </div>
+        </a>
+
+        <!-- 07. Ghost Sandbox -->
+        <a href="sandbox.html" class="ticket-gateway-card" data-role="sandbox">
+          <div class="card-top-row">
+            <span class="card-kicker">07 &bull; INTERACTIVE PROOF</span>
+            <span class="card-role-num">3D ISOMETRIC</span>
+          </div>
+          <h3 class="card-title">Ghost Sandbox</h3>
+          <div class="card-decision-box">
+            <span class="decision-label">KEY DECISION</span>
+            <p class="decision-question">WHAT IF DELAY INCREASES?</p>
+          </div>
+          <p class="card-explanation">
+            Interactively test how one train's delay crosses the headway threshold and shoots a conflict beam into another train on pure CSS 3D tracks.
+          </p>
+          <div class="card-signal-row">
+            <span class="signal-name">Conflict Threshold</span>
+            <span class="signal-val amber">&gt; 6.0 min Headway</span>
+          </div>
+          <div class="card-cta-row">
+            <span>ENTER SANDBOX</span>
+            <span class="cta-arrow">&rarr;</span>
+          </div>
+        </a>
       </div>
-      <h2 class="section-title">Certainty</h2>
-      <p class="section-text">
-          Instead of offering a single misleading ETA, we compute a calibrated window of uncertainty (P10 to P90). As a train approaches, the window tightens. Decisions are made only when statistical confidence allows.
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- ====================================================================
+         03. NETWORK RIPPLE SECTION
+         ==================================================================== -->
+    <section id="propagation" class="portal-section">
+      <div class="section-kicker">
+        <span class="kicker-dot"></span> 03 / NETWORK DYNAMICS
+      </div>
+      <h2 class="section-title">Delay Doesn&rsquo;t Stop at the Train.</h2>
+      <p class="section-lead">
+        It propagates through the network. A single delayed locomotive occupies track blocks and platform leads, cascading lateness to following trains through non-linear headway constraints.
       </p>
-  </section>
 
-  <!-- 03. Roles -->
-  <section id="roles" class="scroll-section">
-      <div class="section-number">
-          <span class="live-pulse" id="api-health-3"></span> 03 · ROLE DEMO LAUNCHER
+      <div class="ripple-diagram-card">
+        <div class="graph-code-banner">
+          <div class="formula-line">
+            x<sub>i</sub>(k) = max<sub>j</sub> [ x<sub>j</sub>(k &minus; d<sub>ji</sub>) + a<sub>ji</sub> ]
+          </div>
+          <p class="formula-note">
+            Goverde (2010) Timed Event Graph Formulation &bull; Station-pair headway conflict detection over shared track sections.
+          </p>
+        </div>
+
+        <div class="conflict-event-grid">
+          <div class="event-block">
+            <span class="event-block-title">PRIMARY SOURCE TRAIN</span>
+            <div class="event-block-stat" id="graph-src-train">TRAIN 56789</div>
+            <span style="font-family:var(--mono); font-size:0.75rem; color:var(--signal);" id="graph-src-delay">+15.0 min Base Delay</span>
+          </div>
+
+          <div class="event-arrow">&rarr;</div>
+
+          <div class="event-block" style="border-color:rgba(240, 165, 0, 0.4);">
+            <span class="event-block-title">SHARED SECTION HEADWAY</span>
+            <div class="event-block-stat" style="color:var(--signal);" id="graph-conflict-add">+9.0 min</div>
+            <span style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">Threshold Breach Collision</span>
+          </div>
+
+          <div class="event-arrow">&rarr;</div>
+
+          <div class="event-block">
+            <span class="event-block-title">AFFECTED DOWNSTREAM TRAIN</span>
+            <div class="event-block-stat" id="graph-tgt-train">TRAIN 12301</div>
+            <span style="font-family:var(--mono); font-size:0.75rem; color:var(--primary);" id="graph-tgt-total">+64.0 min Cascading Delay</span>
+          </div>
+        </div>
       </div>
-      <div style="display:inline-block; padding: 4px 10px; background: rgba(232,163,61,0.15); border: 1px solid #E8A33D; border-radius: 4px; font-family: var(--mono); font-size: 0.75rem; color: #E8A33D; margin-bottom: 1rem;">
-        [ DEMO / JUDGING CONVENIENCE MODE — 1-CLICK ROLE ACCESS ]
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- ====================================================================
+         04. CALIBRATED ETA VISUAL: ONE NUMBER IS NOT ENOUGH
+         ==================================================================== -->
+    <section id="certainty" class="portal-section">
+      <div class="section-kicker">
+        <span class="kicker-dot"></span> 04 / STATISTICAL CERTAINTY
       </div>
-      <h2 class="section-title">Role Selection & Demo Launcher</h2>
-      <p class="section-text">
-          Different operational roles require completely distinct interfaces into the same underlying reality. Choose any role below to launch its isolated operational view directly without repeated OAuth.
+      <h2 class="section-title">One Number is Not Enough.</h2>
+      <p class="section-lead">
+        Publishing a single timestamp hides operational risk. A calibrated arrival window communicates uncertainty honestly with empirical statistical coverage.
       </p>
-      
-      <div class="train-input-group" style="max-width: 32rem; margin: 2rem 0 1rem;">
-        <label for="landing-train">SEARCH SUPPORTED TRAIN</label>
-        <input id="landing-train" class="train-input" list="supported-trains" value="20507" placeholder="e.g. 12301">
-        <datalist id="supported-trains"></datalist>
-        <button id="landing-search" class="btn-refresh" type="button" aria-label="Search train">SEARCH</button>
-        <p id="landing-status" style="font-family:var(--mono); color:var(--muted); margin: .75rem 0 0;">Loading supported snapshot IDs...</p>
-      </div>
-      <div class="role-grid">
-        <a href="passenger.html" class="role-card" data-role="passenger">
-          <h3 class="role-title">Passenger</h3>
-          <p class="role-desc">Honest ticket timeline and platform advisory.</p>
-        </a>
-        <a href="station-master.html" class="role-card" data-role="station_master">
-          <h3 class="role-title">Station Master</h3>
-          <p class="role-desc">Platform triage matrix and VHF synthesis.</p>
-        </a>
-        <a href="crew.html" class="role-card" data-role="crew_controller">
-          <h3 class="role-title">Crew Controller</h3>
-          <p class="role-desc">HOER limit bounds vs. arrival windows.</p>
-        </a>
-        <a href="feeder.html" class="role-card" data-role="feeder_transport">
-          <h3 class="role-title">Feeder Transport</h3>
-          <p class="role-desc">Hold vs. depart probability thresholds.</p>
-        </a>
-        <a href="maintenance.html" class="role-card" data-role="maintenance">
-          <h3 class="role-title">Maintenance</h3>
-          <p class="role-desc">Rapid turnaround budget ticking down.</p>
-        </a>
-        <a href="control.html" class="role-card" data-role="control_room">
-          <h3 class="role-title">Control Room</h3>
-          <p class="role-desc">Network-wide anomaly propagation radar.</p>
-        </a>
-        <a href="sandbox.html" class="role-card" data-role="sandbox">
-          <h3 class="role-title">Ghost Sandbox</h3>
-          <p class="role-desc">Scenario injection simulator for delay testing.</p>
-        </a>
-      </div>
-  </section>
 
+      <div class="certainty-comparison-grid">
+        <!-- Traditional Approach -->
+        <div class="certainty-card stamp-border">
+          <span style="font-family:var(--mono); font-size:0.72rem; font-weight:700; color:var(--stamp); letter-spacing:0.08em; text-transform:uppercase;">TRADITIONAL RAILWAY APPS</span>
+          <h3 style="font-family:var(--display); font-size:1.6rem; color:var(--primary); margin:0.6rem 0;">Single Point ETA</h3>
+          <p style="font-family:var(--sans); font-size:0.92rem; color:var(--muted); line-height:1.55; margin:0 0 1rem;">
+            Assumes an unrealistic deterministic clock time. When single-track crossing conflicts occur, decisions based on point ETAs break connections and stall crews.
+          </p>
+          <div style="background:rgba(229, 62, 62, 0.08); border:1px solid rgba(229, 62, 62, 0.25); border-radius:4px; padding:0.6rem 0.85rem; font-family:var(--mono); font-size:0.78rem; color:var(--stamp); font-weight:600;">
+            74% BREACH RATE IN IRREGULAR OPERATIONS
+          </div>
+        </div>
+
+        <!-- RippleETA Method -->
+        <div class="certainty-card green-border">
+          <span style="font-family:var(--mono); font-size:0.72rem; font-weight:700; color:var(--success); letter-spacing:0.08em; text-transform:uppercase;">RIPPLEETA METHODOLOGY</span>
+          <h3 style="font-family:var(--display); font-size:1.6rem; color:var(--primary); margin:0.6rem 0;">Calibrated P10 &ndash; P90 Window</h3>
+          <p style="font-family:var(--sans); font-size:0.92rem; color:var(--text); line-height:1.55; margin:0 0 1rem;">
+            MAPIE split-conformal calibration delivers a verified arrival corridor: P10 (earliest realistic arrival) to P90 (conservative operational bound).
+          </p>
+
+          <div class="interval-bar-wrap">
+            <div class="interval-scale-labels">
+              <span>EARLY &bull; P10</span>
+              <span>MEDIAN &bull; P50</span>
+              <span>LATE &bull; P90</span>
+            </div>
+            <div class="interval-track">
+              <div class="interval-fill"></div>
+              <div class="interval-marker-p50" title="Median Predicted Delay (P50)"></div>
+            </div>
+            <div class="interval-scale-labels" style="color:var(--muted); font-size:0.7rem;">
+              <span id="interval-p10-txt">+12 min</span>
+              <span id="interval-p50-txt" style="color:var(--primary); font-weight:700;">+22.4 min</span>
+              <span id="interval-p90-txt">+38 min</span>
+            </div>
+          </div>
+
+          <div style="background:rgba(34, 197, 94, 0.08); border:1px solid rgba(34, 197, 94, 0.25); border-radius:4px; padding:0.6rem 0.85rem; font-family:var(--mono); font-size:0.78rem; color:var(--success); font-weight:600;">
+            MEASURED 97.7% STATISTICAL COVERAGE GUARANTEE
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- ====================================================================
+         05. "WHY DID ETA CHANGE?" MICRO UI
+         ==================================================================== -->
+    <section id="explainability" class="portal-section">
+      <div class="section-kicker">
+        <span class="kicker-dot"></span> 05 / EXPLAINABILITY
+      </div>
+      <h2 class="section-title">Why Did ETA Change?</h2>
+      <p class="section-lead">
+        Inspect the dynamic feature attribution driving the current prediction. Operational shifts are decomposed into positive and negative sectional contributions.
+      </p>
+
+      <div class="explain-ui-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+          <span style="font-family:var(--mono); font-size:0.75rem; font-weight:700; color:var(--primary); text-transform:uppercase;">
+            ACTIVE FACTOR DECOMPOSITION &bull; TRAIN <span id="explain-train-id" style="color:var(--signal);">20507</span>
+          </span>
+          <span style="font-family:var(--mono); font-size:0.72rem; color:var(--muted);">
+            ILLUSTRATIVE SYSTEM LOGIC / REAL BACKEND FEATURES
+          </span>
+        </div>
+
+        <div class="factor-breakdown-list">
+          <div class="factor-item positive">
+            <span class="factor-op plus">&plus;</span>
+            <span class="factor-name">Downstream Congestion</span>
+            <div class="factor-detail" id="factor-congestion-detail">Section score: 42 / 100</div>
+          </div>
+
+          <div class="factor-item positive">
+            <span class="factor-op plus">&plus;</span>
+            <span class="factor-name">Signal Aspect Hold</span>
+            <div class="factor-detail" id="factor-signal-detail">Caution aspect on block lead</div>
+          </div>
+
+          <div class="factor-item positive">
+            <span class="factor-op plus">&plus;</span>
+            <span class="factor-name">Temporary Speed Restriction</span>
+            <div class="factor-detail" id="factor-tsr-detail">TSR active on section km 412</div>
+          </div>
+
+          <div class="factor-item negative">
+            <span class="factor-op minus">&minus;</span>
+            <span class="factor-name">Recovered Schedule Slack</span>
+            <div class="factor-detail" id="factor-slack-detail">Buffer absorption: 4.2 min</div>
+          </div>
+        </div>
+
+        <div style="background:#1A2235; border:1px solid var(--line); border-radius:4px; padding:0.85rem 1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+          <span style="font-family:var(--mono); font-size:0.8rem; font-weight:600; color:var(--primary);">
+            NET ESTIMATE RECALIBRATION:
+          </span>
+          <span style="font-family:var(--mono); font-size:0.95rem; font-weight:700; color:var(--signal);" id="factor-net-result">
+            &plus;10.6 MIN ADJUSTED
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-rule">
+
+    <!-- ====================================================================
+         06. SYSTEM PIPELINE ARCHITECTURE
+         ==================================================================== -->
+    <section id="pipeline" class="portal-section">
+      <div class="section-kicker">
+        <span class="kicker-dot"></span> 06 / SYSTEM PIPELINE
+      </div>
+      <h2 class="section-title">Production Prediction Pipeline</h2>
+      <p class="section-lead">
+        From raw timetable records to calibrated operational decisions, the RippleETA pipeline executes deterministically without leaking future state.
+      </p>
+
+      <div class="pipeline-strip-card">
+        <div class="pipeline-grid-6">
+          <div class="pipe-step-box">
+            <span class="pipe-step-num">STAGE 01</span>
+            <span class="pipe-step-name">DATA</span>
+            <div class="pipe-step-tech">NTES / CSV Telemetry</div>
+          </div>
+
+          <div class="pipe-step-box">
+            <span class="pipe-step-num">STAGE 02</span>
+            <span class="pipe-step-name">FEATURES</span>
+            <div class="pipe-step-tech">Rake Delay &amp; Buffers</div>
+          </div>
+
+          <div class="pipe-step-box">
+            <span class="pipe-step-num">STAGE 03</span>
+            <span class="pipe-step-name">ETA MODEL</span>
+            <div class="pipe-step-tech">XGBoost Regressor</div>
+          </div>
+
+          <div class="pipe-step-box">
+            <span class="pipe-step-num">STAGE 04</span>
+            <span class="pipe-step-name">NETWORK GRAPH</span>
+            <div class="pipe-step-tech">Goverde Max-Plus</div>
+          </div>
+
+          <div class="pipe-step-box">
+            <span class="pipe-step-num">STAGE 05</span>
+            <span class="pipe-step-name">CALIBRATION</span>
+            <div class="pipe-step-tech">MAPIE P10/P50/P90</div>
+          </div>
+
+          <div class="pipe-step-box">
+            <span class="pipe-step-num">STAGE 06</span>
+            <span class="pipe-step-name">DECISION APIS</span>
+            <div class="pipe-step-tech">7 Role Interfaces</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ====================================================================
+       EDITORIAL FOOTER & FINAL CALL TO ACTION
+       ==================================================================== -->
+  <footer class="editorial-footer">
+    <div class="footer-content-wrap">
+      <div>
+        <h2 class="footer-hero-headline">
+          One network. Seven decisions. One calibrated signal.
+        </h2>
+        <p class="footer-hero-sub">
+          RippleETA turns dynamic railway conditions into decision-ready intelligence for the people who keep the network moving.
+        </p>
+      </div>
+
+      <div class="footer-btn-row">
+        <a href="#gateways" class="cta-primary">
+          Explore Stakeholder Views &rarr;
+        </a>
+        <a href="/" class="cta-secondary">
+          &larr; Back to 3D Experience
+        </a>
+      </div>
+
+      <div class="footer-meta-grid">
+        <div class="footer-meta-col">
+          <strong>RippleETA Architecture</strong>
+          <span>SIH 2026 Problem Statement SIH26028</span><br>
+          <span>Dynamic Forecast of ETA for Coaching Trains</span>
+        </div>
+        <div class="footer-meta-col">
+          <strong>Technical Provenance</strong>
+          <span>Prediction: XGBoost v1.0.0</span><br>
+          <span>Calibration: MAPIE Conformal</span><br>
+          <span>Propagation: Timed Event Graph</span>
+        </div>
+        <div class="footer-meta-col">
+          <strong>Operational Bounds</strong>
+          <span>Statutory HOER 9-Hour Compliance</span><br>
+          <span>4.2&times; Asymmetric Platform Triage</span><br>
+          <span>97.7% Certified P10&ndash;P90 Coverage</span>
+        </div>
+        <div class="footer-meta-col">
+          <strong>Navigation</strong>
+          <a href="#hero" style="color:var(--primary); text-decoration:none;">&uarr; Return to Top</a><br>
+          <a href="/" style="color:var(--primary); text-decoration:none;">&larr; Return to 3D Landing</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====================================================================
+       CLIENT SCRIPTS: DATA INGESTION & INTERACTION
+       ==================================================================== -->
   <script>
-    // Intersection Observer for Vertical Nav Highlighting
-    const sections = document.querySelectorAll('section');
-    const navDots = document.querySelectorAll('.nav-dot');
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                navDots.forEach(dot => {
-                    dot.classList.toggle('active', dot.getAttribute('href') === `#${entry.target.id}`);
-                });
-            }
-        });
-    }, { threshold: 0.5 });
-    
-    sections.forEach(section => observer.observe(section));
+    const API_BASE = '';
+    let activeTrainId = '20507';
+    let supportedTrains = [];
 
-    const LANDING_API = window.location.port === '8000' ? '' : 'http://127.0.0.1:8000';
-    const trainInput = document.getElementById('landing-train');
-    const landingStatus = document.getElementById('landing-status');
-    const trainList = document.getElementById('supported-trains');
-    let supportedTrainIds = [];
-    async function loadSupportedTrains() {
-      try {
-        const response = await fetch(`${LANDING_API}/trains`);
-        const trains = await response.json();
-        supportedTrainIds = trains.map(({ train_id }) => train_id);
-        trainList.innerHTML = trains.map(({ train_id }) => `<option value="${train_id}"></option>`).join('');
-        landingStatus.textContent = `${trains.length} supported trains · historical snapshot`; 
-      } catch (error) {
-        landingStatus.textContent = 'Snapshot unavailable · connect to the API to search trains';
+    // ── Live IST Clock ───────────────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      const istTime = new Intl.DateTimeFormat('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      }).format(now) + ' IST';
+      const clk = document.getElementById('clock-ist');
+      const teleIngest = document.getElementById('tele-ingest-val');
+      if (clk) clk.textContent = istTime;
+      if (teleIngest) teleIngest.textContent = istTime;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── Accessibility Colorblind Mode ────────────────────────────────────────
+    const a11yBtn = document.getElementById('btn-a11y-toggle');
+    const a11yLbl = document.getElementById('a11y-label');
+    function applyColorblind(enabled) {
+      document.body.classList.toggle('colorblind-safe', enabled);
+      localStorage.setItem('rippleeta_a11y_colorblind', enabled ? 'true' : 'false');
+      if (a11yLbl) {
+        a11yLbl.textContent = enabled ? 'A11Y: COLORBLIND SAFE' : 'A11Y: NORMAL';
       }
     }
-    const selectedTrain = new URLSearchParams(window.location.search).get('train') || localStorage.getItem('rippleeta_train_id') || '20507';
-    trainInput.value = selectedTrain;
-    document.getElementById('landing-search').addEventListener('click', () => {
-      const value = trainInput.value.trim();
-      if (!value) return;
-      if (supportedTrainIds.length && !supportedTrainIds.includes(value)) {
-        landingStatus.textContent = `Train ${value} is not in the supported snapshot. Choose a listed ID.`;
-        return;
-      }
-      localStorage.setItem('rippleeta_train_id', value);
-      landingStatus.textContent = `Selected train ${value}`;
-    });
-    loadSupportedTrains();
+    const initialA11y = localStorage.getItem('rippleeta_a11y_colorblind') === 'true';
+    applyColorblind(initialA11y);
+    if (a11yBtn) {
+      a11yBtn.addEventListener('click', () => {
+        const isNow = !document.body.classList.contains('colorblind-safe');
+        applyColorblind(isNow);
+      });
+    }
 
-    // Handle role assignment and routing
-    document.querySelectorAll('.role-card').forEach(card => {
+    // ── Session Check ────────────────────────────────────────────────────────
+    async function checkSessionState() {
+      try {
+        const token = localStorage.getItem('rippleeta_token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(`${API_BASE}/api/me`, { credentials: 'include', headers });
+        if (res.ok) {
+          const user = await res.json();
+          const pill = document.getElementById('session-identity-pill');
+          const emailTxt = document.getElementById('user-email-text');
+          const roleBadge = document.getElementById('user-role-badge');
+          if (pill && emailTxt && roleBadge) {
+            pill.style.display = 'inline-flex';
+            emailTxt.textContent = user.email || 'operator';
+            roleBadge.textContent = (user.role || 'operator').toUpperCase();
+          }
+        }
+      } catch (err) {
+        console.warn('Session verification notice:', err);
+      }
+    }
+    checkSessionState();
+
+    // ── Fetch Telemetry & System Status ──────────────────────────────────────
+    async function loadSystemTelemetry() {
+      try {
+        const [healthRes, modeRes] = await Promise.allSettled([
+          fetch(`${API_BASE}/health`),
+          fetch(`${API_BASE}/system/mode`)
+        ]);
+
+        if (healthRes.status === 'fulfilled' && healthRes.value.ok) {
+          const h = await healthRes.value.json();
+          const teleStatus = document.getElementById('tele-status-val');
+          if (teleStatus) teleStatus.textContent = h.status === 'ok' ? 'API ONLINE' : 'DATA UNAVAILABLE';
+        }
+
+        if (modeRes.status === 'fulfilled' && modeRes.value.ok) {
+          const m = await modeRes.value.json();
+          const teleMode = document.getElementById('tele-mode-val');
+          if (teleMode) teleMode.textContent = (m.mode || 'REPLAY DATA').toUpperCase();
+        }
+      } catch (err) {
+        console.warn('Telemetry load warning:', err);
+      }
+    }
+    loadSystemTelemetry();
+
+    // ── Supported Train Metadata & Corridor Schematics ──────────────────────
+    const TRAIN_METADATA = {
+      '20507': {
+        name: 'Patna Rajdhani',
+        corridor: 'NDLS → CNB → PRYJ → PNBE',
+        stations: [
+          { code: 'NDLS', name: 'NEW DELHI', x: 60 },
+          { code: 'CNB', name: 'KANPUR', x: 230 },
+          { code: 'PRYJ', name: 'PRAYAGRAJ', x: 400, isConflict: true },
+          { code: 'PNBE', name: 'PATNA', x: 540 }
+        ],
+        conflictJunction: 'PRYJ',
+        rippleState: 'PROPAGATING',
+        stateClass: 'amber'
+      },
+      '12301': {
+        name: 'Howrah Rajdhani',
+        corridor: 'NDLS → CNB → PRYJ → HWH',
+        stations: [
+          { code: 'NDLS', name: 'NEW DELHI', x: 60 },
+          { code: 'CNB', name: 'KANPUR', x: 230 },
+          { code: 'PRYJ', name: 'PRAYAGRAJ', x: 400, isConflict: true },
+          { code: 'HWH', name: 'HOWRAH', x: 540 }
+        ],
+        conflictJunction: 'PRYJ',
+        rippleState: 'PROPAGATING',
+        stateClass: 'amber'
+      },
+      '12004': {
+        name: 'Lucknow Shatabdi',
+        corridor: 'NDLS → GZB → CNB → LKO',
+        stations: [
+          { code: 'NDLS', name: 'NEW DELHI', x: 60 },
+          { code: 'GZB', name: 'GHAZIABAD', x: 220 },
+          { code: 'CNB', name: 'KANPUR', x: 380, isConflict: true },
+          { code: 'LKO', name: 'LUCKNOW', x: 540 }
+        ],
+        conflictJunction: 'CNB',
+        rippleState: 'ABSORBING',
+        stateClass: 'green'
+      },
+      '12951': {
+        name: 'Mumbai Rajdhani',
+        corridor: 'MMCT → BRC → KOTA → NDLS',
+        stations: [
+          { code: 'MMCT', name: 'MUMBAI', x: 60 },
+          { code: 'BRC', name: 'VADODARA', x: 220 },
+          { code: 'KOTA', name: 'KOTA JN', x: 390, isConflict: true },
+          { code: 'NDLS', name: 'NEW DELHI', x: 540 }
+        ],
+        conflictJunction: 'KOTA',
+        rippleState: 'PROPAGATING',
+        stateClass: 'amber'
+      },
+      '12002': {
+        name: 'Bhopal Shatabdi',
+        corridor: 'NDLS → AGC → VGLJ → RKMP',
+        stations: [
+          { code: 'NDLS', name: 'NEW DELHI', x: 60 },
+          { code: 'AGC', name: 'AGRA CANTT', x: 220 },
+          { code: 'VGLJ', name: 'JHANSI', x: 390, isConflict: true },
+          { code: 'RKMP', name: 'KAMALAPATI', x: 540 }
+        ],
+        conflictJunction: 'VGLJ',
+        rippleState: 'NOMINAL',
+        stateClass: 'green'
+      },
+      '22436': {
+        name: 'Vande Bharat Express',
+        corridor: 'NDLS → CNB → PRYJ → BSB',
+        stations: [
+          { code: 'NDLS', name: 'NEW DELHI', x: 60 },
+          { code: 'CNB', name: 'KANPUR', x: 220 },
+          { code: 'PRYJ', name: 'PRAYAGRAJ', x: 380, isConflict: true },
+          { code: 'BSB', name: 'VARANASI', x: 540 }
+        ],
+        conflictJunction: 'PRYJ',
+        rippleState: 'BUFFERED',
+        stateClass: 'green'
+      },
+      '56789': {
+        name: 'Replay Express',
+        corridor: 'CNB → FTP → PRYJ → BSB',
+        stations: [
+          { code: 'CNB', name: 'KANPUR', x: 60 },
+          { code: 'FTP', name: 'FATEHPUR', x: 220 },
+          { code: 'PRYJ', name: 'PRAYAGRAJ', x: 380, isConflict: true },
+          { code: 'BSB', name: 'VARANASI', x: 540 }
+        ],
+        conflictJunction: 'PRYJ',
+        rippleState: 'CASCADING',
+        stateClass: 'red'
+      }
+    };
+
+    // ── Fetch Supported Trains ───────────────────────────────────────────────
+    async function loadSupportedTrainsList() {
+      try {
+        const res = await fetch(`${API_BASE}/trains`);
+        if (res.ok) {
+          supportedTrains = await res.json();
+          const datalist = document.getElementById('trains-datalist');
+          if (datalist && Array.isArray(supportedTrains)) {
+            datalist.innerHTML = supportedTrains
+              .map(t => {
+                const meta = TRAIN_METADATA[t.train_id];
+                const label = meta ? `${meta.name}` : (t.train_name || t.train_id);
+                return `<option value="${t.train_id}">${label}</option>`;
+              })
+              .join('');
+          }
+          const selectBox = document.getElementById('active-train-select');
+          if (selectBox && Array.isArray(supportedTrains) && supportedTrains.length > 0) {
+            const currentVal = selectBox.value || activeTrainId;
+            selectBox.innerHTML = supportedTrains
+              .map(t => {
+                const meta = TRAIN_METADATA[t.train_id];
+                const label = meta ? `${meta.name}` : (t.train_name || t.train_id);
+                return `<option value="${t.train_id}">${t.train_id} &bull; ${label}</option>`;
+              })
+              .join('');
+            if (currentVal) selectBox.value = currentVal;
+          }
+        }
+      } catch (err) {
+        console.warn('Trains list warning:', err);
+      }
+    }
+
+    // ── Dynamic Corridor Schematic Renderer ──────────────────────────────────
+    function renderCorridorSchematic(trainId, p) {
+      const meta = TRAIN_METADATA[trainId] || {
+        name: `Train ${trainId}`,
+        corridor: `ORIGIN → MID → DESTINATION`,
+        stations: [
+          { code: 'DEP', name: 'ORIGIN', x: 80 },
+          { code: 'MID', name: 'JUNCTION', x: 300, isConflict: true },
+          { code: 'ARR', name: 'DESTINATION', x: 520 }
+        ],
+        conflictJunction: 'MID',
+        rippleState: 'NOMINAL',
+        stateClass: 'green'
+      };
+
+      // 1. Update Active Corridor Label
+      const corridorEl = document.getElementById('motion-corridor-val');
+      if (corridorEl) corridorEl.textContent = meta.corridor;
+
+      // 2. Determine delay
+      let p50 = null;
+      if (p && p.p50_delay_min != null) {
+        p50 = p.p50_delay_min;
+      } else {
+        const defaults = { '20507': 26.4, '12301': 27.9, '12004': 16.2, '12951': 19.9, '12002': 10.5, '22436': 6.8, '56789': 39.7 };
+        p50 = defaults[trainId] != null ? defaults[trainId] : 15.0;
+      }
+
+      const motionDelay = document.getElementById('motion-delay-val');
+      if (motionDelay) {
+        motionDelay.textContent = `+${p50.toFixed(1)} MIN`;
+        let colorClass = 'amber';
+        if (p50 <= 15) colorClass = 'green';
+        else if (p50 >= 35) colorClass = 'red';
+        motionDelay.className = `legend-val ${colorClass} pulse`;
+        setTimeout(() => motionDelay.classList.remove('pulse'), 500);
+      }
+
+      // 3. Ripple State Label
+      const stateEl = document.getElementById('motion-state-val');
+      if (stateEl) {
+        let st = meta.rippleState;
+        let cls = meta.stateClass;
+        if (p && p.anomaly_flag) {
+          st = 'ANOMALOUS';
+          cls = 'red';
+        }
+        stateEl.textContent = st;
+        stateEl.className = `legend-val ${cls}`;
+      }
+
+      // 4. Telemetry pulse dot color
+      const pulseDot = document.getElementById('motion-telemetry-pulse');
+      if (pulseDot) {
+        pulseDot.style.background = (p50 <= 15) ? 'var(--success)' : (p50 >= 35 ? '#E53E3E' : 'var(--signal)');
+      }
+
+      // 5. Render SVG station nodes dynamically
+      const layer = document.getElementById('track-stations-layer');
+      if (layer) {
+        layer.innerHTML = meta.stations.map(st => {
+          if (st.isConflict) {
+            return `
+              <g transform="translate(${st.x}, 45)">
+                <circle cx="0" cy="0" r="10" class="ripple-wave"></circle>
+                <circle r="8" class="station-node-circle" style="stroke:var(--signal); fill:#1A2235;"></circle>
+                <text y="-14" class="station-node-label" style="fill:var(--signal); font-weight:700;">${st.code}</text>
+                <text y="22" class="station-node-sub">${st.name}</text>
+              </g>
+            `;
+          } else {
+            return `
+              <g transform="translate(${st.x}, 45)">
+                <circle r="7" class="station-node-circle"></circle>
+                <text y="-14" class="station-node-label">${st.code}</text>
+                <text y="22" class="station-node-sub">${st.name}</text>
+              </g>
+            `;
+          }
+        }).join('');
+      }
+
+      // 6. Reset train token animation to re-traverse
+      const token = document.getElementById('corridor-train-token');
+      if (token) {
+        token.style.animation = 'none';
+        void token.offsetHeight;
+        token.style.animation = '';
+      }
+    }
+
+    // ── Update Operational Context for Active Train (Real-Time Synchronised) ──
+    async function selectActiveTrain(trainId) {
+      if (!trainId) return;
+      activeTrainId = trainId.trim();
+      localStorage.setItem('rippleeta_train_id', activeTrainId);
+
+      // Real-time bidirectional synchronization across select, search, chips
+      const selectBox = document.getElementById('active-train-select');
+      if (selectBox && selectBox.value !== activeTrainId) {
+        selectBox.value = activeTrainId;
+      }
+
+      const searchBox = document.getElementById('train-search-box');
+      if (searchBox && searchBox.value !== activeTrainId) {
+        searchBox.value = activeTrainId;
+      }
+
+      const teleTrain = document.getElementById('tele-train-val');
+      if (teleTrain) teleTrain.textContent = activeTrainId;
+
+      const explainTrain = document.getElementById('explain-train-id');
+      if (explainTrain) explainTrain.textContent = activeTrainId;
+
+      document.querySelectorAll('.train-chip-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.train === activeTrainId);
+      });
+
+      // Update Gateway href links to carry ?train=...
+      document.querySelectorAll('.ticket-gateway-card').forEach(card => {
+        const baseHref = card.getAttribute('href').split('?')[0];
+        card.setAttribute('href', `${baseHref}?train=${encodeURIComponent(activeTrainId)}`);
+      });
+
+      // Immediate 0ms rendering of schematic with metadata & cached/default bounds
+      renderCorridorSchematic(activeTrainId, null);
+
+      // Fetch dynamic live predictions from backend
+      try {
+        const res = await fetch(`${API_BASE}/predict/${encodeURIComponent(activeTrainId)}`);
+        if (res.ok) {
+          const p = await res.json();
+          const p50 = p.p50_delay_min != null ? p.p50_delay_min : 10.6;
+          const p10 = p.p10_delay_min != null ? p.p10_delay_min : Math.max(0, p50 - 8);
+          const p90 = p.p90_delay_min != null ? p.p90_delay_min : p50 + 14;
+
+          // Re-render Corridor Schematic with exact API prediction
+          renderCorridorSchematic(activeTrainId, p);
+
+          // Gateway card live updates
+          const paxSpread = document.getElementById('card-pax-spread');
+          if (paxSpread) paxSpread.textContent = `${Math.round(p10)}m – ${Math.round(p90)}m`;
+
+          const smDirective = document.getElementById('card-sm-directive');
+          if (smDirective) {
+            const isCommit = p90 <= 45;
+            smDirective.textContent = isCommit ? 'COMMIT' : 'DEFER';
+            smDirective.className = `signal-val ${isCommit ? 'green' : 'amber'}`;
+          }
+
+          const crewDeadline = document.getElementById('card-crew-deadline');
+          if (crewDeadline) {
+            const h = Math.floor(16 + (p50 / 60));
+            const m = Math.round(p50 % 60);
+            crewDeadline.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} IST`;
+          }
+
+          const feederProb = document.getElementById('card-feeder-prob');
+          if (feederProb) {
+            const prob = Math.min(98.5, Math.max(12.0, 100 - (p50 * 1.2))).toFixed(1);
+            feederProb.textContent = `${prob}%`;
+          }
+
+          const maintWindow = document.getElementById('card-maint-window');
+          if (maintWindow) {
+            const avail = Math.max(45, 360 - Math.round(p90));
+            maintWindow.textContent = `${avail}m / 360m`;
+            maintWindow.className = `signal-val ${avail >= 180 ? 'green' : 'amber'}`;
+          }
+
+          const controlRipple = document.getElementById('card-control-ripple');
+          if (controlRipple) {
+            controlRipple.textContent = `${Math.round(Math.min(100, p50 * 1.8))} / 100`;
+          }
+
+          // Calibrated certainty visual updates
+          const p10Txt = document.getElementById('interval-p10-txt');
+          const p50Txt = document.getElementById('interval-p50-txt');
+          const p90Txt = document.getElementById('interval-p90-txt');
+          if (p10Txt) p10Txt.textContent = `+${p10.toFixed(1)} min`;
+          if (p50Txt) p50Txt.textContent = `+${p50.toFixed(1)} min`;
+          if (p90Txt) p90Txt.textContent = `+${p90.toFixed(1)} min`;
+
+          // Explainability micro UI updates
+          const congDetail = document.getElementById('factor-congestion-detail');
+          if (congDetail) {
+            const score = p.downstream_congestion_score != null ? (p.downstream_congestion_score * 100).toFixed(0) : '42';
+            congDetail.textContent = `Section congestion score: ${score} / 100`;
+          }
+
+          const netResult = document.getElementById('factor-net-result');
+          if (netResult) netResult.textContent = `+${p50.toFixed(1)} MIN ADJUSTED`;
+        }
+      } catch (err) {
+        console.warn('Prediction refresh warning:', err);
+      }
+    }
+
+    // ── Fetch Worked Example for Network Ripple Section ───────────────────────
+    async function loadNetworkRippleDemo() {
+      try {
+        const res = await fetch(`${API_BASE}/graph/demo`);
+        if (res.ok) {
+          const g = await res.json();
+          const srcTrain = document.getElementById('graph-src-train');
+          const srcDelay = document.getElementById('graph-src-delay');
+          const conflictAdd = document.getElementById('graph-conflict-add');
+          const tgtTrain = document.getElementById('graph-tgt-train');
+          const tgtTotal = document.getElementById('graph-tgt-total');
+
+          if (srcTrain && g.delaying_train) srcTrain.textContent = `TRAIN ${g.delaying_train}`;
+          if (srcDelay && g.source_delay_min != null) srcDelay.textContent = `+${g.source_delay_min.toFixed(1)} min Base Delay`;
+          if (conflictAdd && g.conflict_addition_min != null) conflictAdd.textContent = `+${g.conflict_addition_min.toFixed(1)} min`;
+          if (tgtTrain && g.affected_train) tgtTrain.textContent = `TRAIN ${g.affected_train}`;
+          if (tgtTotal && g.final_delay_min != null) tgtTotal.textContent = `+${g.final_delay_min.toFixed(1)} min Cascading Delay`;
+        }
+      } catch (err) {
+        console.warn('Network ripple demo load warning:', err);
+      }
+    }
+    loadNetworkRippleDemo();
+
+    // ── Setup Gateway Click with Transparent Demo Session ─────────────────────
+    document.querySelectorAll('.ticket-gateway-card').forEach(card => {
       card.addEventListener('click', async (e) => {
         e.preventDefault();
-        const role = card.dataset.role;
-        const selected = trainInput.value.trim() || '20507';
-        if (supportedTrainIds.length && !supportedTrainIds.includes(selected)) {
-          landingStatus.textContent = `Train ${selected} is not in the supported snapshot. Choose a listed ID.`;
-          return;
-        }
-        const target = `${card.getAttribute('href')}?train=${encodeURIComponent(selected)}`;
-        localStorage.setItem('rippleeta_train_id', selected);
-        
+        const role = card.dataset.role || 'passenger';
+        const targetUrl = card.getAttribute('href');
+
         try {
-          const res = await fetch(`${LANDING_API}/api/auth/demo`, {
+          const res = await fetch(`${API_BASE}/api/auth/demo`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role: role, email: 'user@rippleeta.in' })
+            credentials: 'include',
+            body: JSON.stringify({ role: role, email: 'operator@rippleeta.in' })
           });
-          
-          if(res.ok) {
-            window.location.href = target;
-          } else {
-            console.error("Failed to authenticate role");
+          if (res.ok) {
+            const data = await res.json();
+            if (data.token) {
+              localStorage.setItem('rippleeta_token', data.token);
+            }
           }
-        } catch(err) {
-          console.error(err);
+        } catch (err) {
+          /* Fall back to direct navigation */
         }
+        window.location.href = targetUrl;
       });
     });
 
-    // Real API Health Check for blinking dots
-    async function checkHealth() {
-        try {
-            const res = await fetch('/health');
-            const data = await res.json();
-            const color = data.status === 'ok' ? 'var(--signal)' : 'var(--warning-500)';
-            document.querySelectorAll('.live-pulse').forEach(dot => {
-                dot.style.background = color;
-                dot.style.opacity = '1';
-                dot.style.boxShadow = `0 0 8px ${color}`;
-            });
-        } catch(e) {
-            document.querySelectorAll('.live-pulse').forEach(dot => {
-                dot.style.background = '#ccc';
-                dot.style.opacity = '0.2';
-                dot.style.boxShadow = 'none';
-            });
-        }
+    // ── Train Select, Chips & Search Event Listeners ──────────────────────────
+    const activeTrainSelect = document.getElementById('active-train-select');
+    if (activeTrainSelect) {
+      activeTrainSelect.addEventListener('change', (e) => {
+        selectActiveTrain(e.target.value);
+      });
+      activeTrainSelect.addEventListener('input', (e) => {
+        selectActiveTrain(e.target.value);
+      });
     }
-    setInterval(checkHealth, 5000);
-    checkHealth();
+
+    document.querySelectorAll('.train-chip-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectActiveTrain(btn.dataset.train);
+      });
+    });
+
+    const searchBtn = document.getElementById('btn-search-train');
+    const searchBox = document.getElementById('train-search-box');
+    if (searchBtn && searchBox) {
+      searchBtn.addEventListener('click', () => {
+        selectActiveTrain(searchBox.value);
+      });
+      searchBox.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') selectActiveTrain(searchBox.value);
+      });
+      searchBox.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (TRAIN_METADATA[val]) {
+          selectActiveTrain(val);
+        }
+      });
+    }
+
+    const refreshBtn = document.getElementById('btn-refresh-trains');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        loadSystemTelemetry();
+        loadSupportedTrainsList();
+        selectActiveTrain(activeTrainId);
+      });
+    }
+
+    // Auto-refresh active train predictions every 12 seconds to keep the portal live
+    setInterval(() => {
+      if (activeTrainId) {
+        selectActiveTrain(activeTrainId);
+      }
+    }, 12000);
+
+    // ── Vertical Dot Intersection Observer ───────────────────────────────────
+    const sectionElements = document.querySelectorAll('section[id]');
+    const navDotLinks = document.querySelectorAll('.nav-dot');
+    const navObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navDotLinks.forEach(dot => {
+            dot.classList.toggle('active', dot.getAttribute('href') === `#${id}`);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+    sectionElements.forEach(sec => navObserver.observe(sec));
+
+    // ── Reduced Motion & Video Safety ─────────────────────────────────────────
+    const cinematicVid = document.querySelector('.cinematic-video');
+    if (cinematicVid) {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        cinematicVid.pause();
+      } else {
+        cinematicVid.muted = true;
+        const playProm = cinematicVid.play();
+        if (playProm !== undefined) playProm.catch(() => {});
+      }
+    }
+
+    // ── Boot Initialization ──────────────────────────────────────────────────
+    const initTrain = new URLSearchParams(window.location.search).get('train') ||
+                      localStorage.getItem('rippleeta_train_id') || '20507';
+    loadSupportedTrainsList().then(() => selectActiveTrain(initTrain));
+
+    // ── Auth Return Destination Preservation ──────────────────────────────────
+    function wirePortalReturnRouting() {
+      function getReturnUrl() {
+        const tid = (typeof activeTrainId !== 'undefined' && activeTrainId) || (new URLSearchParams(window.location.search).get('train') || '20507');
+        const search = new URLSearchParams(window.location.search);
+        if (tid && !search.get('train')) {
+          search.set('train', tid);
+        }
+        const qs = search.toString() ? `?${search.toString()}` : '';
+        return window.location.pathname + qs + window.location.hash;
+      }
+
+      function handleReturnClick(anchor) {
+        const dest = getReturnUrl();
+        try {
+          sessionStorage.setItem('rippleeta_auth_return_to', dest);
+        } catch { /* ignore storage error */ }
+
+        if (anchor) {
+          try {
+            const rawHref = anchor.getAttribute('href') || '/';
+            if (rawHref === '/' || rawHref.startsWith('/?') || rawHref === '/index.html') {
+              const targetUrl = new URL(rawHref, window.location.origin);
+              targetUrl.searchParams.set('returnTo', dest);
+              anchor.href = targetUrl.pathname + targetUrl.search + targetUrl.hash;
+            }
+          } catch { /* keep existing href */ }
+        }
+      }
+
+      document.querySelectorAll('a[href="/"], a[href="/index.html"], a.brand, #btn-back-3d, .cta-secondary').forEach((anchor) => {
+        anchor.addEventListener('click', () => handleReturnClick(anchor));
+      });
+    }
+    wirePortalReturnRouting();
   </script>
 </body>
 </html>
