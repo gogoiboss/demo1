@@ -63,7 +63,9 @@
 
 All genuinely blocked on the missing dataset in this environment, or out of scope for a code-only session — not fabricated, not silently skipped:
 - **Recorded RailRadar/NTES capture** and **Item L (offline seed)** — the same underlying gap. The consuming code (`scripts/seed_db.py`, `railradar_client.py`'s replay loader) is real and correct; nothing exists at `data/replay/` to consume. Requires a live multi-hour data-collection session.
-- **Item D (4-model baseline real numbers)**, **Item E (real per-segment numbers)**, **Item R (backtest harness)**, **Mondrian real per-bucket numbers (Item F)** — all logic is implemented and tested against synthetic data; none has been run against the real dataset because `data/` does not exist anywhere in this environment (confirmed via exhaustive search across four sessions).
+- **Item D (4-model baseline real numbers)**, **Item E (real per-segment numbers)**, **Item R (backtest harness)**, **Mondrian real per-bucket numbers (Item F)** — all logic is implemented and tested against synthetic data; none has been run against the real dataset because `data/` does not exist anywhere in this environment (confirmed via exhaustive search across **five** consecutive sessions now, most recently 2026-09-11 — see `PROGRESS.md`).
 - **One full stakeholder dashboard verified end-to-end with live/replay data** — needs the real dataset plus a live browser session; not attempted.
+
+**2026-09-11 (session 3):** dataset check repeated, still not present — nothing else in this section changed. Confirmed no fake-test regressions via a full-suite assert-count sanity pass (see `PROGRESS.md`) and no new stale "checked in"/"included" documentation claims.
 
 Maintenance note for future sessions: keep updating the checkboxes above as items are verified — do not mark anything `[x]` without having actually run it and seen it pass.
