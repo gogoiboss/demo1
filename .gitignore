@@ -21,10 +21,10 @@ htmlcov/
 dist/
 build/
 *.egg-info/
-models/*.joblib
+# models/*.joblib
 models/*.pkl
 data/**/*.csv
-data/**/*.parquet
+# data/**/*.parquet
 data/**/*.json
 !data/raw/.gitkeep
 !data/processed/.gitkeep
