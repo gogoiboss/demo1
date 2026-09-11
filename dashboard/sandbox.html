@@ -364,6 +364,18 @@
       color: var(--primary);
     }
 
+    .sb-api-fallback-banner {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--stamp);
+      background: rgba(229, 62, 62, 0.1);
+      border: 1px solid rgba(229, 62, 62, 0.35);
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+    }
+
     /* Primary Action Buttons */
     .action-btn-row {
       display: flex;
@@ -1207,6 +1219,14 @@
                   <span class="panel-sub">DISPATCH TIMING LEVER &bull; TRAIN 56789</span>
                 </div>
                 <div class="stamp-badge-tag">[ HYPOTHETICAL ]</div>
+              </div>
+
+              <!-- API-offline fallback banner: hidden by default, shown by
+                   runSandboxScenario()'s catch block in app.js when
+                   /graph/sandbox is unreachable. Never leave the slider
+                   silently frozen with no explanation. -->
+              <div id="sb-api-fallback-banner" class="sb-api-fallback-banner" hidden>
+                &#9888; API unavailable &mdash; showing local calculation (same max-plus formula, computed in-browser). Reconnect to resume live graph-engine results.
               </div>
 
               <!-- Physical Timing Lever Slider -->

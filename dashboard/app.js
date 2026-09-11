@@ -1682,6 +1682,41 @@ async function loadNetwork() {
 // ────────────────────────────────────────────────────────────────────────────
 let sandboxCurrentDelay = 15.0;
 
+// Offline fallback for the Ghost Sandbox: computes the same fixed two-train
+// (56789 -> 12301, Kanpur -> Allahabad) max-plus scenario the real
+// /graph/sandbox endpoint computes (src/graph/sandbox_endpoint.py), so a live
+// API outage during a demo shows a real (if simplified) local calculation
+// instead of a frozen page. Constants (1564/1580/headway 10) match the
+// backend's fixed scenario exactly — verified against sandbox_endpoint.py.
+function computeSandboxFallback(delayMin) {
+  const train56789Arr = 1564 + delayMin;
+  const train12301Base = 1580;
+  const headway = 10;
+  const constraint = train56789Arr + headway;
+  const conflictActive = constraint > train12301Base;
+  const conflictAdd = conflictActive ? constraint - train12301Base : 0;
+  const totalDelay = 55 + conflictAdd;
+
+  let severity = 'none';
+  if (conflictAdd > 15) severity = 'high';
+  else if (conflictAdd >= 5) severity = 'medium';
+  else if (conflictAdd > 0) severity = 'low';
+
+  return {
+    source_train: '56789',
+    source_delay_min: delayMin,
+    affected_train: '12301',
+    affected_base_delay_min: 55,
+    conflict_addition_min: conflictAdd,
+    affected_total_delay_min: totalDelay,
+    conflict_active: conflictActive,
+    threshold_delay_min: 6,
+    propagation_explanation: `[LOCAL FALLBACK] max(${train12301Base}, ${constraint.toFixed(1)}) = ${Math.max(train12301Base, constraint).toFixed(1)} -> conflict adds +${conflictAdd.toFixed(1)} min (computed in-browser, API unreachable)`,
+    section: 'KANPUR -> ALLAHABAD',
+    severity: severity,
+  };
+}
+
 async function runSandboxScenario(delayVal) {
   sandboxCurrentDelay = parseFloat(delayVal);
   setText('sb-slider-val-readout', `+${Math.round(sandboxCurrentDelay)} min`);
@@ -1695,8 +1730,20 @@ async function runSandboxScenario(delayVal) {
     btn.classList.toggle('is-active', minVal === Math.round(sandboxCurrentDelay));
   });
 
+  let data;
+  let usedFallback = false;
   try {
-    const data = await api(`/graph/sandbox?source_delay=${encodeURIComponent(sandboxCurrentDelay)}`);
+    data = await api(`/graph/sandbox?source_delay=${encodeURIComponent(sandboxCurrentDelay)}`);
+  } catch (err) {
+    console.error('Sandbox API unreachable, using local fallback calculation:', err);
+    data = computeSandboxFallback(sandboxCurrentDelay);
+    usedFallback = true;
+  }
+
+  const fallbackBanner = $('sb-api-fallback-banner');
+  if (fallbackBanner) fallbackBanner.hidden = !usedFallback;
+
+  {
     const conflictAdd = data.conflict_addition_min != null ? data.conflict_addition_min : 0.0;
     const finalTotal = data.affected_total_delay_min != null ? data.affected_total_delay_min : (55.0 + conflictAdd);
     const isConflict = data.conflict_active === true;
@@ -1816,8 +1863,6 @@ async function runSandboxScenario(delayVal) {
     if (data.propagation_explanation) {
       setText('sb-formula-explanation', data.propagation_explanation);
     }
-  } catch (err) {
-    console.error('Sandbox scenario calculation failed:', err);
   }
 }
 
