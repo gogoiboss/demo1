@@ -173,8 +173,14 @@ The repository expects the processed dataset at `data/processed/kaggle_competiti
    python -m src.ingestion.load_kaggle --csv data/raw/train_delay.csv
    ```
 
-   The checked-in raw CSV is sufficient for the demo. This command regenerates
-   `data/processed/kaggle_competition_cleaned.parquet` from it.
+   `data/raw/train_delay.csv` is **not** checked into git (`data/` is
+   gitignored — see the note above); you must place the raw Kaggle CSV
+   there yourself before running this. This command then regenerates
+   `data/processed/kaggle_competition_cleaned.parquet` from it. Required
+   columns: `train_number`, `journey_date`, `actual_delay_minutes`,
+   `scheduled_travel_hours`, `distance_km`, `zone_congestion_index`,
+   `monsoon_flag`, `fog_risk`, `coach_count`, `loco_age_years` — see
+   `src/ingestion/load_kaggle.py` for the full variant-detection schema.
 
 2. **Train the baseline/XGBoost artifact**
 
