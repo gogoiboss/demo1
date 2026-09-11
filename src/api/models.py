@@ -31,7 +31,26 @@ class PredictionResponse(BaseModel):
     generated_at: datetime
     degraded: bool = False
     last_updated: str | None = None
+    # Set only when the live feed is stale beyond the threshold and the
+    # interval has been widened as a result — the moment it crossed the
+    # threshold, not merely the last update time (see src/api/app.py).
+    stale_since: str | None = None
     message: str
+
+    # Per-prediction SHAP feature attribution (src/calibration/conformal.py).
+    # None only when the underlying service does not supply it (e.g. the
+    # degraded persistence-baseline fallback path).
+    shap_explanation: dict[str, float] | None = None
+    shap_text: str | None = None
+
+
+class StationHistory(BaseModel):
+    station_code: str
+    station_name: str
+    scheduled_arrival: datetime
+    actual_arrival: datetime | None = None
+    delay_min: float
+    status: Literal["departed", "arrived", "en_route"]
 
 
 class GraphDemoResponse(BaseModel):
@@ -46,6 +65,7 @@ class GraphDemoResponse(BaseModel):
     message: str
     source_type: str = "local_replay"
     generated_at: datetime | None = None
+    historical_stations: list[StationHistory] = Field(default_factory=list)
 
 
 class SupportedTrain(BaseModel):
@@ -61,14 +81,6 @@ class SystemStatusResponse(BaseModel):
     model_loaded: bool
 
 
-
-class StationHistory(BaseModel):
-    station_code: str
-    station_name: str
-    scheduled_arrival: datetime
-    actual_arrival: datetime | None = None
-    delay_min: float
-    status: Literal["departed", "arrived", "en_route"]
 
 class PassengerResponse(BaseModel):
     train_id: str

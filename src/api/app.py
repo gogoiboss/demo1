@@ -1,27 +1,57 @@
 """FastAPI application for calibrated train predictions."""
 
 from __future__ import annotations
-from fastapi import Response, Depends
+
+import os
+import sqlite3
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from statistics import NormalDist
+from typing import Literal
+
+from fastapi import Depends, FastAPI, HTTPException, Query, Response
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from .auth import create_session_token, verify_google_token, get_current_user, role_required
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+from .auth import create_session_token, get_current_user, role_required, verify_google_token
+from src.api.models import (
+    CrewControllerResponse,
+    FeederTransportResponse,
+    GraphDemoResponse,
+    HealthResponse,
+    MaintenanceResponse,
+    PassengerResponse,
+    PredictionResponse,
+    SupportedTrain,
+    StationMasterResponse,
+    SandboxResponse,
+    StationHistory,
+    SystemStatusResponse,
+)
+from src.api.service import PredictionService, TrainNotFoundError
+from src.graph.worked_example import run_worked_example
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 
 class GoogleLoginRequest(BaseModel):
     credential: str
+
 
 class DemoLoginRequest(BaseModel):
     email: str
     role: str
 
 
-
-from datetime import datetime, timedelta, timezone
-from statistics import NormalDist
-import sqlite3
-import json
-
-def get_trend(train_id: str, current_delay: float) -> str:
-    import os
+def get_trend(
+    train_id: str, current_delay: float
+) -> Literal["stable", "worsening", "improving", "unknown"]:
     if os.environ.get("RIPPLEETA_CI") == "1":
         return "unknown"
     if current_delay is None:
@@ -51,27 +81,6 @@ def get_trend(train_id: str, current_delay: float) -> str:
     return "stable"
 
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-
-from src.api.models import (
-    CrewControllerResponse,
-    FeederTransportResponse,
-    GraphDemoResponse,
-    HealthResponse,
-    MaintenanceResponse,
-    PassengerResponse,
-    PredictionResponse,
-    SupportedTrain,
-    StationMasterResponse,
-    SandboxResponse,
-    SystemStatusResponse,
-)
-from src.graph.worked_example import run_worked_example
-from src.api.service import PredictionService, TrainNotFoundError
-
-
 def create_app(service: PredictionService | None = None) -> FastAPI:
     prediction_service = service or PredictionService()
     app = FastAPI(
@@ -93,7 +102,6 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
     def get_prediction(train_id: str, prediction_variance: float | None = None) -> dict:
         from src.ingestion.railradar_client import get_live_status
         import pandas as pd
-        import os
 
         try:
             from dotenv import load_dotenv
@@ -113,6 +121,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         )
         is_stale = False
         last_updated = None
+        stale_since = None
         current_delay = 0.0
 
         if live_status:
@@ -121,10 +130,15 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
                 try:
                     last_updated_dt = datetime.fromisoformat(live_status["last_updated"].replace("Z", "+00:00"))
                     last_updated = last_updated_dt.isoformat()
-                    staleness_min = (now_utc() - last_updated_dt).total_seconds() / 60.0
                     STALE_THRESHOLD_MIN = 15.0  # Configurable threshold
+                    staleness_min = (now_utc() - last_updated_dt).total_seconds() / 60.0
                     if staleness_min > STALE_THRESHOLD_MIN:
                         is_stale = True
+                        # The moment the feed crossed the staleness threshold,
+                        # not merely when it was last updated — tells the
+                        # caller exactly how long the interval has been
+                        # widened for, not just that the feed is old.
+                        stale_since = (last_updated_dt + timedelta(minutes=STALE_THRESHOLD_MIN)).isoformat()
                 except ValueError:
                     pass
 
@@ -152,7 +166,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
                 )
         except TrainNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
-        except Exception as exc:
+        except Exception:
             # FALLBACK 1: ML Error -> Persistence Baseline (degraded: true)
             is_degraded = True
             prediction = {
@@ -163,7 +177,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
                 "p90_delay_min": current_delay + 60.0,
                 "anomaly_flag": False,
                 "uncertainty_mode": False,
-                "message": f"ML unavailable. Using persistence baseline."
+                "message": "ML unavailable. Using persistence baseline."
             }
 
         # FALLBACK 2: Anomaly Gate
@@ -186,7 +200,8 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
 
         prediction["degraded"] = is_degraded
         prediction["last_updated"] = last_updated
-        
+        prediction["stale_since"] = stale_since
+
         # LOGGING (Step 4)
         conn = sqlite3.connect('predictions_history.db')
         c = conn.cursor()
@@ -212,7 +227,6 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
 
     @app.get("/system/mode", tags=["system"])
     def get_mode() -> dict:
-        import os
         live_configured = bool(os.environ.get("RIPPLEETA_API_KEY"))
         requested = os.environ.get("RIPPLEETA_MODE", "replay").upper()
         mode = "LIVE" if requested == "LIVE" and live_configured else "REPLAY"
@@ -225,7 +239,6 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
 
     @app.get("/system/status", response_model=SystemStatusResponse, tags=["system"])
     def system_status() -> SystemStatusResponse:
-        import os
         mode = get_mode()
         return SystemStatusResponse(
             **mode,
@@ -258,9 +271,9 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             conflict_addition_min=result["conflict_min"],
             final_delay_min=result["alld_delay_min"],
             historical_stations=[
-            {"station_code": "NDLS", "station_name": "New Delhi", "scheduled_arrival": now_utc(), "actual_arrival": now_utc(), "delay_min": 0.0, "status": "departed"},
-            {"station_code": "CNB", "station_name": "Kanpur Central", "scheduled_arrival": now_utc(), "actual_arrival": now_utc(), "delay_min": 12.5, "status": "departed"},
-            {"station_code": "PRYJ", "station_name": "Prayagraj Jn", "scheduled_arrival": now_utc(), "actual_arrival": None, "delay_min": 26.5, "status": "en_route"}
+            StationHistory(station_code="NDLS", station_name="New Delhi", scheduled_arrival=now_utc(), actual_arrival=now_utc(), delay_min=0.0, status="departed"),
+            StationHistory(station_code="CNB", station_name="Kanpur Central", scheduled_arrival=now_utc(), actual_arrival=now_utc(), delay_min=12.5, status="departed"),
+            StationHistory(station_code="PRYJ", station_name="Prayagraj Jn", scheduled_arrival=now_utc(), actual_arrival=None, delay_min=26.5, status="en_route"),
         ],
         message=(
                 "Real timed-event graph computation on a corrected two-train "
@@ -286,7 +299,6 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
 
     @app.get("/api/auth/config", tags=["auth"])
     def auth_config() -> dict:
-        import os
         client_id = os.getenv("GOOGLE_CLIENT_ID")
         if client_id and not client_id.startswith("your-real-"):
             return {"auth_configured": True, "google_client_id": client_id}
@@ -300,12 +312,18 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         try:
             idinfo = verify_google_token(req.credential)
             email = idinfo.get("email")
+            if not email:
+                raise ValueError("Google token did not include an email address.")
             role = "passenger"
-            if "station" in email.lower(): role = "station_master"
-            if "crew" in email.lower(): role = "crew_controller"
-            if "feeder" in email.lower(): role = "feeder_transport"
-            if "maintenance" in email.lower(): role = "maintenance"
-            
+            if "station" in email.lower():
+                role = "station_master"
+            if "crew" in email.lower():
+                role = "crew_controller"
+            if "feeder" in email.lower():
+                role = "feeder_transport"
+            if "maintenance" in email.lower():
+                role = "maintenance"
+
             token = create_session_token(email, role)
             response.set_cookie(key="rippleeta_session", value=token, httponly=True, samesite="lax")
             return {"success": True, "role": role}
@@ -380,6 +398,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> StationMasterResponse:
         prediction = get_prediction(train_id, prediction_variance)
+        decision: Literal["COMMIT", "DEFER", "SUSPENDED"]
         if prediction["anomaly_flag"]:
             decision = "SUSPENDED"
             decision_time = None
@@ -387,7 +406,8 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             width = prediction["p90_delay_min"] - prediction["p10_delay_min"]
             decision = "COMMIT" if width <= 30 else "DEFER"
             decision_time = round(max(0.0, 90.0 - width), 1)
-        
+
+        urgency: Literal["critical", "high", "normal", "low"]
         if prediction["anomaly_flag"]:
             radio = f"Control to Station, Train {train_id} prediction suspended due to anomaly. Fallback to manual charts. Over."
             urgency = "critical"
@@ -419,7 +439,6 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> CrewControllerResponse:
         prediction = get_prediction(train_id, prediction_variance)
-        tid_hash = sum(ord(c) for c in train_id)
         deadline = None
         if prediction["p50_delay_min"] is not None:
             deadline = now_utc() + timedelta(minutes=max(15.0, 120.0 - prediction["p90_delay_min"]))
@@ -439,13 +458,12 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> FeederTransportResponse:
         prediction = get_prediction(train_id, prediction_variance)
-        tid_hash = sum(ord(c) for c in train_id)
         if cutoff_time.tzinfo is None:
             cutoff_time = cutoff_time.replace(tzinfo=timezone.utc)
         now = now_utc()
         minutes_until_cutoff = (cutoff_time - now).total_seconds() / 60.0
         probability = None
-        recommendation = "SUSPEND"
+        recommendation: Literal["WAIT", "DEPART", "USE JUDGMENT", "SUSPEND"] = "SUSPEND"
         if prediction["p50_delay_min"] is not None:
             sigma = max((prediction["p90_delay_min"] - prediction["p10_delay_min"]) / 2.56, 1.0)
             probability = NormalDist(prediction["p50_delay_min"], sigma).cdf(minutes_until_cutoff)
@@ -466,7 +484,6 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         prediction_variance: float | None = Query(default=None, ge=0),
     ) -> MaintenanceResponse:
         prediction = get_prediction(train_id, prediction_variance)
-        tid_hash = sum(ord(c) for c in train_id)
         available = None
         adequate = None
         if prediction["p90_delay_min"] is not None:
@@ -487,7 +504,12 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
     ) -> PredictionResponse:
         prediction = get_prediction(train_id, prediction_variance)
         prediction.pop("train_id", None)
-        prediction.pop("message", None)
+        # get_prediction() already computes the correct reason string for
+        # every state (active / degraded fallback / stale-widened /
+        # anomaly-suspended) — preserve it rather than discarding it, so a
+        # degraded or stale response doesn't come back looking like a
+        # normal, fully-confident prediction.
+        original_message = prediction.pop("message", None)
         prediction["weather_risk_flag"] = "none"
         prediction["tsr_active"] = False
         prediction["signal_aspect_restriction"] = False
@@ -497,7 +519,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         return PredictionResponse(
             train_id=train_id,
             generated_at=now_utc(),
-            message=(
+            message=original_message or (
                 "Prediction suspended — anomalous conditions."
                 if prediction["anomaly_flag"]
                 else "Calibrated network-aware prediction."
@@ -509,15 +531,6 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
 
 
 app = create_app()
-
-import os
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
-
-from pathlib import Path
 
 # Mount the static frontends
 internal_frontend = Path(__file__).resolve().parent.parent.parent / "frontend"
