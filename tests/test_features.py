@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import pytest
 from src.features.engineering import (
     engineer_all_features,
@@ -86,6 +85,71 @@ def test_training_and_serving_paths_agree_when_serving_uses_preengineered_batch_
         serving_row.reset_index(drop=True),
         training_path.tail(1).reset_index(drop=True),
     )
+
+
+def test_rake_delay_inheritance_never_leaks_a_later_journeys_delay_backward():
+    """Point-in-time backfill audit (Round 2 Item H).
+
+    Plants a highly distinctive sentinel delay (999.0 min) on the LATEST
+    journey of a train and confirms no EARLIER row's prior_leg_delay ever
+    picks it up — the concrete failure mode a naive join/shift (e.g. using
+    shift(-1) instead of shift(1), or not sorting by date first) would
+    produce. Every row strictly before the sentinel's date must show a
+    prior_leg_delay drawn only from what came before *it*, never from the
+    future sentinel.
+    """
+    df = pd.DataFrame({
+        "train_number": [12301, 12301, 12301, 12301],
+        "journey_date": pd.to_datetime(
+            ["2025-01-01", "2025-01-08", "2025-01-15", "2025-01-22"]
+        ),
+        "actual_delay_minutes": [10.0, 20.0, 30.0, 999.0],  # 999.0 is the future sentinel
+    })
+
+    result = rake_delay_inheritance(df)
+
+    for _, row in result.iterrows():
+        if row["journey_date"] < pd.Timestamp("2025-01-22"):
+            assert row["prior_leg_delay"] != 999.0, (
+                f"row dated {row['journey_date']} leaked the future sentinel delay"
+            )
+    # And the row that legitimately follows the sentinel's journey (if one
+    # existed) would be the only one allowed to see it — confirm the
+    # mechanism is shift(1), i.e. exactly one row later, not shift(-1).
+    naive_future_leak = df.sort_values(["train_number", "journey_date"]).copy()
+    naive_future_leak["prior_leg_delay"] = (
+        naive_future_leak.groupby("train_number")["actual_delay_minutes"].shift(-1)
+    )
+    # This is what a naive (buggy) shift(-1) implementation would produce:
+    # the row dated 2025-01-15 would show the *future* 999.0 value.
+    leaked_row = naive_future_leak[naive_future_leak["journey_date"] == "2025-01-15"].iloc[0]
+    assert leaked_row["prior_leg_delay"] == 999.0  # confirms this IS a real leak in the naive version
+
+    real_row = result[result["journey_date"] == "2025-01-15"].iloc[0]
+    assert real_row["prior_leg_delay"] == 20.0  # the actual code correctly uses the PRIOR leg, not the next one
+
+
+def test_rake_delay_inheritance_is_robust_to_non_chronological_input_row_order():
+    """A naive shift() without sorting first would silently depend on
+    whatever order rows happen to arrive in — e.g. from an unordered raw
+    CSV or an out-of-order ingestion batch. Feed the same records in
+    scrambled order and confirm the result is identical to the
+    already-sorted case (the real code sorts by [train_number, date]
+    internally before shifting, so input order must not matter)."""
+    ordered = pd.DataFrame({
+        "train_number": [12301, 12301, 12301],
+        "journey_date": pd.to_datetime(["2025-01-01", "2025-01-08", "2025-01-15"]),
+        "actual_delay_minutes": [10.0, 45.0, 20.0],
+    })
+    scrambled = ordered.iloc[[2, 0, 1]].reset_index(drop=True)  # deliberately out of order
+
+    result_ordered = rake_delay_inheritance(ordered).sort_values("journey_date").reset_index(drop=True)
+    result_scrambled = rake_delay_inheritance(scrambled).sort_values("journey_date").reset_index(drop=True)
+
+    pd.testing.assert_series_equal(
+        result_ordered["prior_leg_delay"], result_scrambled["prior_leg_delay"]
+    )
+    assert result_ordered["prior_leg_delay"].tolist() == [0.0, 10.0, 45.0]
 
 
 def test_isolated_single_row_reengineering_cannot_reproduce_batch_prior_leg_delay():
