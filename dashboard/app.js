@@ -1481,7 +1481,9 @@ async function loadFeeder() {
       transStatus.textContent = 'CONNECTION TIGHT (USE JUDGMENT)';
       transStatus.style.color = 'var(--signal)';
     }
-  }
+  // Update schematic train token text
+  const feederTrainTokenText = $('schematic-train-token')?.querySelector('text');
+  if (feederTrainTokenText) feederTrainTokenText.textContent = `🚆 ${prediction.train_id}`;
 
   // Distribution SVG Cutoff Line position
   const cutoffLine = $('curve-cutoff-line');
@@ -1782,7 +1784,10 @@ async function loadMaintenance() {
     pin.style.left = `${p50Pct}%`;
   }
 
-  // ── 7. Train Chips Active State
+  // ── 7. Train Chips Active State & Yard Token
+  const yardTrainTokenText = $('yard-train-token')?.querySelector('text');
+  if (yardTrainTokenText) yardTrainTokenText.textContent = `🚆 ${result.train_id}`;
+
   document.querySelectorAll('.train-chip').forEach(chip => {
     chip.classList.toggle('is-active', chip.dataset.train === result.train_id);
   });
