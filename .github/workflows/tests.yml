@@ -27,6 +27,8 @@ jobs:
   test:
     name: "Python ${{ matrix.python-version }} — lint, types, schemas, tests"
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: "."
 
     strategy:
       fail-fast: false
