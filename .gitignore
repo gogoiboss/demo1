@@ -23,12 +23,13 @@ build/
 *.egg-info/
 # models/*.joblib
 models/*.pkl
-data/**/*.csv
-# data/**/*.parquet
-data/**/*.json
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-data/
+# Data — track essential 2MB pipeline files, ignore bulk downloads
+data/raw/datameet_railways/
+data/replay/
+!data/raw/train_delay.csv
+!data/raw/timetable.csv
+!data/processed/kaggle_competition_cleaned.parquet
+!data/processed/timetable_processed.parquet
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 mlruns/
