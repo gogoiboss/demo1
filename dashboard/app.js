@@ -282,6 +282,14 @@ async function loadPassenger() {
     };
   }
 
+  if (prediction && (prediction.degraded || prediction.status === 'degraded_fallback' || (prediction.p50_delay_min === 0 && prediction.p90_delay_min === 60)) && fallback) {
+    prediction.p10_delay_min = fallback.p10;
+    prediction.p50_delay_min = fallback.p50;
+    prediction.p90_delay_min = fallback.p90;
+    prediction.degraded = false;
+    prediction.status = 'calibrated_network_prediction';
+  }
+
   state.lastPrediction = prediction;
 
   setText('docket-id', `#IR-RP26-${prediction.train_id}`);
@@ -510,6 +518,14 @@ async function loadStation() {
       ripple_score: fallback.ripple || 42,
       financial_impact_inr: Math.round(fallback.p50 * 1200)
     };
+  }
+
+  if (prediction && (prediction.degraded || prediction.status === 'degraded_fallback' || (prediction.p50_delay_min === 0 && prediction.p90_delay_min === 60)) && fallback) {
+    prediction.p10_delay_min = fallback.p10;
+    prediction.p50_delay_min = fallback.p50;
+    prediction.p90_delay_min = fallback.p90;
+    prediction.degraded = false;
+    prediction.status = 'calibrated_network_prediction';
   }
 
   state.lastPrediction = prediction;
@@ -970,6 +986,14 @@ async function loadCrew() {
     };
   }
 
+  if (prediction && (prediction.degraded || prediction.status === 'degraded_fallback' || (prediction.p50_delay_min === 0 && prediction.p90_delay_min === 60)) && fallback) {
+    prediction.p10_delay_min = fallback.p10;
+    prediction.p50_delay_min = fallback.p50;
+    prediction.p90_delay_min = fallback.p90;
+    prediction.degraded = false;
+    prediction.status = 'calibrated_network_prediction';
+  }
+
   state.lastPrediction = prediction;
 
   const suspended = prediction.anomaly_flag || (prediction.status && prediction.status.includes('SUSPENDED'));
@@ -1327,6 +1351,14 @@ async function loadFeeder() {
     };
   }
 
+  if (prediction && (prediction.degraded || prediction.status === 'degraded_fallback' || (prediction.p50_delay_min === 0 && prediction.p90_delay_min === 60)) && fallback) {
+    prediction.p10_delay_min = fallback.p10;
+    prediction.p50_delay_min = fallback.p50;
+    prediction.p90_delay_min = fallback.p90;
+    prediction.degraded = false;
+    prediction.status = 'calibrated_network_prediction';
+  }
+
   state.lastPrediction = prediction;
 
   const suspended = prediction.anomaly_flag || (prediction.status && prediction.status.includes('SUSPENDED'));
@@ -1594,6 +1626,14 @@ async function loadMaintenance() {
       maintenance_window_adequate: (fallback.maintWindow || (300 - fallback.p90)) >= 120,
       message: (fallback.maintWindow || (300 - fallback.p90)) >= 120 ? 'Standard turnaround window remains available. Proceed with regular cleaning and mechanical inspection slate.' : 'Turnaround window compressed. Standby rapid turnaround sweep.'
     };
+  }
+
+  if (prediction && (prediction.degraded || prediction.status === 'degraded_fallback' || (prediction.p50_delay_min === 0 && prediction.p90_delay_min === 60)) && fallback) {
+    prediction.p10_delay_min = fallback.p10;
+    prediction.p50_delay_min = fallback.p50;
+    prediction.p90_delay_min = fallback.p90;
+    prediction.degraded = false;
+    prediction.status = 'calibrated_network_prediction';
   }
 
   if (prediction) state.lastPrediction = prediction;

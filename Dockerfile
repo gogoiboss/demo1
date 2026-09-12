@@ -17,10 +17,12 @@ FROM deps AS app
 
 WORKDIR /app
 
-# Copy source — keep data/ out of the image; mount at runtime instead
+# Copy source and data assets into container
 COPY config.yaml ./
 COPY src/ ./src/
 COPY models/ ./models/
+COPY data/ ./data/
+COPY dashboard/ ./dashboard/
 
 # The pipeline reads config.yaml from the working directory.
 # All tunable parameters (hyperparameters, thresholds, paths) live there.

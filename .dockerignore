@@ -8,8 +8,7 @@ __pycache__/
 .pytest_cache/
 .venv/
 
-# Data — mount at runtime with:  docker run -v $(pwd)/data:/app/data ...
-data/
+# Data is included for container self-sufficiency
 
 # Notebooks / docs
 notebooks/
