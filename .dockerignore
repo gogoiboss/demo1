@@ -13,7 +13,6 @@ __pycache__/
 # Notebooks / docs
 notebooks/
 docs/
-dashboard/
 
 # CI config (not needed inside container)
 .github/
