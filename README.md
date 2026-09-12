@@ -9,7 +9,7 @@
 
 > **Smart India Hackathon 2026 · Problem Statement 26028 · Team Outliers**  
 > **Ministry of Railways · Theme: Smart Automation · Category: Software**  
-> **Evaluation: Round 1 Cleared (86.5 / 100)**
+
 
 ---
 
