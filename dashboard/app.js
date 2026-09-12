@@ -1599,7 +1599,6 @@ async function loadMaintenance() {
   if (prediction) state.lastPrediction = prediction;
 
   const minutes = result.available_turnaround_min != null ? result.available_turnaround_min : 300.1;
-  const trainMeta = TRAIN_NAMES[result.train_id] || { name: 'Express Train', route: 'Corridor Transit', location: 'Approaching Terminal Block' };
   
   const p10 = prediction?.p10_delay_min != null ? prediction.p10_delay_min : 0.0;
   const p50 = prediction?.p50_delay_min != null ? prediction.p50_delay_min : 26.4;
