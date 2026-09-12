@@ -507,7 +507,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             response.set_cookie(
                 key="rippleeta_session", value=token, httponly=True, samesite="lax"
             )
-            return {"success": True, "role": role}
+            return {"success": True, "role": role, "token": token}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -531,7 +531,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
         response.set_cookie(
             key="rippleeta_session", value=token, httponly=True, samesite="lax"
         )
-        return {"success": True, "role": role}
+        return {"success": True, "role": role, "token": token}
 
     @app.post("/api/auth/logout", tags=["auth"])
     def logout(response: Response):

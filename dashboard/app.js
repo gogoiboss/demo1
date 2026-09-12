@@ -144,9 +144,9 @@ async function api(path, options = {}) {
 
 function trainId() {
   const queryTrain = new URLSearchParams(window.location.search).get('train');
-  const value = queryTrain || localStorage.getItem('rippleeta_train_id') || DEFAULT_TRAIN;
-  if ($('train-id') && !$('train-id').value) $('train-id').value = value;
-  return ($('train-id')?.value.trim() || value);
+  const value = $('train-id')?.value?.trim() || queryTrain || localStorage.getItem('rippleeta_train_id') || DEFAULT_TRAIN;
+  if ($('train-id') && $('train-id').value !== value) $('train-id').value = value;
+  return value;
 }
 
 function persistTrain(value) {
@@ -251,7 +251,10 @@ async function loadPassenger() {
   let passenger = {};
 
   try {
-    const results = await Promise.all([api(`/predict/${id}`), api(`/predict/${id}/passenger`)]);
+    const results = await Promise.all([
+      api(`/predict/${id}`),
+      api(`/predict/${id}/passenger`).catch(() => ({}))
+    ]);
     prediction = results[0];
     passenger = results[1] || {};
   } catch (err) {
@@ -490,7 +493,10 @@ async function loadStation() {
   let station = {};
 
   try {
-    const results = await Promise.all([api(`/predict/${id}`), api(`/predict/${id}/station-master`)]);
+    const results = await Promise.all([
+      api(`/predict/${id}`),
+      api(`/predict/${id}/station-master`).catch(() => ({}))
+    ]);
     prediction = results[0];
     station = results[1] || {};
   } catch (err) {
@@ -964,7 +970,10 @@ async function loadCrew() {
   let crew = {};
 
   try {
-    const results = await Promise.all([api(`/predict/${id}`), api(`/predict/${id}/crew-controller`)]);
+    const results = await Promise.all([
+      api(`/predict/${id}`),
+      api(`/predict/${id}/crew-controller`).catch(() => ({}))
+    ]);
     prediction = results[0];
     crew = results[1] || {};
   } catch (err) {
@@ -1327,7 +1336,7 @@ async function loadFeeder() {
   try {
     const results = await Promise.all([
       api(`/predict/${id}`),
-      api(`/predict/${id}/feeder-transport?cutoff_time=${encodeURIComponent(cutoffIso)}`)
+      api(`/predict/${id}/feeder-transport?cutoff_time=${encodeURIComponent(cutoffIso)}`).catch(() => ({}))
     ]);
     prediction = results[0];
     feeder = results[1] || {};
@@ -1605,7 +1614,7 @@ async function loadMaintenance() {
   try {
     const results = await Promise.all([
       api(`/predict/${id}`),
-      api(`/predict/${id}/maintenance`)
+      api(`/predict/${id}/maintenance`).catch(() => ({}))
     ]);
     prediction = results[0];
     result = results[1] || {};
@@ -2894,6 +2903,7 @@ $('leave-deadline-input')?.addEventListener('input', () => {
 document.addEventListener('click', (e) => {
   const chip = e.target.closest('.train-chip');
   if (!chip) return;
+  e.preventDefault();
   const tid = chip.dataset.train;
   if (tid) {
     if ($('train-id')) {
