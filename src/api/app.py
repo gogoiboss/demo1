@@ -614,10 +614,19 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             ("DEST", "Destination Terminal", 30, d_min, "en_route"),
         ])
 
-        result = []
-        for code, name, offset_min, stn_delay, status in stops:
+        result: list[StationHistory] = []
+        for code, name, offset_min, stn_delay, status_str in stops:
             sched = now + timedelta(minutes=offset_min)
-            act = sched + timedelta(minutes=stn_delay) if status == "departed" else None
+            status_val: Literal["departed", "arrived", "en_route"] = (
+                "departed"
+                if status_str == "departed"
+                else ("arrived" if status_str == "arrived" else "en_route")
+            )
+            act = (
+                sched + timedelta(minutes=stn_delay)
+                if status_val == "departed"
+                else None
+            )
             result.append(
                 StationHistory(
                     station_code=code,
@@ -625,7 +634,7 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
                     scheduled_arrival=sched,
                     actual_arrival=act,
                     delay_min=stn_delay,
-                    status=status,
+                    status=status_val,
                 )
             )
         return result
