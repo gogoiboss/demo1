@@ -3980,45 +3980,75 @@ select option:checked {
   color: #5F7185 !important;
 }
 
-/* Topbar Return Button (Top-Left Corner Navigation) */
-.topbar-return-btn {
-  position: absolute;
-  left: 1.5rem;
-  display: inline-flex;
+/* Topbar Return Button & Layout (Top-Left Corner Navigation) */
+.topbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  max-width: 1240px !important;
+  margin: 0 auto !important;
+  padding: 1.1rem 1.5rem 0.5rem !important;
+  min-height: 64px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+.topbar-left {
+  display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-family: var(--sans, 'Inter', sans-serif);
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--primary, #123B5D);
-  background: #FFFFFF;
-  border: 1px solid var(--line, #CBD5E1);
-  padding: 0.4rem 0.85rem;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  cursor: pointer;
-  z-index: 100;
+  min-width: 170px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 170px;
+}
+
+.topbar-return-btn {
+  position: static !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  font-family: var(--sans, 'Inter', sans-serif) !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  color: var(--primary, #123B5D) !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid var(--line, #CBD5E1) !important;
+  padding: 0.45rem 1rem !important;
+  border-radius: 8px !important;
+  text-decoration: none !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 2px 6px rgba(18, 59, 93, 0.08) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
 }
 
 .topbar-return-btn:hover {
   background: var(--primary, #123B5D) !important;
   color: #FFFFFF !important;
   border-color: var(--primary, #123B5D) !important;
-  transform: translateX(-2px);
-  box-shadow: 0 4px 12px rgba(18, 59, 93, 0.15);
+  transform: translateX(-3px) !important;
+  box-shadow: 0 4px 14px rgba(18, 59, 93, 0.18) !important;
 }
 
 .topbar-return-btn:active {
-  transform: translateX(0);
+  transform: translateX(0) !important;
 }
 
 @media (max-width: 640px) {
+  .topbar-left, .topbar-right {
+    min-width: auto;
+  }
   .topbar-return-btn span:last-child {
     display: none;
   }
   .topbar-return-btn {
-    padding: 0.4rem 0.6rem;
+    padding: 0.4rem 0.65rem !important;
   }
 }

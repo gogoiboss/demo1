@@ -1021,16 +1021,19 @@
 <body class="has-grain" data-view="sandbox">
 
   <!-- ── Minimal Centered Logo Topbar ── -->
-  <div class="topbar" style="position:relative; display:flex; align-items:center; justify-content:center; padding:0.85rem 1.5rem; min-height:60px;">
-    <a href="index.html" class="topbar-return-btn" id="btn-return-dashboard" aria-label="Return to Dashboard">
-      <span style="font-size:0.95rem; line-height:1;">&larr;</span>
-      <span>Return to Dashboard</span>
-    </a>
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="topbar-return-btn" id="btn-return-dashboard" aria-label="Return to Dashboard">
+        <span style="font-size:0.95rem; line-height:1;">&larr;</span>
+        <span>Return to Dashboard</span>
+      </a>
+    </div>
     <a class="brand" href="/" aria-label="RippleETA Home" style="display:inline-flex; align-items:center; gap:0.65rem; text-decoration:none; color:var(--primary);">
       <span class="brand-mark" style="background:var(--primary); color:#FFFFFF; width:30px; height:30px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:0.95rem; font-family:var(--serif); font-weight:700; border:2px solid var(--signal, #E5B83F);">R</span>
       <span class="brand-logotype" style="font-family:var(--display); font-weight:800; font-size:1.25rem; color:var(--primary); letter-spacing:0.02em;">RippleETA</span>
     </a>
-  </div>
+    <div class="topbar-right"></div>
+  </header>
 
   <div class="app-layout">
     <main class="main-content">
