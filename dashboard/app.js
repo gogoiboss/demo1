@@ -1490,6 +1490,8 @@ async function loadFeeder() {
       transStatus.textContent = 'CONNECTION TIGHT (USE JUDGMENT)';
       transStatus.style.color = 'var(--signal)';
     }
+  }
+
   // Update schematic train token text
   const feederTrainTokenText = $('schematic-train-token')?.querySelector('text');
   if (feederTrainTokenText) feederTrainTokenText.textContent = `🚆 ${prediction.train_id}`;
