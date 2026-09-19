@@ -22,16 +22,12 @@
     { "source": "/system/(.*)", "destination": "https://demo1-production-b538.up.railway.app/system/$1" },
     { "source": "/trains", "destination": "https://demo1-production-b538.up.railway.app/trains" },
     { "source": "/graph/(.*)", "destination": "https://demo1-production-b538.up.railway.app/graph/$1" },
-    { "source": "/dashboard", "destination": "/dashboard/index.html" },
-    { "source": "/dashboard/", "destination": "/dashboard/index.html" },
-    { "source": "/dashboard/(.*)", "destination": "/dashboard/$1" },
-    { "source": "/eta/(.*)", "destination": "/eta/$1" },
-    { "source": "/", "destination": "/eta/index.html" },
+    { "source": "/", "destination": "/eta/" },
     { "source": "/three.min.js", "destination": "/eta/three.min.js" },
     { "source": "/GLTFLoader.js", "destination": "/eta/GLTFLoader.js" },
     { "source": "/wap7_model_data.js", "destination": "/eta/wap7_model_data.js" },
     { "source": "/wap7.glb", "destination": "/eta/wap7.glb" },
     { "source": "/assetes/(.*)", "destination": "/eta/assetes/$1" },
-    { "source": "/privacy.html", "destination": "/eta/privacy.html" }
+    { "source": "/privacy", "destination": "/eta/privacy" }
   ]
 }
