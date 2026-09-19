@@ -461,7 +461,7 @@
       <input type="text" id="nav-search-input" placeholder="Search train, station..." autocomplete="off" style="width:100%; border:none; background:transparent; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--text-primary); outline:none;" />
       <div id="search-dropdown" class="search-dropdown" style="display:none; position:absolute; top:40px; left:0; right:0; background:#FFFFFF; border:1px solid var(--line-strong); border-radius:12px; box-shadow:0 8px 24px rgba(18,59,93,0.12); z-index:100; max-height:260px; overflow-y:auto; padding:6px 0;"></div>
     </div>
-    <a href="/dashboard/index.html" class="nav-pill-btn">
+    <a href="/dashboard/" class="nav-pill-btn">
       <span class="live-dot"></span> Open Dashboard ↗
     </a>
     <button type="button" class="nav-pill-btn" onclick="if(window.triggerReplay3D) window.triggerReplay3D();">
@@ -509,7 +509,7 @@
     <h1 class="hero-h1 display">NETWORK<br><span class="line2">OVERVIEW</span></h1>
     <p class="hero-sub">Watch how one late train turns into a network-wide ripple — and how RippleETA sees it coming before the platform does.</p>
     <div class="hero-actions">
-      <a class="btn-primary" href="/dashboard/index.html">Proceed to Dashboard <span aria-hidden="true">→</span></a>
+      <a class="btn-primary" href="/dashboard/">Proceed to Dashboard <span aria-hidden="true">→</span></a>
       <a class="btn-secondary" href="#network">Explore 3D Network</a>
     </div>
   </div>
@@ -598,7 +598,7 @@
     <span>Built for a smarter, more reliable Indian Railways</span>
   </div>
   <div class="f-right">
-    <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a>
+    <a href="privacy" target="_blank" rel="noopener noreferrer">Privacy</a>
     <a href="#terms" onclick="openFooterModal('terms'); return false;">Terms</a>
     <a href="#contact" onclick="openFooterModal('contact'); return false;">Contact</a>
   </div>
@@ -1578,7 +1578,7 @@ window.addEventListener('load', function() {
       if (rawTarget && typeof rawTarget === 'string' && !rawTarget.startsWith('//') && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(rawTarget)) {
         try {
           const u = new URL(rawTarget, window.location.origin);
-          if (u.origin === window.location.origin && /^\/dashboard\/(index|passenger|station-master|crew|feeder|maintenance|control|sandbox)\.html$/.test(u.pathname)) {
+          if (u.origin === window.location.origin && /^\/dashboard\/(index|passenger|station-master|crew|feeder|maintenance|control|sandbox)$/.test(u.pathname)) {
             dest = u.pathname + u.search + u.hash;
           }
         } catch { /* fallback to default */ }

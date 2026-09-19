@@ -303,7 +303,7 @@ function _closeAuthModal() {
 }
 
 export function getSafeReturnUrl(rawUrl) {
-  const DEFAULT_DESTINATION = '/dashboard/index.html';
+  const DEFAULT_DESTINATION = '/dashboard/';
   if (!rawUrl || typeof rawUrl !== 'string') {
     return DEFAULT_DESTINATION;
   }
@@ -337,7 +337,7 @@ export function getSafeReturnUrl(rawUrl) {
     }
 
     // Whitelist allowed stakeholder dashboard pages
-    const ALLOWED_PAGES = /^\/dashboard\/(index|passenger|station-master|crew|feeder|maintenance|control|sandbox)\.html$/;
+    const ALLOWED_PAGES = /^\/dashboard\/(index|passenger|station-master|crew|feeder|maintenance|control|sandbox)$/;
     if (!ALLOWED_PAGES.test(pathname)) {
       return DEFAULT_DESTINATION;
     }

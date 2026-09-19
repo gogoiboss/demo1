@@ -642,7 +642,7 @@
       role: 'passenger',
       title: 'Passenger',
       num: '01',
-      targetUrl: '/dashboard/passenger.html'
+      targetUrl: '/dashboard/passenger'
     };
 
     function showAlert(msg) {
@@ -689,7 +689,7 @@
           localStorage.setItem('user', JSON.stringify({ email: selectedUser.email, role: selectedUser.role }));
           showAlert(`Authenticated! Redirecting to ${selectedUser.title} Dashboard...`);
           setTimeout(() => {
-            window.location.href = selectedUser.targetUrl || '/dashboard/index.html';
+            window.location.href = selectedUser.targetUrl || '/dashboard/';
           }, 400);
         } else {
           showAlert(`Login failed: ${data.error || 'Unknown error'}`);
@@ -697,7 +697,7 @@
       } catch (err) {
         console.error('Login error:', err);
         localStorage.setItem('user', JSON.stringify({ email: selectedUser.email, role: selectedUser.role }));
-        window.location.href = selectedUser.targetUrl || '/dashboard/index.html';
+        window.location.href = selectedUser.targetUrl || '/dashboard/';
       }
     }
 
@@ -739,7 +739,7 @@
           }
           showAlert('Google Authentication Successful! Redirecting...');
           setTimeout(() => {
-            window.location.href = selectedUser.targetUrl || '/dashboard/index.html';
+            window.location.href = selectedUser.targetUrl || '/dashboard/';
           }, 500);
         } else {
           showAlert(`Google auth notice: Logging in as selected user ${selectedUser.title}`);
@@ -777,12 +777,12 @@
     (function autoSelectFromQueryParam() {
       const roleParam = new URLSearchParams(window.location.search).get('role');
       const roleCardMap = {
-        'passenger':        { id: 'card-passenger',    email: 'passenger@rippleeta.in',   role: 'passenger',       title: 'Passenger',        num: '01', targetUrl: '/dashboard/passenger.html' },
-        'station_master':   { id: 'card-station',      email: 'station@rippleeta.in',     role: 'station_master',  title: 'Station Master',   num: '02', targetUrl: '/dashboard/station-master.html' },
-        'crew_controller':  { id: 'card-crew',         email: 'crew@rippleeta.in',        role: 'crew_controller', title: 'Crew Controller',  num: '03', targetUrl: '/dashboard/crew.html' },
-        'feeder_transport': { id: 'card-feeder',       email: 'feeder@rippleeta.in',      role: 'feeder_transport',title: 'Feeder Transport', num: '04', targetUrl: '/dashboard/feeder.html' },
-        'maintenance':      { id: 'card-maintenance',  email: 'maintenance@rippleeta.in', role: 'maintenance',     title: 'Maintenance',      num: '05', targetUrl: '/dashboard/maintenance.html' },
-        'control_room':     { id: 'card-control',      email: 'control@rippleeta.in',     role: 'control_room',    title: 'Control Room',     num: '06', targetUrl: '/dashboard/control.html' },
+        'passenger':        { id: 'card-passenger',    email: 'passenger@rippleeta.in',   role: 'passenger',       title: 'Passenger',        num: '01', targetUrl: '/dashboard/passenger' },
+        'station_master':   { id: 'card-station',      email: 'station@rippleeta.in',     role: 'station_master',  title: 'Station Master',   num: '02', targetUrl: '/dashboard/station-master' },
+        'crew_controller':  { id: 'card-crew',         email: 'crew@rippleeta.in',        role: 'crew_controller', title: 'Crew Controller',  num: '03', targetUrl: '/dashboard/crew' },
+        'feeder_transport': { id: 'card-feeder',       email: 'feeder@rippleeta.in',      role: 'feeder_transport',title: 'Feeder Transport', num: '04', targetUrl: '/dashboard/feeder' },
+        'maintenance':      { id: 'card-maintenance',  email: 'maintenance@rippleeta.in', role: 'maintenance',     title: 'Maintenance',      num: '05', targetUrl: '/dashboard/maintenance' },
+        'control_room':     { id: 'card-control',      email: 'control@rippleeta.in',     role: 'control_room',    title: 'Control Room',     num: '06', targetUrl: '/dashboard/control' },
       };
       if (roleParam && roleCardMap[roleParam]) {
         const m = roleCardMap[roleParam];

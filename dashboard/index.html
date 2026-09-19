@@ -1215,7 +1215,7 @@
             RippleETA forecasts how a train&rsquo;s delay evolves across the journey &mdash; then translates one calibrated forecast into decision-ready intelligence.
           </p>
           <div class="hero-cta-row">
-            <a href="login.html" class="cta-primary" id="hero-login-btn">
+            <a href="login" class="cta-primary" id="hero-login-btn">
               Log In &rarr;
             </a>
           </div>
@@ -1386,7 +1386,7 @@
 
       <div class="gateways-grid">
         <!-- 01. Passenger -->
-        <a href="login.html?role=passenger" class="ticket-gateway-card" data-role="passenger">
+        <a href="login?role=passenger" class="ticket-gateway-card" data-role="passenger">
           <div class="card-top-row">
             <span class="card-kicker">01 &bull; PASSENGER ADVISORY</span>
             <span class="card-role-num">B2C</span>
@@ -1410,7 +1410,7 @@
         </a>
 
         <!-- 02. Station Master -->
-        <a href="login.html?role=station_master" class="ticket-gateway-card" data-role="station_master">
+        <a href="login?role=station_master" class="ticket-gateway-card" data-role="station_master">
           <div class="card-top-row">
             <span class="card-kicker">02 &bull; PLATFORM TRIAGE</span>
             <span class="card-role-num">CONTROL</span>
@@ -1434,7 +1434,7 @@
         </a>
 
         <!-- 03. Crew Controller -->
-        <a href="crew.html" class="ticket-gateway-card" data-role="crew_controller">
+        <a href="crew" class="ticket-gateway-card" data-role="crew_controller">
           <div class="card-top-row">
             <span class="card-kicker">03 &bull; STATUTORY DUTY</span>
             <span class="card-role-num">DISPATCH</span>
@@ -1458,7 +1458,7 @@
         </a>
 
         <!-- 04. Feeder Transport -->
-        <a href="feeder.html" class="ticket-gateway-card" data-role="feeder_transport">
+        <a href="feeder" class="ticket-gateway-card" data-role="feeder_transport">
           <div class="card-top-row">
             <span class="card-kicker">04 &bull; MULTI-MODAL FLEET</span>
             <span class="card-role-num">CONNECTIVITY</span>
@@ -1482,7 +1482,7 @@
         </a>
 
         <!-- 05. Maintenance -->
-        <a href="maintenance.html" class="ticket-gateway-card" data-role="maintenance">
+        <a href="maintenance" class="ticket-gateway-card" data-role="maintenance">
           <div class="card-top-row">
             <span class="card-kicker">05 &bull; TURNAROUND BUDGET</span>
             <span class="card-role-num">YARD</span>
@@ -1506,7 +1506,7 @@
         </a>
 
         <!-- 06. Control Room -->
-        <a href="control.html" class="ticket-gateway-card" data-role="control_room">
+        <a href="control" class="ticket-gateway-card" data-role="control_room">
           <div class="card-top-row">
             <span class="card-kicker">06 &bull; NETWORK RADAR</span>
             <span class="card-role-num">REGIONAL</span>
@@ -1529,7 +1529,7 @@
           </div>
         </a>
         <!-- 07. Ghost Sandbox -->
-        <a href="sandbox.html" class="ticket-gateway-card" data-role="sandbox">
+        <a href="sandbox" class="ticket-gateway-card" data-role="sandbox">
           <div class="card-top-row">
             <span class="card-kicker">07 &bull; INTERACTIVE PROOF</span>
             <span class="card-role-num">3D ISOMETRIC</span>
@@ -1799,7 +1799,7 @@
           <strong>Navigation</strong>
           <a href="#hero" style="color:var(--primary); text-decoration:none;">&uarr; Return to Top</a><br>
           <a href="/" style="color:var(--primary); text-decoration:none;">&larr; Return to 3D Landing</a><br>
-          <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--primary); text-decoration:none;">Privacy Policy</a>
+          <a href="privacy" target="_blank" rel="noopener noreferrer" style="color:var(--primary); text-decoration:none;">Privacy Policy</a>
         </div>
       </div>
     </div>
@@ -2422,7 +2422,7 @@
         if (anchor) {
           try {
             const rawHref = anchor.getAttribute('href') || '/';
-            if (rawHref === '/' || rawHref.startsWith('/?') || rawHref === '/index.html') {
+            if (rawHref === '/' || rawHref.startsWith('/?') ) {
               const targetUrl = new URL(rawHref, window.location.origin);
               targetUrl.searchParams.set('returnTo', dest);
               anchor.href = targetUrl.pathname + targetUrl.search + targetUrl.hash;
@@ -2431,7 +2431,7 @@
         }
       }
 
-      document.querySelectorAll('a[href="/"], a[href="/index.html"], a.brand, #btn-back-3d, .cta-secondary').forEach((anchor) => {
+      document.querySelectorAll('a[href="/"], a.brand, #btn-back-3d, .cta-secondary').forEach((anchor) => {
         anchor.addEventListener('click', () => handleReturnClick(anchor));
       });
     }

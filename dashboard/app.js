@@ -2979,7 +2979,7 @@ function wireAuthReturnRouting() {
     if (anchor) {
       try {
         const rawHref = anchor.getAttribute('href') || '/';
-        if (rawHref === '/' || rawHref.startsWith('/?') || rawHref === '/index.html') {
+        if (rawHref === '/' || rawHref.startsWith('/?') ) {
           const targetUrl = new URL(rawHref, window.location.origin);
           targetUrl.searchParams.set('returnTo', dest);
           anchor.href = targetUrl.pathname + targetUrl.search + targetUrl.hash;
@@ -2989,7 +2989,7 @@ function wireAuthReturnRouting() {
   }
 
   // Intercept all landing / brand links and back buttons
-  document.querySelectorAll('a[href="/"], a[href="/index.html"], a.brand, #btn-back-3d').forEach((anchor) => {
+  document.querySelectorAll('a[href="/"], a.brand, #btn-back-3d').forEach((anchor) => {
     anchor.addEventListener('click', () => handleReturnClick(anchor));
   });
 }

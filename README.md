@@ -283,7 +283,7 @@ uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8000
 ```bash
 python -m http.server 8080
 ```
-*Access the landing experience at `http://127.0.0.1:8080/eta/index.html` or the dashboard at `http://127.0.0.1:8080/dashboard/index.html`.*
+*Access the landing experience at `http://127.0.0.1:8080/eta/` or the dashboard at `http://127.0.0.1:8080/dashboard/`.*
 
 ---
 
