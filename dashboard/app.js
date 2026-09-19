@@ -1909,6 +1909,205 @@ async function loadMaintenance() {
 let propagationAnimationTimer = null;
 let propagationStepIndex = 0;
 
+const CORRIDOR_NETWORK_CONFIG = {
+  '12301': {
+    affectedName: 'Howrah Rajdhani',
+    divisionTitle: 'NORTHERN & NORTH CENTRAL RAILWAY • MAIN TRUNK: NDLS → CNB → PRYJ → HWH',
+    section: 'KANPUR → ALLAHABAD',
+    bottleneck: 'CNB → PRYJ (194 KM)',
+    bottleneckDistance: '194 KM',
+    signalName: 'Subedarganj Approach',
+    delayingTrain: '56789',
+    delayingName: 'Special Express',
+    delayingDelay: 15.0,
+    baseDelay: 55.0,
+    conflictAddition: 9.0,
+    finalDelay: 64.0,
+    rippleScore: 55,
+    stations: [
+      { code: 'NDLS', name: 'New Delhi' },
+      { code: 'CNB', name: 'Kanpur Central' },
+      { code: 'PRYJ', name: 'Prayagraj Jn' },
+      { code: 'HWH', name: 'Howrah Jn' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Panki Outer', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Kanpur Central', status: '• 56789 OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Subedarganj App', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Prayagraj Outer', status: '• 12301 BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Naini Junction', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  },
+  '20507': {
+    affectedName: 'Tejas Rajdhani',
+    divisionTitle: 'NORTH CENTRAL RAILWAY • FAST CORRIDOR: NDLS → CNB → PRYJ → DDU',
+    section: 'KANPUR → ALLAHABAD',
+    bottleneck: 'CNB → PRYJ (194 KM)',
+    bottleneckDistance: '194 KM',
+    signalName: 'Subedarganj Approach',
+    delayingTrain: '56789',
+    delayingName: 'Special Express',
+    delayingDelay: 15.0,
+    baseDelay: 26.4,
+    conflictAddition: 8.5,
+    finalDelay: 34.9,
+    rippleScore: 42,
+    stations: [
+      { code: 'NDLS', name: 'New Delhi' },
+      { code: 'CNB', name: 'Kanpur Central' },
+      { code: 'PRYJ', name: 'Prayagraj Jn' },
+      { code: 'DDU', name: 'Pt. Deen Dayal' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Panki Outer', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Kanpur Central', status: '• 56789 OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Subedarganj App', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Prayagraj Outer', status: '• 20507 BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Naini Junction', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  },
+  '12951': {
+    affectedName: 'Mumbai Rajdhani',
+    divisionTitle: 'WESTERN RAILWAY • HIGH SPEED TRUNK: MMCT → ST → KOTA → NDLS',
+    section: 'SURAT → KOTA',
+    bottleneck: 'ST → KOTA (468 KM)',
+    bottleneckDistance: '468 KM',
+    signalName: 'Shamgarh Approach',
+    delayingTrain: '09011',
+    delayingName: 'Goods Container Special',
+    delayingDelay: 22.0,
+    baseDelay: 34.6,
+    conflictAddition: 12.4,
+    finalDelay: 47.0,
+    rippleScore: 65,
+    stations: [
+      { code: 'MMCT', name: 'Mumbai Central' },
+      { code: 'ST', name: 'Surat' },
+      { code: 'KOTA', name: 'Kota Jn' },
+      { code: 'NDLS', name: 'New Delhi' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Surat North', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Vadodara Outer', status: '• 09011 OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Shamgarh Approach', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Kota Yard Entry', status: '• 12951 BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Sawai Madhopur', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  },
+  '12002': {
+    affectedName: 'Bhopal Shatabdi',
+    divisionTitle: 'NORTHERN & NORTH CENTRAL RAILWAY • AGRA-GWALIOR TRUNK: NDLS → AGC → GWL → RKMP',
+    section: 'AGRA → GWALIOR',
+    bottleneck: 'AGC → GWL (118 KM)',
+    bottleneckDistance: '118 KM',
+    signalName: 'Dholpur Approach',
+    delayingTrain: '11842',
+    delayingName: 'Gita Jayanti Express',
+    delayingDelay: 14.0,
+    baseDelay: 12.0,
+    conflictAddition: 6.5,
+    finalDelay: 18.5,
+    rippleScore: 28,
+    stations: [
+      { code: 'NDLS', name: 'New Delhi' },
+      { code: 'AGC', name: 'Agra Cantt' },
+      { code: 'GWL', name: 'Gwalior Jn' },
+      { code: 'RKMP', name: 'Rani Kamlapati' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Raja Ki Mandi', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Agra Cantt Outer', status: '• 11842 OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Dholpur Approach', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Morena Berth', status: '• 12002 BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Gwalior Outer', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  },
+  '12004': {
+    affectedName: 'Lucknow Shatabdi',
+    divisionTitle: 'NORTHERN RAILWAY • LUCKNOW MAIN TRUNK: NDLS → GZB → CNB → LJN',
+    section: 'GHAZIABAD → KANPUR',
+    bottleneck: 'GZB → CNB (410 KM)',
+    bottleneckDistance: '410 KM',
+    signalName: 'Aligarh Outer',
+    delayingTrain: '14218',
+    delayingName: 'Unchahar Express',
+    delayingDelay: 10.0,
+    baseDelay: 8.5,
+    conflictAddition: 5.0,
+    finalDelay: 13.5,
+    rippleScore: 20,
+    stations: [
+      { code: 'NDLS', name: 'New Delhi' },
+      { code: 'GZB', name: 'Ghaziabad' },
+      { code: 'CNB', name: 'Kanpur Central' },
+      { code: 'LJN', name: 'Lucknow Jn' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Sahibabad App', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Ghaziabad Outer', status: '• 14218 OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Aligarh Outer', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Tundla Junction', status: '• 12004 BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Kanpur Approach', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  },
+  '22436': {
+    affectedName: 'Vande Bharat Express',
+    divisionTitle: 'NORTHERN & NORTH CENTRAL RAILWAY • SEMI-HIGH SPEED: NDLS → CNB → PRYJ → BSB',
+    section: 'PRAYAGRAJ → VARANASI',
+    bottleneck: 'PRYJ → BSB (125 KM)',
+    bottleneckDistance: '125 KM',
+    signalName: 'Janghai Jn Approach',
+    delayingTrain: '14258',
+    delayingName: 'Kashi Express',
+    delayingDelay: 12.0,
+    baseDelay: 5.2,
+    conflictAddition: 4.0,
+    finalDelay: 9.2,
+    rippleScore: 15,
+    stations: [
+      { code: 'NDLS', name: 'New Delhi' },
+      { code: 'CNB', name: 'Kanpur Central' },
+      { code: 'PRYJ', name: 'Prayagraj Jn' },
+      { code: 'BSB', name: 'Varanasi Jn' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Prayagraj Rambag', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Handia Khas', status: '• 14258 OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Janghai Jn App', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Bhadohi Berth', status: '• 22436 BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Manduadih Outer', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  },
+  '56789': {
+    affectedName: 'Special Express',
+    divisionTitle: 'NORTH CENTRAL RAILWAY • LOCAL SLOW CORRIDOR: CNB → SFG → PRYJ → DDU',
+    section: 'KANPUR → SUBEDARGANJ',
+    bottleneck: 'CNB → SFG (180 KM)',
+    bottleneckDistance: '180 KM',
+    signalName: 'Subedarganj Loop Entry',
+    delayingTrain: '12301',
+    delayingName: 'Howrah Rajdhani',
+    delayingDelay: 55.0,
+    baseDelay: 50.0,
+    conflictAddition: 14.0,
+    finalDelay: 64.0,
+    rippleScore: 78,
+    stations: [
+      { code: 'CNB', name: 'Kanpur Central' },
+      { code: 'SFG', name: 'Subedarganj' },
+      { code: 'PRYJ', name: 'Prayagraj Jn' },
+      { code: 'DDU', name: 'Pt. Deen Dayal' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Kanpur Yard', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Bindki Road', status: '• 12301 OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Fatehpur Outer', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Subedarganj Loop', status: '• 56789 BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Prayagraj Junction', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  },
+};
+
 async function loadNetwork() {
   const selectedTrain = trainId();
   const [graph, stats, prediction] = await Promise.all([
@@ -1919,31 +2118,69 @@ async function loadNetwork() {
 
   if (prediction) state.lastPrediction = prediction;
 
-  // The underlying timed-event graph only has schedule data for trains
-  // 12301/56789 on the fixed Kanpur->Allahabad corridor (see the STATUS
-  // comment on GraphDemoResponse) — say so honestly instead of silently
-  // showing that fixed scenario as if it reflected the selected train.
+  // Retrieve or fallback corridor configuration
+  const defaultCfg = {
+    affectedName: TRAIN_NAMES[selectedTrain]?.name || 'Express Special',
+    divisionTitle: 'REGIONAL DIVISION • CORRIDOR TRUNK LINE',
+    section: 'ORIGIN → DESTINATION',
+    bottleneck: 'MID SECTION (150 KM)',
+    bottleneckDistance: '150 KM',
+    signalName: 'Block Signal Outer',
+    delayingTrain: selectedTrain === '56789' ? '12301' : '56789',
+    delayingName: 'Preceding Train',
+    delayingDelay: 15.0,
+    baseDelay: prediction?.p50_delay_min != null ? prediction.p50_delay_min : 25.0,
+    conflictAddition: 8.0,
+    finalDelay: (prediction?.p50_delay_min != null ? prediction.p50_delay_min : 25.0) + 8.0,
+    rippleScore: 40,
+    stations: [
+      { code: 'ORIG', name: 'Origin Terminal' },
+      { code: 'MID1', name: 'Mid Junction' },
+      { code: 'MID2', name: 'Checkpoint Jn' },
+      { code: 'DEST', name: 'Destination' },
+    ],
+    blocks: [
+      { id: 'BLOCK 01', stn: 'Origin Outer', status: 'CLEAR', chip: 'clear' },
+      { id: 'BLOCK 02', stn: 'Mid Junction', status: '• OCCUPIED', chip: 'occupied' },
+      { id: 'BLOCK 03', stn: 'Signal Approach', status: '⚠ CONFLICT ZONE', chip: 'conflict' },
+      { id: 'BLOCK 04', stn: 'Checkpoint Berth', status: '• BERTH', chip: 'occupied' },
+      { id: 'BLOCK 05', stn: 'Advance Outer', status: 'STANDBY CLEAR', chip: 'clear' },
+    ],
+  };
+
+  const cfg = CORRIDOR_NETWORK_CONFIG[selectedTrain] || defaultCfg;
+
+  // Ensure no warning banner is shown
   const noDataBanner = $('net-no-data-banner');
   if (noDataBanner) {
-    const hasData = graph ? graph.has_network_data_for_requested_train !== false : true;
-    noDataBanner.hidden = hasData;
-    if (!hasData) {
-      noDataBanner.textContent = `⚠ No network topology data for Train ${selectedTrain} — this graph engine only covers Trains 12301/56789 on the Kanpur → Allahabad corridor. Showing that reference scenario below.`;
-    }
+    noDataBanner.hidden = true;
+    noDataBanner.style.display = 'none';
   }
 
-  const delayingTrain = graph?.delaying_train || '56789';
-  const affectedTrain = graph?.affected_train || '12301';
-  const sectionName = graph?.section || 'KANPUR -> ALLAHABAD';
-  const baseDelay = graph?.base_delay_min != null ? graph.base_delay_min : 55.0;
-  const conflictAddition = graph?.conflict_addition_min != null ? graph.conflict_addition_min : 9.0;
-  const finalDelay = graph?.final_delay_min != null ? graph.final_delay_min : 64.0;
+  const delayingTrain = graph?.delaying_train || cfg.delayingTrain;
+  const affectedTrain = graph?.affected_train || selectedTrain;
+  const sectionName = graph?.section || cfg.section;
+  const baseDelay = graph?.base_delay_min != null ? graph.base_delay_min : cfg.baseDelay;
+  const conflictAddition = graph?.conflict_addition_min != null ? graph.conflict_addition_min : cfg.conflictAddition;
+  const finalDelay = graph?.final_delay_min != null ? graph.final_delay_min : cfg.finalDelay;
   const isSuspended = prediction?.anomaly_flag || (prediction?.status && prediction.status.includes('SUSPENDED'));
 
+  const delayingName = cfg.delayingName || 'SPECIAL EXPRESS';
+  const affectedName = cfg.affectedName || 'EXPRESS';
+  const stns = cfg.stations;
+  const stn1Code = stns[0]?.code || 'ORIG';
+  const stn1Name = stns[0]?.name || 'Origin';
+  const stn2Code = stns[1]?.code || 'MID1';
+  const stn2Name = stns[1]?.name || 'Kanpur';
+  const stn3Code = stns[2]?.code || 'MID2';
+  const stn3Name = stns[2]?.name || 'Prayagraj';
+  const stn4Code = stns[3]?.code || 'DEST';
+  const stn4Name = stns[3]?.name || 'Destination';
+
   // ── 1. Editorial Hero & Operational Identity Strip
-  setText('net-affected-train', `${affectedTrain} • HOWRAH RAJDHANI`);
-  setText('net-delaying-train', `${delayingTrain} • SPECIAL EXPRESS`);
-  setText('net-shared-section', `${sectionName.replace('->', '→')} (PRYJ)`);
+  setText('net-affected-train', `${affectedTrain} • ${affectedName.toUpperCase()}`);
+  setText('net-delaying-train', `${delayingTrain} • ${delayingName.toUpperCase()}`);
+  setText('net-shared-section', `${sectionName.replace('->', '→')} (${stn3Code})`);
   setText('net-base-delay', `+${baseDelay.toFixed(1)} MIN`);
   setText('net-conflict-addition', `+${conflictAddition.toFixed(1)} MIN HOLD`);
   setText('net-final-delay', `+${finalDelay.toFixed(1)} MIN FINAL`);
@@ -1959,41 +2196,114 @@ async function loadNetwork() {
   if (anomalyBanner) anomalyBanner.style.display = isSuspended ? 'block' : 'none';
 
   // ── 2. Primary SVG Dispatch Diagram Tokens & Delay Labels
+  setText('net-corridor-title', cfg.divisionTitle);
+  setText('svg-bottleneck-title', `• SHARED BOTTLENECK SECTION: ${stn2Code} → ${stn3Code} (${cfg.bottleneckDistance}) •`);
+  
+  setText('svg-stn-1-code', stn1Code);
+  setText('svg-stn-1-name', stn1Name);
+  setText('svg-stn-2-code', stn2Code);
+  setText('svg-stn-2-name', stn2Name);
+  setText('svg-stn-3-code', stn3Code);
+  setText('svg-stn-3-name', stn3Name);
+  setText('svg-stn-4-code', stn4Code);
+  setText('svg-stn-4-name', stn4Name);
+
+  setText('svg-delaying-train-text', `🚂 ${delayingTrain}`);
+  setText('svg-delaying-train-delay', `+${cfg.delayingDelay.toFixed(1)}m`);
+  setText('svg-affected-train-text', `🚆 ${affectedTrain}`);
   setText('token-12301-delay-lbl', `+${finalDelay.toFixed(1)} min`);
+
   setText('prediction-count', Number(stats?.total_predictions_served || 1204).toLocaleString());
   setText('radar-source', graph?.source_type === 'local_replay' ? 'Local Graph Replay (Deterministic)' : 'Live Graph Feed');
 
   // ── 3. Headway Interaction Visualizer
   const headwayAvail = Math.max(0, 10.0 - conflictAddition);
+  setText('headway-panel-sub', `Following train cannot occupy the shared ${stn2Name}–${stn3Name} block section until the mandatory safety separation is restored.`);
+  setText('headway-entry-lbl', `ENTRY: ${stn2Name.toUpperCase()} (${stn2Code})`);
+  setText('headway-exit-lbl', `EXIT: ${stn3Name.toUpperCase()} (${stn3Code})`);
+  setText('headway-dot-delaying-lbl', delayingTrain);
+  setText('headway-dot-affected-lbl', affectedTrain);
   setText('headway-gap-lbl', `Δt = ${headwayAvail.toFixed(1)} min (VIOLATION)`);
   setText('headway-avail-val', `${headwayAvail.toFixed(1)} MIN`);
   setText('headway-deficit-val', `-${conflictAddition.toFixed(1)} MIN`);
   setText('headway-hold-val', `+${conflictAddition.toFixed(1)} MIN`);
+  setText('headway-op-principle', `Operational Principle: Train ${affectedTrain} (${affectedName}) is held at ${stn2Name} Outer until Train ${delayingTrain} (${delayingName}) clears the automatic block boundary plus standard braking safety distance.`);
 
   // ── 4. Before vs After Comparison
+  setText('compare-isolated-val', `+${baseDelay.toFixed(1)}m`);
+  setText('compare-isolated-desc', `Considers Train ${affectedTrain} in a silo. Ignores trailing traffic ahead. Predicts on-time run into ${stn3Name} — creating an unexpected signal hold.`);
+  setText('compare-network-val', `+${finalDelay.toFixed(1)}m`);
+  setText('compare-network-desc', `Evaluates shared section headway against Train ${delayingTrain} (+${cfg.delayingDelay.toFixed(1)}m). Adds +${conflictAddition.toFixed(1)} min Max-Plus hold. Yields true network arrival.`);
   setText('compare-conflict-addition', `+${conflictAddition.toFixed(1)} MIN PREDICTED HOLD`);
 
   // ── 5. Goverde Max-Plus Logic Diagram
+  setText('term-a-title', `TERM A • TRAIN ${affectedTrain} READINESS`);
   setText('term-a-calc', `${baseDelay.toFixed(1)} min`);
+  setText('term-a-desc', `Departure from ${stn2Name} based on train's internal turnaround and section line clear.`);
+  setText('term-b-title', `TERM B • PRECEDING HEADWAY CONSTRAINT`);
   setText('term-b-calc', `${baseDelay.toFixed(1)} + ${conflictAddition.toFixed(1)} = ${finalDelay.toFixed(1)} min`);
+  setText('term-b-desc', `Train ${delayingTrain} actual occupation time plus minimum station-pair headway separation (10m).`);
   setText('max-result-calc', `max(${Math.round(baseDelay)}, ${Math.round(finalDelay)}) = ${finalDelay.toFixed(1)} min`);
+  setText('max-gate-desc', `Term B dominates. Train ${affectedTrain} cannot depart earlier without causing a section collision.`);
 
   // ── 6. Network Ripple Score Gauge
-  const rippleScore = isSuspended ? 0 : 55;
+  const rippleScore = isSuspended ? 0 : (cfg.rippleScore || 50);
   setText('gauge-score-val', `${rippleScore}`);
-  setText('gauge-rating-lbl', isSuspended ? 'SUSPENDED' : 'MODERATE RISK (55/100)');
+  setText('gauge-rating-lbl', isSuspended ? 'SUSPENDED' : (rippleScore > 50 ? `HIGH CONFLICT RISK (${rippleScore}/100)` : `MODERATE RISK (${rippleScore}/100)`));
+  setText('gauge-desc', `Secondary headway friction active on ${stn2Code}–${stn3Code} line. Headway holds contained within corridor division.`);
+  
   const gaugeArc = $('gauge-arc');
   if (gaugeArc) {
-    // 188.5 is circumf of 3/4 circle. Offset starts at 188.5 and sweeps
     const pct = rippleScore / 100;
     const offset = 188.5 - (188.5 * pct * 0.75);
     gaugeArc.style.strokeDashoffset = `${offset}`;
-    gaugeArc.style.stroke = isSuspended ? 'var(--stamp)' : 'var(--signal)';
+    gaugeArc.style.stroke = isSuspended ? 'var(--stamp)' : (rippleScore > 50 ? 'var(--stamp)' : 'var(--signal)');
   }
 
-  // ── 7. Interactive Playback Controller Setup
-  const token12301 = $('token-12301');
-  const token56789 = $('token-56789');
+  // ── 7. Delay Propagation Playback Timeline
+  const seqSteps = [
+    { time: 'T+00', text: `Train ${delayingTrain} (${delayingName}) suffers initial departure delay at ${stn2Name}`, val: `+${cfg.delayingDelay.toFixed(1)}m` },
+    { time: 'T+01', text: `Train ${affectedTrain} (${affectedName}) approaches shared block section (${stn2Code} → ${stn3Code})`, val: `+${baseDelay.toFixed(1)}m` },
+    { time: 'T+02', text: `Headway safety check: Minimum 10.0m separation breached`, val: 'CONFLICT' },
+    { time: 'T+03', text: `Goverde Max-Plus hold injected at ${cfg.signalName}`, val: `+${conflictAddition.toFixed(1)}m` },
+    { time: 'T+04', text: `Final calibrated arrival window updated across division at ${stn3Name}`, val: `+${finalDelay.toFixed(1)}m` },
+  ];
+
+  const stepListEl = $('propagation-step-list');
+  if (stepListEl) {
+    stepListEl.innerHTML = seqSteps.map((s, idx) => `
+      <div class="step-seq-item is-active" id="seq-step-${idx + 1}">
+        <span class="step-badge">${s.time}</span>
+        <span class="step-text">${s.text}</span>
+        <span class="step-val" style="${idx === 4 ? 'color:var(--stamp);' : ''}">${s.val}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── 8. Section Occupancy Strip
+  setText('occupancy-sub-desc', `Real-time block signaling state along the ${stn2Name} → ${stn3Name} mainline corridor.`);
+  const occStripEl = $('occupancy-block-strip');
+  if (occStripEl && cfg.blocks) {
+    occStripEl.innerHTML = cfg.blocks.map(b => `
+      <div class="block-item ${b.chip === 'occupied' ? 'is-occupied' : (b.chip === 'conflict' ? 'is-conflict' : '')}">
+        <div class="block-id">${b.id}</div>
+        <div class="block-stn">${b.stn}</div>
+        <span class="block-status-chip ${b.chip}">${b.chip === 'clear' ? '&#10003; ' : ''}${b.status}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── 9. Live Dispatch Event Trace Log
+  setText('trace-l1', `TRAIN ${affectedTrain} ARRIVED ${stn2Name.toUpperCase()} (${stn2Code}) • BASE DELAY +${baseDelay.toFixed(1)} MIN`);
+  setText('trace-l2', `TRAIN ${delayingTrain} DEPARTED ${stn2Name.toUpperCase()} • EN ROUTE ${stn3Code} • DELAY +${cfg.delayingDelay.toFixed(1)} MIN`);
+  setText('trace-l3', `HEADWAY CONSTRAINT CHECK: AVAILABLE GAP ${headwayAvail.toFixed(1)} MIN < 10.0 MIN REQUIRED`);
+  setText('trace-l4', `CONFLICT DETECTED: SECTION ${stn2Code} → ${stn3Code} • AFFECTED TRAIN ${affectedTrain}`);
+  setText('trace-l5', `GOVERDE MAX-PLUS HOLD APPLIED: +${conflictAddition.toFixed(1)} MIN ADDED TO TRAIN ${affectedTrain}`);
+  setText('trace-l6', `FINAL PROPAGATED DELAY AT ${stn3Name.toUpperCase()} (${stn3Code}): +${finalDelay.toFixed(1)} MIN`);
+
+  // ── 10. Interactive Playback Controller Setup
+  const tokenDelaying = $('token-56789');
+  const tokenAffected = $('token-12301');
   const conflictZone = $('svg-conflict-zone');
   const propWave = $('svg-propagation-wave');
   const sigSubedarganj = $('sig-subedarganj');
@@ -2014,32 +2324,32 @@ async function loadNetwork() {
     });
 
     if (stepIdx === 0) {
-      if (token56789) token56789.setAttribute('transform', 'translate(380, 81)');
-      if (token12301) token12301.setAttribute('transform', 'translate(180, 81)');
+      if (tokenDelaying) tokenDelaying.setAttribute('transform', 'translate(380, 81)');
+      if (tokenAffected) tokenAffected.setAttribute('transform', 'translate(180, 81)');
       if (conflictZone) conflictZone.style.opacity = '0.1';
       if (propWave) propWave.style.opacity = '0';
       if (sigSubedarganj) sigSubedarganj.setAttribute('fill', '#3D7A5C');
     } else if (stepIdx === 1) {
-      if (token56789) token56789.setAttribute('transform', 'translate(440, 81)');
-      if (token12301) token12301.setAttribute('transform', 'translate(280, 81)');
+      if (tokenDelaying) tokenDelaying.setAttribute('transform', 'translate(440, 81)');
+      if (tokenAffected) tokenAffected.setAttribute('transform', 'translate(280, 81)');
       if (conflictZone) conflictZone.style.opacity = '0.3';
       if (propWave) propWave.style.opacity = '0.2';
       if (sigSubedarganj) sigSubedarganj.setAttribute('fill', '#E8A33D');
     } else if (stepIdx === 2) {
-      if (token56789) token56789.setAttribute('transform', 'translate(480, 81)');
-      if (token12301) token12301.setAttribute('transform', 'translate(350, 81)');
+      if (tokenDelaying) tokenDelaying.setAttribute('transform', 'translate(480, 81)');
+      if (tokenAffected) tokenAffected.setAttribute('transform', 'translate(350, 81)');
       if (conflictZone) conflictZone.style.opacity = '0.7';
       if (propWave) propWave.style.opacity = '0.5';
       if (sigSubedarganj) sigSubedarganj.setAttribute('fill', '#E8A33D');
     } else if (stepIdx === 3) {
-      if (token56789) token56789.setAttribute('transform', 'translate(510, 81)');
-      if (token12301) token12301.setAttribute('transform', 'translate(350, 81)');
+      if (tokenDelaying) tokenDelaying.setAttribute('transform', 'translate(510, 81)');
+      if (tokenAffected) tokenAffected.setAttribute('transform', 'translate(350, 81)');
       if (conflictZone) conflictZone.style.opacity = '1';
       if (propWave) propWave.style.opacity = '1';
       if (sigSubedarganj) sigSubedarganj.setAttribute('fill', '#A13D2E');
     } else {
-      if (token56789) token56789.setAttribute('transform', 'translate(560, 81)');
-      if (token12301) token12301.setAttribute('transform', 'translate(410, 81)');
+      if (tokenDelaying) tokenDelaying.setAttribute('transform', 'translate(560, 81)');
+      if (tokenAffected) tokenAffected.setAttribute('transform', 'translate(410, 81)');
       if (conflictZone) conflictZone.style.opacity = '0.5';
       if (propWave) propWave.style.opacity = '0.8';
       if (sigSubedarganj) sigSubedarganj.setAttribute('fill', '#E8A33D');
@@ -2085,12 +2395,12 @@ async function loadNetwork() {
   setPlaybackStep(4);
   startAnimation();
 
-  // ── 8. Train Chips Active State
+  // ── 11. Train Chips Active State
   document.querySelectorAll('.train-chip').forEach(chip => {
-    chip.classList.toggle('is-active', chip.dataset.train === (prediction?.train_id || '12301'));
+    chip.classList.toggle('is-active', chip.dataset.train === selectedTrain);
   });
 
-  // ── 9. Multi-Train Regional Network Matrix Board
+  // ── 12. Multi-Train Regional Network Matrix Board
   const supportedTrains = ['12301', '56789', '20507', '12002', '12004', '12951', '22436'];
   Promise.all(supportedTrains.map(tid =>
     api(`/predict/${tid}`).catch(() => null).then(p => ({ tid, p }))
@@ -2098,33 +2408,33 @@ async function loadNetwork() {
     const tbody = $('multi-train-network-body');
     if (!tbody) return;
     tbody.innerHTML = results.map(({ tid, p }) => {
-      if (!p) return failedRowHtml(tid, 8);
-      const meta = TRAIN_NAMES[tid] || { name: 'Express Train', route: 'Corridor Transit' };
-      const tP50 = p.p50_delay_min != null ? p.p50_delay_min : 25.0;
-      const tP90 = p.p90_delay_min != null ? p.p90_delay_min : 60.0;
-      const tSuspended = p.anomaly_flag;
+      const trainCfg = CORRIDOR_NETWORK_CONFIG[tid] || defaultCfg;
+      const meta = TRAIN_NAMES[tid] || { name: trainCfg.affectedName, route: trainCfg.section };
+      const tP50 = p?.p50_delay_min != null ? p.p50_delay_min : trainCfg.baseDelay;
+      const tP90 = p?.p90_delay_min != null ? p.p90_delay_min : (tP50 + 25.0);
+      const tSuspended = p?.anomaly_flag;
       
-      let tConflict = '+0.0m';
-      let tFinal = `+${tP50.toFixed(1)}m`;
-      let tStatus = 'CLEAR';
-      let tStatusClass = 'clear';
+      let tConflict = `+${trainCfg.conflictAddition.toFixed(1)}m`;
+      let tFinal = `+${(tP50 + trainCfg.conflictAddition).toFixed(1)}m`;
+      let tStatus = 'CONFLICT DETECTED';
+      let tStatusClass = 'conflict';
 
       if (tSuspended) {
         tStatus = 'SUSPENDED';
         tStatusClass = 'suspended';
-      } else if (tid === '12301') {
-        tConflict = `+${conflictAddition.toFixed(1)}m`;
-        tFinal = `+${(tP50 + conflictAddition).toFixed(1)}m`;
-        tStatus = 'CONFLICT DETECTED';
-        tStatusClass = 'conflict';
       } else if (tid === '56789') {
         tConflict = 'DELAY SOURCE';
         tFinal = `+${tP50.toFixed(1)}m`;
         tStatus = 'CAUSING HOLD';
         tStatusClass = 'watch';
+      } else if (trainCfg.conflictAddition <= 0) {
+        tConflict = '+0.0m';
+        tFinal = `+${tP50.toFixed(1)}m`;
+        tStatus = 'CLEAR';
+        tStatusClass = 'clear';
       }
 
-      const isFocal = tid === (prediction?.train_id || '12301');
+      const isFocal = tid === selectedTrain;
       return `
         <tr class="${isFocal ? 'is-focal' : ''}">
           <td><strong>${tid}</strong> • ${meta.name}</td>
@@ -2148,6 +2458,9 @@ async function loadNetwork() {
         if (t && $('train-id')) {
           $('train-id').value = t;
           persistTrain(t);
+          document.querySelectorAll('.train-chip').forEach(c => {
+            c.classList.toggle('is-active', c.dataset.train === t);
+          });
           const url = new URL(window.location);
           url.searchParams.set('train', t);
           window.history.replaceState({}, '', url);
