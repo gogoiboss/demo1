@@ -264,17 +264,20 @@ python -m src.evaluation.backtest
 
 ### 3. Launch Services Locally
 
-**Terminal 1 — Start the FastAPI Backend:**
+> [!IMPORTANT]
+> The FastAPI backend must run on **port 8000** for the frontend static dashboard's API calls to route successfully. If hosted on a different port or host, set `window.RIPPLEETA_API_BASE = 'http://<host>:<port>'` before page scripts load.
+
+**Terminal 1 — Start the FastAPI Backend (Port 8000):**
 ```bash
 uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8000
 ```
 *API Swagger Documentation available at `http://127.0.0.1:8000/docs`.*
 
-**Terminal 2 — Launch the Stakeholder Dashboard:**
+**Terminal 2 — Launch the Static Frontend / Dashboard (e.g., Port 8080):**
 ```bash
-python -m http.server 5500 --directory dashboard
+python -m http.server 8080
 ```
-*Access the portal at `http://127.0.0.1:5500`.*
+*Access the landing experience at `http://127.0.0.1:8080/eta/index.html` or the dashboard at `http://127.0.0.1:8080/dashboard/index.html`.*
 
 ---
 

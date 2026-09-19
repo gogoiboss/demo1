@@ -6,6 +6,8 @@
 export function initDashboard() {
   "use strict";
 
+  const API_BASE = (typeof window !== 'undefined' && window.RIPPLEETA_API_BASE) ? window.RIPPLEETA_API_BASE : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:8000' : '');
+
   // Application state
   let corridorData = null;
   let activeTab = "timetable";
@@ -125,7 +127,7 @@ export function initDashboard() {
   // Health API
   async function fetchHealth() {
     try {
-      const res = await fetch("/health");
+      const res = await fetch(`${API_BASE}/health`);
       if (res.ok) {
         healthBadge.textContent = "SYSTEM LIVE";
         healthBadge.className = "badge status-badge live";
@@ -142,7 +144,7 @@ export function initDashboard() {
   // Corridor API
   async function fetchCorridor() {
     try {
-      const res = await fetch("/api/corridor");
+      const res = await fetch(`${API_BASE}/api/corridor`);
       if (!res.ok) throw new Error("Failed to load corridor");
       corridorData = await res.json();
       populateStationSelects();
@@ -156,7 +158,7 @@ export function initDashboard() {
   // Historical Acceptance Gate API
   async function fetchEvaluationSummary() {
     try {
-      const res = await fetch("/api/evaluation/summary");
+      const res = await fetch(`${API_BASE}/api/evaluation/summary`);
       if (!res.ok) return;
       const data = await res.json();
       gateCount.textContent = data.evaluated_count;
@@ -297,7 +299,7 @@ export function initDashboard() {
 
   async function checkAndInitializeLiveMode() {
     try {
-      const res = await fetch("/api/provider/status");
+      const res = await fetch(`${API_BASE}/api/provider/status`);
       if (!res.ok) throw new Error("Failed to check provider status");
       const statusData = await res.json();
 
@@ -333,7 +335,7 @@ export function initDashboard() {
 
   async function pollLiveTelemetry() {
     try {
-      const res = await fetch("/api/live/train/12301");
+      const res = await fetch(`${API_BASE}/api/live/train/12301`);
       if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
         throw new Error(errJson.error || `HTTP ${res.status}`);
@@ -400,7 +402,7 @@ export function initDashboard() {
     submitBtn.innerHTML = `<span>Forecasting...</span>`;
 
     try {
-      const res = await fetch("/api/predict", {
+      const res = await fetch(`${API_BASE}/api/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -531,7 +533,7 @@ export function initDashboard() {
   async function renderBenchmark() {
     tableContainer.innerHTML = `<div style="padding: 1rem; color: var(--text-muted);">Running head-to-head model benchmark...</div>`;
     try {
-      const res = await fetch("/api/evaluation/compare");
+      const res = await fetch(`${API_BASE}/api/evaluation/compare`);
       if (!res.ok) throw new Error("Failed to load benchmark");
       const data = await res.json();
       const b = data.baseline_metrics;
@@ -612,7 +614,7 @@ export function initDashboard() {
   async function renderMonitoring() {
     tableContainer.innerHTML = `<div style="padding: 1rem; color: var(--text-muted);">Analyzing model error slicing and reliability...</div>`;
     try {
-      const res = await fetch("/api/monitoring/analysis");
+      const res = await fetch(`${API_BASE}/api/monitoring/analysis`);
       if (!res.ok) throw new Error("Failed to load monitoring");
       const data = await res.json();
       const rel = data.reliability_summary;
@@ -698,7 +700,7 @@ export function initDashboard() {
   async function renderTelemetry() {
     tableContainer.innerHTML = `<div style="padding: 1rem; color: var(--text-muted);">Fetching operational monitoring telemetry...</div>`;
     try {
-      const res = await fetch("/api/monitoring");
+      const res = await fetch(`${API_BASE}/api/monitoring`);
       if (!res.ok) throw new Error("Failed to load telemetry");
       const t = await res.json();
 
@@ -755,7 +757,7 @@ export function initDashboard() {
   async function renderModelInfo() {
     tableContainer.innerHTML = `<div style="padding: 1rem; color: var(--text-muted);">Loading ML model parameters and architecture...</div>`;
     try {
-      const res = await fetch("/api/model");
+      const res = await fetch(`${API_BASE}/api/model`);
       if (!res.ok) throw new Error("Failed to load model info");
       const m = await res.json();
 
@@ -832,7 +834,7 @@ export function initDashboard() {
   async function renderProvenance() {
     tableContainer.innerHTML = `<div style="padding: 1rem; color: var(--text-muted);">Verifying provenance audit records...</div>`;
     try {
-      const res = await fetch("/api/provenance");
+      const res = await fetch(`${API_BASE}/api/provenance`);
       if (!res.ok) throw new Error("Failed to load provenance");
       const p = await res.json();
 
@@ -902,7 +904,7 @@ export function initDashboard() {
   async function renderAuditLog() {
     tableContainer.innerHTML = `<div style="padding: 1rem; color: var(--text-muted);">Loading prediction audit trail...</div>`;
     try {
-      const res = await fetch("/api/predictions?limit=30");
+      const res = await fetch(`${API_BASE}/api/predictions?limit=30`);
       if (!res.ok) throw new Error("Failed to load predictions");
       const data = await res.json();
       let items = data.predictions || [];
@@ -996,7 +998,7 @@ export function initDashboard() {
   async function renderProviderStatus() {
     tableContainer.innerHTML = `<div style="padding: 1rem; color: var(--text-muted);">Querying railway data provider diagnostic status...</div>`;
     try {
-      const res = await fetch("/api/provider/status");
+      const res = await fetch(`${API_BASE}/api/provider/status`);
       if (!res.ok) throw new Error("Failed to load provider status");
       const p = await res.json();
 
@@ -1056,7 +1058,10 @@ export function initDashboard() {
         testBtn.addEventListener("click", async () => {
           testBtn.textContent = "Probing...";
           try {
-            const resp = await fetch("/api/provider/test", { method: "POST" });
+            const resp = await fetch(`${API_BASE}/api/provider/test`, { method: "POST" });
+            if (!resp.ok) {
+              throw new Error(`HTTP ${resp.status}`);
+            }
             const data = await resp.json();
             alert(`Provider Probe Result:\nStatus: ${data.status}\nMessage: ${data.message}`);
           } catch (e) {

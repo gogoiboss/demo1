@@ -1,5 +1,5 @@
 /* Shared controller for the RippleETA stakeholder pages. */
-const API_BASE = '';
+const API_BASE = (typeof window !== 'undefined' && window.RIPPLEETA_API_BASE) ? window.RIPPLEETA_API_BASE : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:8000' : '');
 const view = document.body.dataset.view;
 const $ = (id) => document.getElementById(id);
 const DEFAULT_TRAIN = '20507';

@@ -689,6 +689,10 @@
     .search-action-btn:hover {
       background: #0D263D;
     }
+    .search-action-btn:active {
+      transform: scale(0.95);
+      background: #091C2D;
+    }
 
     /* ── Seven Stakeholder Gateways Section ─────────────────────────────── */
     .gateways-grid {
@@ -1806,7 +1810,7 @@
        CLIENT SCRIPTS: DATA INGESTION & INTERACTION
        ==================================================================== -->
   <script>
-    const API_BASE = '';
+    const API_BASE = (typeof window !== 'undefined' && window.RIPPLEETA_API_BASE) ? window.RIPPLEETA_API_BASE : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:8000' : '');
     let activeTrainId = '20507';
     let supportedTrains = [];
 
@@ -2292,6 +2296,7 @@
             credentials: 'include',
             body: JSON.stringify({ role: role, email: 'operator@rippleeta.in' })
           });
+          console.log('/api/auth/demo response status:', res.status);
           if (res.ok) {
             const data = await res.json();
             if (data.token) {
@@ -2301,6 +2306,7 @@
         } catch (err) {
           /* Fall back to direct navigation */
         }
+        console.log('Computed targetUrl right before navigation:', targetUrl);
         window.location.href = targetUrl;
       });
     });
@@ -2327,6 +2333,15 @@
     if (searchBtn && searchBox) {
       searchBtn.addEventListener('click', () => {
         selectActiveTrain(searchBox.value);
+        const originalText = searchBtn.textContent;
+        searchBtn.textContent = 'Updated!';
+        searchBtn.style.backgroundColor = '#4CAF7D';
+        searchBtn.style.borderColor = '#4CAF7D';
+        setTimeout(() => {
+          searchBtn.textContent = originalText;
+          searchBtn.style.backgroundColor = '';
+          searchBtn.style.borderColor = '';
+        }, 1000);
       });
       searchBox.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') selectActiveTrain(searchBox.value);

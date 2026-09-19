@@ -635,7 +635,7 @@
   <div id="auth-alert">Authenticating session...</div>
 
   <script>
-    const API_BASE = window.location.origin;
+    const API_BASE = (typeof window !== 'undefined' && window.RIPPLEETA_API_BASE) ? window.RIPPLEETA_API_BASE : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:8000' : '');
 
     let selectedUser = {
       email: 'passenger@rippleeta.in',
@@ -678,8 +678,14 @@
           credentials: 'include',
           body: JSON.stringify({ email: selectedUser.email, role: selectedUser.role })
         });
+        if (!res.ok) {
+          throw new Error(`Authentication server returned HTTP ${res.status}`);
+        }
         const data = await res.json();
-        if (data.success) {
+        if (data.success || data.token) {
+          if (data.token) {
+            localStorage.setItem('rippleeta_token', data.token);
+          }
           localStorage.setItem('user', JSON.stringify({ email: selectedUser.email, role: selectedUser.role }));
           showAlert(`Authenticated! Redirecting to ${selectedUser.title} Dashboard...`);
           setTimeout(() => {
@@ -723,8 +729,14 @@
           credentials: 'include',
           body: JSON.stringify({ credential: response.credential })
         });
+        if (!res.ok) {
+          throw new Error(`Google Auth HTTP ${res.status}`);
+        }
         const data = await res.json();
-        if (data.success) {
+        if (data.success || data.token) {
+          if (data.token) {
+            localStorage.setItem('rippleeta_token', data.token);
+          }
           showAlert('Google Authentication Successful! Redirecting...');
           setTimeout(() => {
             window.location.href = selectedUser.targetUrl || '/dashboard/index.html';

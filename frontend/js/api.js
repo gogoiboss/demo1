@@ -3,7 +3,7 @@
  * Single Source of Truth for frontend ↔ backend communication.
  */
 export class APIClient {
-  constructor(baseUrl = '') {
+  constructor(baseUrl = ((typeof window !== 'undefined' && window.RIPPLEETA_API_BASE) ? window.RIPPLEETA_API_BASE : (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000' : ''))) {
     this.baseUrl = baseUrl;
     this._token = localStorage.getItem('rippleeta_token') || null;
   }

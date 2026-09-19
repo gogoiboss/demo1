@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="RippleETA is an AI-powered predictive ETA dashboard and simulator for Indian Railways, providing network-wide delay tracking and 3D insights.">
 <title>RippleETA — Network Overview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
 <style>
   :root{
     --bg:#F5F3EE;
@@ -176,7 +178,7 @@
     width:var(--fill,0%); transition:width .6s var(--ease);
   }
   .step{position:relative; text-align:left; flex:1; cursor:default;}
-  .step-dot{width:13px;height:13px;border-radius:50%; background:#FFFFFF; border:2px solid var(--steel); margin-bottom:14px; transition:border-color .3s, background .3s;}
+  .step-dot{display:block; flex-shrink:0; width:13px;height:13px;border-radius:50%; background:#FFFFFF; border:2px solid var(--steel); margin-bottom:14px; transition:border-color .3s, background .3s;}
   .step.active .step-dot{border-color:var(--rail-blue); background:var(--yellow); box-shadow:0 0 0 4px var(--yellow-soft);}
   .step-num{font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--text-muted); margin-right:6px;}
   .step.active .step-num{color:var(--rail-blue); font-weight:700;}
@@ -422,10 +424,12 @@
     display:flex; gap:6px; background:#FFFFFF;
     padding:5px; border-radius:24px; border:1px solid var(--line-strong);
     box-shadow:var(--shadow-card);
+    white-space: nowrap;
   }
   .cam-btn{
     font-size:11.5px; font-family:'JetBrains Mono',monospace; padding:6px 14px;
     border-radius:18px; color:var(--text-secondary); transition:all .2s var(--ease); font-weight:600;
+    white-space: nowrap;
   }
   .cam-btn:hover{color:var(--text-primary); background:var(--bg-subtle);}
   .cam-btn.active{background:var(--rail-blue); color:#FFFFFF;}
@@ -595,8 +599,8 @@
   </div>
   <div class="f-right">
     <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a>
-    <a href="javascript:void(0)" onclick="openFooterModal('terms')">Terms</a>
-    <a href="javascript:void(0)" onclick="openFooterModal('contact')">Contact</a>
+    <a href="#terms" onclick="openFooterModal('terms'); return false;">Terms</a>
+    <a href="#contact" onclick="openFooterModal('contact'); return false;">Contact</a>
   </div>
 </footer>
 
@@ -610,19 +614,9 @@
   </div>
 </div>
 
-<script src="three.min.js"></script>
-<script>
-if(typeof THREE === 'undefined'){
-  document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
-}
-</script>
-<script src="GLTFLoader.js"></script>
-<script>
-if(typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined'){
-  document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
-}
-</script>
-<script src="wap7_model_data.js"></script>
+<script src="three.min.js" defer></script>
+<script src="GLTFLoader.js" defer></script>
+<script src="wap7_model_data.js" defer></script>
 <script>
 /* ======================================================================
    DATA
@@ -1053,7 +1047,7 @@ setLayer('stations', true);
 /* ======================================================================
    THREE.JS — AUTHENTIC WAP-7 LOCOMOTIVE & CINEMATIC RAILWAY SCENE
 ====================================================================== */
-(function(){
+window.addEventListener('load', function() {
   if(typeof THREE === 'undefined'){
     const introEl = document.getElementById('intro');
     if(introEl) introEl.classList.add('hidden');
@@ -1799,7 +1793,7 @@ setLayer('stations', true);
   }
 
   requestAnimationFrame(animate);
-})();
+});
 
 function openFooterModal(type) {
   const modal = document.getElementById('footerModal');
@@ -2074,6 +2068,17 @@ function initSearchEngine() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initSearchEngine();
+  // LIVE REPRO INSTRUMENTATION
+  document.addEventListener('click', (e) => {
+    const anchor = e.target.closest('a');
+    if (anchor) {
+      console.log('--- LIVE REPRO CLICK INTERCEPT ---');
+      console.log('Target:', anchor);
+      console.log('Href:', anchor.getAttribute('href'));
+      console.log('Default Prevented:', e.defaultPrevented);
+      // Wait briefly so log can be seen in console before unload
+    }
+  });
 });
 </script>
 </body>
