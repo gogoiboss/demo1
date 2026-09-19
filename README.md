@@ -42,7 +42,7 @@ Traditional railway passenger and operational information systems (**NTES**, **R
 | **Delay Propagation** | Blind to incoming rake delays on previous legs | Explicit `prior_leg_delay` feature capturing >80% departure correlation |
 | **Headway Conflicts** | Ignores downstream block section occupancy | Timed Event Graph using Max-Plus algebra for network conflict resolution |
 | **Explainability** | Black box or static rule table | Integrated SHAP feature attribution + Anomaly Variance Gating |
-| **Stakeholder Utility** | One generic point ETA forced on all personas | 5 customized decision portals (Passenger, Station, Crew, Feeder, Workshop) |
+| **Stakeholder Utility** | One generic point ETA forced on all personas | 7 customized decision portals (Passenger, Station Master, Crew, Feeder, Workshop, Ghost Sandbox, Control Room) |
 
 ---
 
@@ -76,8 +76,8 @@ flowchart TD
         G -- No --> I["Calibrated Prediction Package<br/>(Intervals + SHAP Attributions)"]
     end
 
-    subgraph ServingLayer ["5. FastAPI REST API & WebSockets"]
-        I --> J["FastAPI High-Throughput Core<br/>/predict/eta | /predict/corridor | /health"]
+    subgraph ServingLayer ["5. FastAPI REST API"]
+        I --> J["FastAPI High-Throughput Core<br/>/predict/{id}/passenger | /health"]
         H --> J
     end
 
@@ -88,6 +88,7 @@ flowchart TD
         J --> K4["🚌 Feeder Transit<br/>(Multimodal P_arrival Cutoff Prob)"]
         J --> K5["🔧 Maintenance Depot<br/>(Turnaround Window Risk Flag)"]
         J --> K6["🧪 Ghost Sandbox<br/>(Interactive What-If Injection)"]
+        J --> K7["🎛️ Control Room<br/>(Network-Wide Delay Propagation)"]
     end
 
     style DataIngestion fill:#1e293b,stroke:#475569,stroke-width:1px,color:#fff
@@ -138,7 +139,7 @@ Rather than asserting false precision, RippleETA uses **MAPIE** distribution-fre
 
 ---
 
-## 🎯 Five Stakeholder Decision Portals
+## 🎯 Seven Stakeholder Decision Portals
 
 ```mermaid
 graph LR
@@ -151,6 +152,8 @@ graph LR
     E -->|HOER Relief Clock + Alert| S3["Crew Management"]
     E -->|P_arrival Before Bus Cutoff| S4["Feeder Multimodal"]
     E -->|Turnaround Buffer Health| S5["Workshop & Maintenance"]
+    E -->|Network Propagation| S6["Control Room"]
+    E -->|What-If Injections| S7["Ghost Sandbox"]
 
     style Engine fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
     style S1 fill:#0f172a,stroke:#10b981,stroke-width:1px,color:#fff
@@ -166,6 +169,7 @@ graph LR
 4. **Feeder Multimodal Transport Portal:** Provides city bus, metro, and auto-rickshaw transit coordinators with $P(\text{arrival} \le \text{cutoff})$ probabilities to optimize fleet dispatch and eliminate idle waiting.
 5. **Maintenance & Turnaround Workshop:** Calculates predictive turnaround windows before rakes enter terminal yards, giving depot supervisors 2–3 hours early warning for critical maintenance workflows.
 6. **Ghost Simulation Sandbox:** Interactive "What-If" injector allowing dispatchers to simulate synthetic signal failures, track blocks, and weather cascades in real time.
+7. **Control Room Portal:** Network-wide view of delay propagation across correlated trains.
 
 ---
 
@@ -176,11 +180,11 @@ Evaluated on strictly chronological held-out splits (**TimeSeriesSplit** — str
 | Metric | Baseline (Prior-Leg Persistence) | RippleETA Full Model | Improvement |
 |---|---|---|---|
 | **Mean Absolute Error (MAE)** | `34.75 min` | **`28.39 min`** | **-6.36 min (-18.30%)** |
-| **Pinball Loss (Quantile Loss)** | `18.42` | **`8.19`** | **-55.5% Reduction** |
+| **Pinball Loss (Quantile Loss)** | `18.23` | **`8.12`** | **-55.5% Reduction** |
 | **Empirical P10–P90 Coverage** | N/A (Point only) | **`97.70%`** | Target $\ge 90.0\%$ Met |
 | **Stratified Mondrian Coverage** | N/A | **`89.7% – 91.0%`** | Uniform across delay tiers |
 | **Average Interval Width** | N/A | **`82.4 – 106.5 min`** | Dynamically narrows en route |
-| **Inference Throughput** | N/A | **`3.30 ms / train`** | **300+ predictions/sec** |
+| **Inference Throughput** | N/A | **`3.30 ms / train`** | **~303 journey-predictions/sec (measured throughput)** |
 | **Network Propagation Benchmark** | N/A | **`20.58 ms`** | 500 trains × 8 stops |
 
 *Canonical benchmarks and evaluation methodology documented in [docs/RESULTS.md](docs/RESULTS.md).*
@@ -210,14 +214,16 @@ rippleeta/
 ├── dashboard/                # Stakeholder portals (Passenger, Station, Crew, etc.)
 │   ├── index.html            # Unified portal navigation & authentication
 │   ├── passenger.html        # Live Passenger Advisory portal
-│   ├── station.html          # Station Controller decision dashboard
+│   ├── station-master.html   # Station Controller decision dashboard
 │   ├── crew.html             # Crew Management & HOER compliance portal
 │   ├── feeder.html           # Multimodal feeder transit scheduling portal
 │   ├── maintenance.html      # Workshop predictive turnaround portal
+│   ├── control.html          # Network Control Room portal
+│   ├── sandbox.html          # Ghost Sandbox injection portal
 │   ├── app.js                # Dynamic state management & corridor switching logic
 │   └── styles.css            # Responsive dark-mode design system
 ├── eval/                     # SHAP explanations, benchmarks & synthetic tests
-├── tests/                    # 66 comprehensive pytest test suites (unit + integration)
+├── tests/                    # 68 comprehensive pytest test suites (unit + integration)
 └── docs/                     # Architectural specs, results audit & demo script
 ```
 
@@ -289,8 +295,8 @@ To build and run the entire self-contained application stack:
 # Build the Docker image
 docker build -t rippleeta:latest .
 
-# Run the container
-docker run -d -p 8000:8000 --name rippleeta-app rippleeta:latest
+# Run the full stack
+docker compose up -d
 ```
 
 Verify service health:
@@ -318,8 +324,36 @@ ruff check src/
 ## 🛡️ Engineering Boundaries & Real-World Considerations
 
 - **CRIS / RTIS Integration Target:** The current prototype validates on historical datasets and real-time replay streams. Full national rollout is designed to ingest high-frequency telemetry directly from Indian Railways' Centre for Railway Information Systems (CRIS) and Real-Time Train Information System (RTIS).
-- **Stateless & Resilient Architecture:** The prediction core is completely stateless, enabling horizontal auto-scaling on sovereign Indian infrastructure (NIC / MeghRaj cloud) with sub-5ms latency.
+- **Stateless & Resilient Architecture:** The prediction core is completely stateless, designed as an architecturally scalable system for sovereign Indian infrastructure (NIC / MeghRaj cloud) with measured local inference latency at 3.30ms.
 - **Fail-Safe Operation:** Anomaly Variance Gating ensures that if unexpected physical events (derailments, severe line breaches) invalidate model assumptions, the system visibly alerts operators and suspends uncertain forecasts rather than issuing hazardous predictions.
+
+### Detailed Limitations & Assumptions (Phase 1 Audit)
+
+**1. Ground Truth & MLOps Recalibration**
+- Due to the lack of live NTES (National Train Enquiry System) or COA (Control Office Application) API keys during this hackathon, we cannot log live actual arrival times.
+- Current behavior (Backtest Mode): `jobs/nightly_recalibration.py` computes MAE on a deterministic chronological holdout and applies a real threshold-based drift trigger. This is a static threshold, not statistical change-point detection.
+
+**2. Real-Time Feeds (Weather, TSRs, Signal Aspects)**
+- The Problem Statement requires adapting to dynamic real-time events. While API schemas and UI handle this data, it is injected via deterministic proxy logic (hashing the Train ID) to simulate how the system reacts. The XGBoost model is currently trained only on static historical metrics.
+
+**3. Prescriptive Tier (Ripple Score & INR Financial Cost)**
+- Our UI features a Ripple Score and INR Cost translation to demonstrate prescriptive triage. However, the exact numbers shown in the demo are proxy constants. A production rollout would require a full schedule integration to accurately run the max-plus propagation counterfactuals.
+
+**4. Graph Propagation Scope & Network Conflicts**
+- The Timed Event Graph relies on a fixed network topology optimized for a localized corridor demo. Scaling to all 17 administrative zones requires comprehensive adjacency lists.
+- Because real-time block-section occupancy data is not publicly available, we split graph propagation into **HARD Conflicts** (rake/crew handoff - deterministic) and **SOFT Conflicts** (shared-section headway - probabilistic approximations).
+
+**5. Training-Serving Feature Skew Risk**
+- A genuine latent skew risk exists: `CalibratedPredictionPipeline.predict()`'s fallback re-engineering branch would silently compute `prior_leg_delay` as 0 if called with an isolated single row. A warning is now logged if this path is hit with insufficient per-train history.
+
+**6. Systematic Overprediction on Recovering Trains**
+- The model treats `prior_leg_delay` as a static input. For trains actively recovering time, the point estimate carries an upward bias, though Calibrated P10-P90 intervals partially compensate.
+
+**7. Low-Bandwidth / 2G Station Display Mode**
+- There is currently no low-bandwidth fallback (text-only mode, reduced asset loading) implemented for the dashboard portals.
+
+**8. Crew Controller HOER Duty-Elapsed Estimate**
+- The Crew Controller view's "duty elapsed" figure is an illustrative estimate, not real crew sign-on time. This is explicitly disclosed in the UI. No CMS integration exists in this prototype.
 
 ---
 
