@@ -772,6 +772,23 @@
     }
     window.addEventListener('load', initGoogleAuth);
     initGoogleAuth();
+
+    // Auto-select persona from ?role= query param (set by gateway cards on index.html)
+    (function autoSelectFromQueryParam() {
+      const roleParam = new URLSearchParams(window.location.search).get('role');
+      const roleCardMap = {
+        'passenger':        { id: 'card-passenger',    email: 'passenger@rippleeta.in',   role: 'passenger',       title: 'Passenger',        num: '01', targetUrl: '/dashboard/passenger.html' },
+        'station_master':   { id: 'card-station',      email: 'station@rippleeta.in',     role: 'station_master',  title: 'Station Master',   num: '02', targetUrl: '/dashboard/station-master.html' },
+        'crew_controller':  { id: 'card-crew',         email: 'crew@rippleeta.in',        role: 'crew_controller', title: 'Crew Controller',  num: '03', targetUrl: '/dashboard/crew.html' },
+        'feeder_transport': { id: 'card-feeder',       email: 'feeder@rippleeta.in',      role: 'feeder_transport',title: 'Feeder Transport', num: '04', targetUrl: '/dashboard/feeder.html' },
+        'maintenance':      { id: 'card-maintenance',  email: 'maintenance@rippleeta.in', role: 'maintenance',     title: 'Maintenance',      num: '05', targetUrl: '/dashboard/maintenance.html' },
+        'control_room':     { id: 'card-control',      email: 'control@rippleeta.in',     role: 'control_room',    title: 'Control Room',     num: '06', targetUrl: '/dashboard/control.html' },
+      };
+      if (roleParam && roleCardMap[roleParam]) {
+        const m = roleCardMap[roleParam];
+        selectPersona(m.email, m.role, m.title, m.num, m.targetUrl, m.id);
+      }
+    })();
   </script>
 </body>
 </html>

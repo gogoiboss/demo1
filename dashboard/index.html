@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1386,7 +1386,7 @@
 
       <div class="gateways-grid">
         <!-- 01. Passenger -->
-        <div class="ticket-gateway-card" data-role="passenger">
+        <a href="login.html?role=passenger" class="ticket-gateway-card" data-role="passenger">
           <div class="card-top-row">
             <span class="card-kicker">01 &bull; PASSENGER ADVISORY</span>
             <span class="card-role-num">B2C</span>
@@ -1403,14 +1403,14 @@
             <span class="signal-name">P10 &ndash; P90 Spread</span>
             <span class="signal-val" id="card-pax-spread">12m &ndash; 38m</span>
           </div>
-          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
-            <span>PASSENGER ADVISORY SPEC</span>
-            <span style="color:var(--success);">&#x25CF;</span>
+          <div class="card-cta-row">
+            <span>ENTER PASSENGER VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
           </div>
-        </div>
+        </a>
 
         <!-- 02. Station Master -->
-        <div class="ticket-gateway-card" data-role="station_master">
+        <a href="login.html?role=station_master" class="ticket-gateway-card" data-role="station_master">
           <div class="card-top-row">
             <span class="card-kicker">02 &bull; PLATFORM TRIAGE</span>
             <span class="card-role-num">CONTROL</span>
@@ -1427,14 +1427,14 @@
             <span class="signal-name">Triage Directive</span>
             <span class="signal-val green" id="card-sm-directive">COMMIT</span>
           </div>
-          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
-            <span>PLATFORM TRIAGE SPEC</span>
-            <span style="color:var(--success);">&#x25CF;</span>
+          <div class="card-cta-row">
+            <span>ENTER STATION MASTER VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
           </div>
-        </div>
+        </a>
 
         <!-- 03. Crew Controller -->
-        <div class="ticket-gateway-card" data-role="crew_controller">
+        <a href="crew.html" class="ticket-gateway-card" data-role="crew_controller">
           <div class="card-top-row">
             <span class="card-kicker">03 &bull; STATUTORY DUTY</span>
             <span class="card-role-num">DISPATCH</span>
@@ -1451,14 +1451,14 @@
             <span class="signal-name">Relief Deadline</span>
             <span class="signal-val amber" id="card-crew-deadline">16:45 IST</span>
           </div>
-          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
-            <span>CREW DISPATCH SPEC</span>
-            <span style="color:var(--success);">&#x25CF;</span>
+          <div class="card-cta-row">
+            <span>ENTER CREW CONTROLLER VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
           </div>
-        </div>
+        </a>
 
         <!-- 04. Feeder Transport -->
-        <div class="ticket-gateway-card" data-role="feeder_transport">
+        <a href="feeder.html" class="ticket-gateway-card" data-role="feeder_transport">
           <div class="card-top-row">
             <span class="card-kicker">04 &bull; MULTI-MODAL FLEET</span>
             <span class="card-role-num">CONNECTIVITY</span>
@@ -1475,14 +1475,14 @@
             <span class="signal-name">P(Arrival &lt; Cutoff)</span>
             <span class="signal-val amber" id="card-feeder-prob">84.5%</span>
           </div>
-          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
-            <span>FEEDER FLEET SPEC</span>
-            <span style="color:var(--success);">&#x25CF;</span>
+          <div class="card-cta-row">
+            <span>ENTER FEEDER TRANSPORT VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
           </div>
-        </div>
+        </a>
 
         <!-- 05. Maintenance -->
-        <div class="ticket-gateway-card" data-role="maintenance">
+        <a href="maintenance.html" class="ticket-gateway-card" data-role="maintenance">
           <div class="card-top-row">
             <span class="card-kicker">05 &bull; TURNAROUND BUDGET</span>
             <span class="card-role-num">YARD</span>
@@ -1499,14 +1499,14 @@
             <span class="signal-name">Available Window</span>
             <span class="signal-val green" id="card-maint-window">240m / 360m</span>
           </div>
-          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
-            <span>YARD PROTOCOL SPEC</span>
-            <span style="color:var(--success);">&#x25CF;</span>
+          <div class="card-cta-row">
+            <span>ENTER MAINTENANCE VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
           </div>
-        </div>
+        </a>
 
         <!-- 06. Control Room -->
-        <div class="ticket-gateway-card" data-role="control_room">
+        <a href="control.html" class="ticket-gateway-card" data-role="control_room">
           <div class="card-top-row">
             <span class="card-kicker">06 &bull; NETWORK RADAR</span>
             <span class="card-role-num">REGIONAL</span>
@@ -1523,12 +1523,11 @@
             <span class="signal-name">Ripple Score</span>
             <span class="signal-val amber" id="card-control-ripple">42 / 100</span>
           </div>
-          <div class="card-cta-row" style="color:var(--muted); font-weight:600;">
-            <span>NETWORK RADAR SPEC</span>
-            <span style="color:var(--success);">&#x25CF;</span>
+          <div class="card-cta-row">
+            <span>ENTER CONTROL ROOM VIEW</span>
+            <span class="cta-arrow">&rarr;</span>
           </div>
-        </div>
-
+        </a>
         <!-- 07. Ghost Sandbox -->
         <a href="sandbox.html" class="ticket-gateway-card" data-role="sandbox">
           <div class="card-top-row">
