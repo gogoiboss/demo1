@@ -8,7 +8,7 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from statistics import NormalDist
-from typing import Any, Literal
+from typing import Any, Literal, TypedDict
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -395,7 +395,17 @@ def create_app(service: PredictionService | None = None) -> FastAPI:
             model_loaded=prediction_service.model_loaded,
         )
 
-    CORRIDOR_NETWORK_SCENARIOS = {
+    class CorridorScenario(TypedDict):
+        section: str
+        corridor_title: str
+        delaying_train: str
+        source_delay_min: float
+        base_delay_min: float
+        conflict_addition_min: float
+        final_delay_min: float
+        stations: list[tuple[str, str, float, Literal["departed", "arrived", "en_route"]]]
+
+    CORRIDOR_NETWORK_SCENARIOS: dict[str, CorridorScenario] = {
         "12301": {
             "section": "KANPUR -> ALLAHABAD",
             "corridor_title": "NORTHERN & NORTH CENTRAL RAILWAY • MAIN TRUNK: NDLS → CNB → PRYJ → HWH",
